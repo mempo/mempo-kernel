@@ -1,0 +1,29 @@
+Securian (debian+grsecurity+patches) - build report (5 - output)
+Builded from sources_id:
+cc64f16fba90d7cc58f7026c6f8660fbe4184cdcb16307f7e6677c99db6bf3bb
+
+Builded from system_id:
+07e23a78ceb9d3c4ff322a955be4a8ce536db4b34df78184a7929d85bf6bfe5d
+With system files:
+32eb487b152cfbd83cf0b79087855ca2b66d7d64  /etc/kernel-img.conf
+6d757ab34f8a1af2e61f4567cab15d50ff1aab91  /etc/kernel-pkg.conf
+
+Builded with compiler: 
+Using built-in specs.
+COLLECT_GCC=gcc
+COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/4.7/lto-wrapper
+Target: x86_64-linux-gnu
+Configured with: ../src/configure -v --with-pkgversion='Debian 4.7.2-5' --with-bugurl=file:///usr/share/doc/gcc-4.7/README.Bugs --enable-languages=c,c++,go,fortran,objc,obj-c++ --prefix=/usr --program-suffix=-4.7 --enable-shared --enable-linker-build-id --with-system-zlib --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --with-gxx-include-dir=/usr/include/c++/4.7 --libdir=/usr/lib --enable-nls --with-sysroot=/ --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --enable-gnu-unique-object --enable-plugin --enable-objc-gc --with-arch-32=i586 --with-tune=generic --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+Thread model: posix
+gcc version 4.7.2 (Debian 4.7.2-5) 
+
+Following files where created:
+8df88cd04f17d1e38f0dcc557e6749461ad6bb69  linux-headers-3.2.51-grsec-good.0.1.9_01_amd64.deb
+5a80a8adf45e1bd5388ab4bbe6de902d74ec03bc  linux-image-3.2.51-grsec-good.0.1.9_01_amd64.deb
+30c413b87178b66b3b5ad34b58d3d6b885294187  linux-image-3.2.51-grsec-good.0.1.9-dbg_01_amd64.deb
+eb55943ac8cb02585a74556c17bcd5905ab0c779  linux-3.2.51/.config
+
+8a11a2d4bb5e7e3c4bc5d9ddd44a5e242e607aec0ea05dc214dc614d2174ff4d  linux-headers-3.2.51-grsec-good.0.1.9_01_amd64.deb
+85e757b36612bc4656afec0f61cfd00e7b3ab470d6d80e168e29e775c222e196  linux-image-3.2.51-grsec-good.0.1.9_01_amd64.deb
+8d8274e17ed0b64fccb21c76d0d6f1ecea21e4333ed279e0d9406bc4089b2165  linux-image-3.2.51-grsec-good.0.1.9-dbg_01_amd64.deb
+b414c540cbf59bcf9d102c09e000f4a7266105a4965633c0c098dcd8386b2692  linux-3.2.51/.config
