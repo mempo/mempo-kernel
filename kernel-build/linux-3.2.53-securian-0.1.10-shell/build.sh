@@ -36,7 +36,7 @@ echo "Starting build in $linuxdir"
 	echo "$sources_id"
 	echo "$sources_id" > "../sources_id.txt"
 
- 	cp ../config .config || { echo "ERROR Could not copy the ../config file here." ; exit 1 ; }
+ 	cp ../configs/config-good.config .config || { echo "ERROR Could not copy the ../config file here." ; exit 1 ; }
 	config_id=`sha256sum .config | cut -d" " -f1`
 	echo "Using .config with ID=$config_id"
 
