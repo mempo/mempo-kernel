@@ -19,6 +19,12 @@ export BUILD_NICENESS=0
 echo "Starting build in $linuxdir"
 
 (
+# export TIMESTAMP_RFC3339='2013-12-02 17:28:00'
+
+	echo "CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
+	echo "Will faketime: $TIMESTAMP_RFC3339"
+
+
 	echo "Entering Linux sources in $linuxdir"
 	cd "$linuxdir"
 
@@ -44,7 +50,7 @@ echo "Starting build in $linuxdir"
 
 	echo ""
 	echo "=== BUILD MAIN ================================="
-	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" 2>1 | tee ../buildlog/build.result
+	faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" 2>1 | tee ../buildlog/build.result
 	echo "... returned from the main BUILD program"
 	echo
 	date
