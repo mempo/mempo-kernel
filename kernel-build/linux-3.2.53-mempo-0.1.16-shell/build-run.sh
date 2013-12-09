@@ -15,7 +15,7 @@ echo "Working on linux sources in linuxdir=$linuxdir"
 match='^[-a-zA-Z0-9]+[-.a-zA-Z0-9]*$'; dir="$linuxdir" ; [[ "$dir" =~ $match ]] || { echo "ERROR invalid directory name ($dir)"; exit 1 ; }
 rm -rf $dir
 
-out="securian-report-$kernel_general_name-5.txt"
+out="mempo-report-$kernel_general_name-5.txt"
 
 echo ""
 echo "=== PATCH ======================================"
