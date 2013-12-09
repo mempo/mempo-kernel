@@ -37,6 +37,7 @@ function get_and_check() {
 	fi
 	checksum_now_short="${checksum_now:0:16}"
 	echo " OK ($checksum_now_short...) "
+	mkdir -p "${localdir}"
 	mv  "tmp/${filename}"  "${localdir}${filename}"
 }
 
