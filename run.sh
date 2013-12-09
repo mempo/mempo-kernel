@@ -15,6 +15,9 @@ then
 
 	if [ ! -r "kernel-sources/kernel/linux-3.2.53.tar.xz" ]
 	then
+		echo "Need .xz from internet"
+		echo "Will download NOW from CLEAR INTERNET, press ENTER to allow, or ctrl-c to abort"
+		read _
 		echo "The .xz file not present - starting network download now"
 		wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.53.tar.xz
 	fi
@@ -46,9 +49,7 @@ echo "Executing the build script"
 echo 
 #faketime "2013-12-02 17:28:00" ./all.sh  # time is set not here, but in env.sh
 
-pwd=$PWD
-echo "In $pwd execute ./all.sh to build the kernel."
-echo "Press ENTER to conitnue, or Ctrl-C to abort"
+echo "Will now execute ./all.sh to build the kernel."
 
 read _
 ./all.sh
