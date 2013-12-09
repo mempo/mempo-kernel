@@ -37,13 +37,13 @@ function get_and_check() {
 	fi
 	checksum_now_short="${checksum_now:0:16}"
 	echo " OK ($checksum_now_short...) "
-	mv  "tmp/${filename}"  "./${filename}"
+	mv  "tmp/${filename}"  "${localdir}${filename}"
 }
 
 echo "Processing sources list"
-while IFS=, read -r kind reserved1 reserved2 subdir filename hash_type hash
+while IFS=, read -r kind reserved1 reserved2 subdir filename hash_type hash localdir
 do
-	get_and_check "$subdir" "$filename" "$hash_type" "$hash"
+	get_and_check "$subdir" "$filename" "$hash_type" "$hash" "$localdir"
 done < sources.list
 echo "Sources list completed"
 

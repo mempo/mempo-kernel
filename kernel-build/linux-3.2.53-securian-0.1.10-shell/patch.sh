@@ -22,11 +22,11 @@ tar -xf "$linuxfile"
 
 	mkdir -p ../buildlog
 
-	while IFS=, read -r kind reserved1 reserved2 subdir filename hash_type hash
+	while IFS=, read -r kind reserved1 reserved2 subdir filename hash_type hash localdir
 	do
 		if [ "$kind" == "P" ] ; then
 			echo -n " # patching with: ${filename}... "
-			patch -p1 < "../${filename}" &> ../buildlog/${filename}.result \
+			patch -p1 < "../${localdir}${filename}" &> ../buildlog/${filename}.result \
 				|| { echo "ERROR: Patch failed ($filename). " ; exit 1 ; }
 			echo " DONE ($filename)"
 		fi

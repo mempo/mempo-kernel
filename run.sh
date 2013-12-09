@@ -34,6 +34,12 @@ echo
 echo "Executing the build script"
 echo 
 #faketime "2013-12-02 17:28:00" ./all.sh  # time is set not here, but in env.sh
+
+pwd=$PWD
+echo "In $pwd execute ./all.sh to build the kernel."
+echo "Press ENTER to conitnue, or Ctrl-C to abort"
+
+read _
 ./all.sh
 set +x
 
