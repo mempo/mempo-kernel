@@ -9,6 +9,7 @@ echo "Will get kernel sources (will verify checksum later - before actually usin
 
 if [ ! -r "kernel-sources/kernel/linux-3.2.53.tar" ]
 then
+(
 	echo "Kernel sources are not ready."
 	cd kernel-sources/kernel
 
@@ -20,6 +21,7 @@ then
 	wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.53.tar.sign
 	unxz linux-3.2.53.tar.xz
 	chmod 755 linux-3.2.53.tar*
+)
 #cd ..
 fi
 
