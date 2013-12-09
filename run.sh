@@ -5,23 +5,32 @@ set -x
 mkdir -p kernel-sources/kernel
 
 
-(
-echo "Downloading kernel sources (will verify checksum later - before actually using them)"
-cd kernel-sources/kernel
-wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.53.tar.xz
-wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.53.tar.sign
-unxz linux-3.2.53.tar.xz
-chmod 755 linux-3.2.53.tar*
+echo "Will get kernel sources (will verify checksum later - before actually using them)"
+
+if [ ! -r "kernel-sources/kernel/linux-3.2.53.tar" ]
+then
+	echo "Kernel sources are not ready."
+	cd kernel-sources/kernel
+
+	if [ ! -r "kernel-sources/kernel/linux-3.2.53.tar.xz" ]
+	then
+		echo "The .xz file not present - starting network download now"
+		wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.53.tar.xz
+	fi
+	wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.53.tar.sign
+	unxz linux-3.2.53.tar.xz
+	chmod 755 linux-3.2.53.tar*
 #cd ..
-)
+fi
 
 
 (
+echo "Grsecurity"
 #mkdir -p grsecurity
 #cd grsecurity
 #wget http://grsecurity.net/stable/grsecurity-3.0-3.2.53-201312021727.patch
 #wget http://grsecurity.net/stable/grsecurity-3.0-3.2.53-201312021727.patch.sig
-chmod 755 grsecurity-3.0-3.2.53-201312021727.patch*
+#chmod 755 grsecurity-3.0-3.2.53-201312021727.patch*
 #cd ..
 )
 
@@ -29,7 +38,7 @@ chmod 755 grsecurity-3.0-3.2.53-201312021727.patch*
 
 #deterministic-kernel
 
-cd kernel-build/linux-3.2.53-securian-0.1.10-shell
+cd kernel-build/linux-3.2.53-mempo-0.1.16-shell
 echo 
 echo "Executing the build script"
 echo 
