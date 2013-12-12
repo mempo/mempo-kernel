@@ -19,7 +19,6 @@ export BUILD_NICENESS=0
 echo "Starting build in $linuxdir"
 
 (
-# export TIMESTAMP_RFC3339='2013-12-02 17:28:00'
 
 	echo "CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
 	echo "Will faketime: $TIMESTAMP_RFC3339"
