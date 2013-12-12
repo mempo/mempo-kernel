@@ -1,12 +1,13 @@
 #!/bin/bash 
 # On deterministic-kernel
 
-set -x 
+# set -x 
 mkdir -p kernel-sources/kernel
 
 
-kernel_file="linux-3.2.53.tar"
-kernel_file_download="$kernel_file.xz"
+kernel_file="linux-3.2.53.tar" # the file that we want
+kernel_file_download="$kernel_file.xz" # the compressed for download version of file
+user_download_folder="${HOME}/Downloads/" # where user stores downloads, use this as download cache (read it, write ther)
 
 echo "Will get kernel sources (will verify checksum later - before actually using them)"
 
@@ -23,22 +24,25 @@ then
 	if [ ! -r "kernel-sources/kernel/$kernel_file_download" ]
 	then
 		echo "Kernel sources are not downloaded locally yet ($kernel_file_download)"
-		download_folder="${HOME}/Downloads/"
-		if [ ! -r "${download_folder}/${kernel_file_download}" ]
+		if [ ! -r "${user_download_folder}/${kernel_file_download}" ]
 		then
-			echo "Kernel sources are not cached in $download_folder"
+			echo "Kernel sources are not cached in $user_download_folder"
 
 			echo "Need .xz to download from the Internet."
-			download_wget "https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.53.tar.xz"
+			download_wget "https://www.kernel.org/pub/linux/kernel/v3.x/$kernel_file_download" -O "kernel-sources/kernel/${kernel_file_download}"
+			cp "kernel-sources/kernel/${kernel_file_download}" "${user_download_folder}/" # cache it
 		else 
 			echo "Kernel sources ARE cached in $download_folder. If this file would be bad then delete it and try again to really download."
-			cp "${download_folder}/${kernel_file_download}" "kernel-sources/kernel/$kernel_file_download" 
+			cp "${user_download_folder}/${kernel_file_download}" "kernel-sources/kernel/$kernel_file_download" # load from cache
 		fi
 
 	fi
-	wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.53.tar.sign
-	unxz linux-3.2.53.tar.xz
-	chmod 755 linux-3.2.53.tar*
+	(
+		echo "Unpacking the downloaded file"
+		cd "kernel-sources/kernel/"
+		unxz linux-3.2.53.tar.xz
+		chmod 755 linux-3.2.53.tar*
+	)
 )
 #cd ..
 fi
@@ -58,14 +62,13 @@ echo "Grsecurity"
 
 #deterministic-kernel
 
-cd kernel-build/linux-3.2.53-mempo-0.1.16-shell
+cd kernel-build/linux-3.2.53-mempo-*-shell
 echo 
 echo "Executing the build script"
 echo 
-#faketime "2013-12-02 17:28:00" ./all.sh  # time is set not here, but in env.sh
 
 echo "Will now execute ./all.sh to build the kernel."
-
+pwd
 ./all.sh
 set +x
 
