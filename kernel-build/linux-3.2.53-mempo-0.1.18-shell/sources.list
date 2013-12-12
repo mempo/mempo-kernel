@@ -1,0 +1,3 @@
+V,x,x,kernel,linux-3.2.53.tar,sha256,37518ac085ff81d0f1064e2d4df6042e5de202a9315401cfd6e3890993883b1b,./
+P,x,x,grsecurity,grsecurity-3.0-3.2.53-201312081752.patch,sha256,a8911b02c8deef9cb61a0be0d606ec8178466094b54261cc5d397183280370c8,./tmp-path/
+P,x,x,mempo,linux-3.2.53-deterministic-build2.diff,sha256,f784190d7099ad0c95d88a613c572a092a4039f368a0a0527c10276698192714,./tmp-path/
