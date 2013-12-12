@@ -1,8 +1,0 @@
-*.swp
-buildlog/
-*.tar
-linux-*/
-*report*.txt
-sources_id.txt
-system_id.txt
-tmp-path/
