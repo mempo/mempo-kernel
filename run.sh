@@ -5,24 +5,36 @@ set -x
 mkdir -p kernel-sources/kernel
 
 
+kernel_file="linux-3.2.53.tar"
+kernel_file_download="$kernel_file.xz"
+
 echo "Will get kernel sources (will verify checksum later - before actually using them)"
 
-if [ ! -r "kernel-sources/kernel/linux-3.2.53.tar" ]
+function download_wget() {
+	echo "Downloading: " $@
+	wget $@
+}
+
+if [ ! -r "kernel-sources/kernel/$kernel_file" ]
 then
 (
-	echo "Kernel sources are not ready."
-	cd kernel-sources/kernel
+	echo "Kernel sources are not ready ($kernel_file)"
 
-	if [ ! -r "kernel-sources/kernel/linux-3.2.53.tar.xz" ]
+	if [ ! -r "kernel-sources/kernel/$kernel_file_download" ]
 	then
-		echo "Need .xz from internet"
-		echo ""
-		echo "----------------------------"
-		echo "Will download NOW from CLEAR INTERNET, press ENTER to allow, or ctrl-c to abort"
-		echo "> "
-		read _
-		echo "The .xz file not present - starting network download now"
-		wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.53.tar.xz
+		echo "Kernel sources are not downloaded locally yet ($kernel_file_download)"
+		download_folder="${HOME}/Downloads/"
+		if [ ! -r "${download_folder}/${kernel_file_download}" ]
+		then
+			echo "Kernel sources are not cached in $download_folder"
+
+			echo "Need .xz to download from the Internet."
+			download_wget "https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.53.tar.xz"
+		else 
+			echo "Kernel sources ARE cached in $download_folder. If this file would be bad then delete it and try again to really download."
+			cp "${download_folder}/${kernel_file_download}" "kernel-sources/kernel/$kernel_file_download" 
+		fi
+
 	fi
 	wget https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.2.53.tar.sign
 	unxz linux-3.2.53.tar.xz
