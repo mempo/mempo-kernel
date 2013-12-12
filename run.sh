@@ -68,7 +68,6 @@ echo "Executing the build script"
 echo 
 
 echo "Will now execute ./all.sh to build the kernel."
-pwd
-./all.sh
+./all.sh $@
 set +x
 

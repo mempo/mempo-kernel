@@ -36,7 +36,7 @@ function get_and_check() {
 		exit 1
 	fi
 	checksum_now_short="${checksum_now:0:16}"
-	echo " OK ($checksum_now_short...) "
+	echo " OK ($checksum_now_short... as expected) "
 	mkdir -p "${localdir}"
 	mv  "tmp/${filename}"  "${localdir}${filename}"
 }
@@ -52,4 +52,5 @@ if [ -d "tmp/" ] ; then
 	rm -rf "tmp/"
 fi
 
+echo "=== Sources are now patched and ready to be builded === "
 
