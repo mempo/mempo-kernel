@@ -8,3 +8,6 @@ Compile:
 ./run.sh
 
 Important: You must run compilation every time in the same path (You can create user for this) e.g. /home/kernel-builder/
+
+Git commits might be signed with GPG.
+
