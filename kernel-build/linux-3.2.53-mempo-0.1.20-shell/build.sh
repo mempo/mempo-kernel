@@ -44,13 +44,10 @@ echo "Starting build in $linuxdir"
  	cp ../configs/config-good.config .config || { echo "ERROR Could not copy the ../config file here." ; exit 1 ; }
 	config_id=`sha256sum .config | cut -d" " -f1`
 	echo "Using .config with ID=$config_id"
-
-
-	overlay-dir=$HOME/deterministic-kernel/overlay-dir	
-
+	echo $PWD
 	echo ""
 	echo "=== BUILD MAIN ================================="
-	faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" --overlay-dir $overlay-dir 2>1 | tee ../buildlog/build.result
+	faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" --overlay-dir ~/deterministic-kernel/overlay-dir 2>1 | tee ../buildlog/build.result
 	echo "... returned from the main BUILD program"
 	echo
 	date
