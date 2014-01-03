@@ -44,10 +44,7 @@ pwd_here=$PWD
  	cp ../configs/config-good.config .config || { echo "ERROR Could not copy the ../config file here." ; exit 1 ; }
 	config_id=`sha256sum .config | cut -d" " -f1`
 	echo "Using .config with ID=$config_id"
-
-
-	overlay-dir=$HOME/deterministic-kernel/overlay-dir	
-
+	echo $PWD
 	echo ""
 	echo "=== BUILD MAIN ================================="
 
@@ -75,7 +72,8 @@ pwd_here=$PWD
 		PATH="$ccache_path_dir:$PATH"
 	fi
 
-	overlay_flag="--overlay-dir $overlay-dir"
+	overlay_dir="$HOME/deterministic-kernel/overlay-dir/"
+	overlay_flag="--overlay-dir $overlay_dir"
 
 	echo "* Using CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
 	echo "* Using PATH=$PATH"
@@ -86,6 +84,7 @@ pwd_here=$PWD
 	set +x
 
 	# faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" --overlay-dir $overlay-dir 2>1 | tee ../buildlog/build.result
+	# faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" --overlay-dir ~/deterministic-kernel/overlay-dir 2>1 | tee ../buildlog/build.result
 	
 	echo "... returned from the main BUILD program"
 	echo
