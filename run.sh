@@ -30,7 +30,11 @@ then
 
 			echo "Need .xz to download from the Internet."
 			download_wget "https://www.kernel.org/pub/linux/kernel/v3.x/$kernel_file_download" -O "kernel-sources/kernel/${kernel_file_download}"
+
+			echo "We downloaded the file from internet, and we will now save it into $user_download_folder"
+			mkdir -p "{$user_download_folder}/"
 			cp "kernel-sources/kernel/${kernel_file_download}" "${user_download_folder}/" # cache it
+
 		else 
 			echo "Kernel sources ARE cached in $download_folder. If this file would be bad then delete it and try again to really download."
 			cp "${user_download_folder}/${kernel_file_download}" "kernel-sources/kernel/$kernel_file_download" # load from cache
