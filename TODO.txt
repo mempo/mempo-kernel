@@ -1,0 +1,25 @@
+
+
+=== THINGS TODO ===
+
+* use ccache
+* do not set concurency_level if already set; set to number of cores otherwise
+
+=================================================
+
+
+
+=== BUGS TODO ===
+
+* copy to ~/Downloads/ after wget is broken (can not copy to "Downloads//")
+* configure the 1 new config option (pax) to yes
+
+=================================================
+
+
+
+=== BUGS FIXED ===
+
+
+=================================================
+
