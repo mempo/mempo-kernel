@@ -1,0 +1,101 @@
+diff -Nuar ruleset/targets/debug.mk ../debian/ruleset/targets/debug.mk
+--- ruleset/targets/debug.mk	2014-01-03 08:03:11.198690919 +0100
++++ ../debian/ruleset/targets/debug.mk	2014-01-03 08:10:32.382689406 +0100
+@@ -58,7 +58,7 @@
+ 	if test -f README.Debian ; then                                                 \
+            $(install_file) README.Debian                $(DOCDIR)/README.Debian.1st;\
+ 	fi
+-	gzip -9qfr                                      $(DOCDIR)/
++	gzip -n9qfr                                      $(DOCDIR)/
+ 	echo "This was produced by kernel-package version: $(kpkg_version)." >         \
+ 	                                                   $(DOCDIR)/Buildinfo
+ 	chmod 0644                                         $(DOCDIR)/Buildinfo
+diff -Nuar ruleset/targets/doc.mk ../debian/ruleset/targets/doc.mk
+--- ruleset/targets/doc.mk	2014-01-03 08:03:11.194690919 +0100
++++ ../debian/ruleset/targets/doc.mk	2014-01-03 08:10:32.430689405 +0100
+@@ -87,7 +87,7 @@
+ 	(cd $(DOCDIR);              \
+                test -x $(doc_clean_hook) && $(doc_clean_hook))
+ endif
+-	-gzip -9qfr $(DOCDIR)
++	-gzip -n9qfr $(DOCDIR)
+ 	-find $(DOCDIR)      -type f -name \*.gz -perm +111 -exec gunzip {} \;
+ 	-find $(DOCDIR)/html -type f -name \*.gz            -exec gunzip {} \;
+ 	find   $(DOCDIR)/              -type d -exec chmod 0755 {} \;
+diff -Nuar ruleset/targets/headers.mk ../debian/ruleset/targets/headers.mk
+--- ruleset/targets/headers.mk	2014-01-03 08:03:11.198690919 +0100
++++ ../debian/ruleset/targets/headers.mk	2014-01-03 08:10:32.430689405 +0100
+@@ -72,7 +72,7 @@
+ 	if test -f README.Debian ; then                                                 \
+            $(install_file) README.Debian                $(DOCDIR)/README.Debian.1st;\
+ 	fi
+-	gzip -9qfr                                      $(DOCDIR)/
++	gzip -n9qfr                                      $(DOCDIR)/
+ 	echo "This was produced by kernel-package version: $(kpkg_version)." >         \
+ 	                                                   $(DOCDIR)/Buildinfo
+ 	chmod 0644                                         $(DOCDIR)/Buildinfo
+diff -Nuar ruleset/targets/image.mk ../debian/ruleset/targets/image.mk
+--- ruleset/targets/image.mk	2014-01-03 08:03:11.198690919 +0100
++++ ../debian/ruleset/targets/image.mk	2014-01-03 08:10:32.430689405 +0100
+@@ -58,7 +58,7 @@
+ 	$(make_directory) $(UML_DIR)
+ 	$(make_directory) $(MAN1DIR)
+ 	$(install_file) $(DEBDIR)/docs/linux.1 $(MAN1DIR)/linux-$(KERNELRELEASE).1
+-	gzip -9fq			       $(MAN1DIR)/linux-$(KERNELRELEASE).1
++	gzip -n9fq			       $(MAN1DIR)/linux-$(KERNELRELEASE).1
+ endif
+ 	test ! -d $(DEBDIR)/examples/ ||                                     \
+           (cd $(DEBDIR); tar cf - examples | (cd $(DOCDIR);  umask 000; tar xsf -)); 
+@@ -84,7 +84,7 @@
+ ifeq ($(strip $(HAVE_EXTRA_DOCS)),YES)
+ 	$(install_file) $(extra_docs)		 $(DOCDIR)/
+ endif
+-	gzip -9qfr			  $(DOCDIR)
++	gzip -n9qfr			  $(DOCDIR)
+ 	$(install_file) $(DEBDIR)/pkg/image/copyright $(DOCDIR)/copyright
+ ######################################################################
+ ###   For linux, if modules are defined, install modules
+@@ -192,7 +192,7 @@
+ ###   Post-processing
+ ######################################################################
+ ifeq ($(strip $(NEED_DIRECT_GZIP_IMAGE)),YES)
+-	gzip -9fq $(kimagedest)
++	gzip -n9fq $(kimagedest)
+ 	test ! -f $(kimagedest).gz || mv -f $(kimagedest).gz $(kimagedest)
+ endif
+ # Set permissions on the image
+diff -Nuar ruleset/targets/manual.mk ../debian/ruleset/targets/manual.mk
+--- ruleset/targets/manual.mk	2014-01-03 08:03:11.198690919 +0100
++++ ../debian/ruleset/targets/manual.mk	2014-01-03 08:10:32.430689405 +0100
+@@ -44,8 +44,8 @@
+ 	test ! -d $(TMP_MAN) || find $(TMP_MAN) -type f -exec mv {} $(MAN9DIR) \;
+ 	-gunzip -qfr $(MANDIR)
+ 	find $(MANDIR) -type f -size 0 -exec rm {} \;
+-	-gzip -9qfr $(MANDIR)
+-	-gzip -9qfr $(DOCDIR)
++	-gzip -n9qfr $(MANDIR)
++	-gzip -n9qfr $(DOCDIR)
+ 	$(install_file) $(DEBDIR)/pkg/doc/copyright $(DOCDIR)/copyright
+ 	@echo done > $@
+ 
+diff -Nuar ruleset/targets/source.mk ../debian/ruleset/targets/source.mk
+--- ruleset/targets/source.mk	2014-01-03 08:03:11.194690919 +0100
++++ ../debian/ruleset/targets/source.mk	2014-01-03 08:10:32.430689405 +0100
+@@ -56,7 +56,7 @@
+ 	if test -f README.Debian ; then                                                 \
+            $(install_file) README.Debian                $(DOCDIR)/README.Debian.1st;\
+ 	fi
+-	gzip -9qfr                                     $(DOCDIR)/
++	gzip -n9qfr                                     $(DOCDIR)/
+ 	$(install_file) $(DEBDIR)/pkg/source/copyright $(DOCDIR)/copyright
+ 	echo "This was produced by kernel-package version $(kpkg_version)." >  \
+ 	                                               $(DOCDIR)/Buildinfo
+@@ -83,7 +83,7 @@
+                  $(DEBDIR)/pkg/source/README >  $(SRCDIR)/README.Debian ;
+ 	if test -f README.Debian ; then                                         \
+            $(install_file) README.Debian        $(DOCDIR)/README.Debian.1st;    \
+-	   gzip -9qf                            $(DOCDIR)/README.Debian.1st;    \
++	   gzip -n9qf                            $(DOCDIR)/README.Debian.1st;    \
+ 	fi
+ 	test -d $(SRCDIR)/debian || mkdir $(SRCDIR)/debian
+ 	for file in $(DEBIAN_FILES) control changelog; do                    \
