@@ -49,7 +49,37 @@ echo "Starting build in $linuxdir"
 
 	echo ""
 	echo "=== BUILD MAIN ================================="
+
+	cores_max_autodetect=32 # TODO configure this? e.g. from amount of RAM available
+
+	if [[ -z $CONCURENCY_LEVEL ]] ; then
+		echo "Will try to auto-detect proper CONCURENCY_LEVEL since none was set in variable"
+		cores=2
+		if command -v nproc 2>/dev/null; then
+			cores=$((nproc) 2>&1)	
+			if (( $cores > $cores_max_autodetect )) ; then
+				cores=$cores_max_autodetect
+				echo "Limied to cores=$cores (because free RAM limitation) you can override by setting CONCURENCY_LEVEL env"
+			fi
+		else 
+			echo "Warning: can not detect number of CPUs to optimize build speed, please configure CONCURENCY_LEVEL variable if you want"
+		fi
+		CONCURENCY_LEVEL=$cores
+	fi
+
+	ccache_path_dir="/usr/lib/ccache"
+	if [ -d "$ccache_path_dir" ] ; then
+		echo "Detected ccache directory, adding to path: $ccache_path_dir"
+		PATH="$ccache_path_dir:$PATH"
+	fi
+
+	echo "* Using CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
+	echo "* Using PATH=$PATH"
+
+	set -x
 	faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" 2>1 | tee ../buildlog/build.result
+	set +x
+
 	echo "... returned from the main BUILD program"
 	echo
 	date
