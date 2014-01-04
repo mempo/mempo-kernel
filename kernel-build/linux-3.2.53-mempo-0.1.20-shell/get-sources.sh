@@ -52,5 +52,5 @@ if [ -d "tmp/" ] ; then
 	rm -rf "tmp/"
 fi
 
-echo "=== Sources are now patched and ready to be builded === "
+echo "=== Sources and patches are now prepared === "
 

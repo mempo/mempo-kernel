@@ -73,14 +73,22 @@ pwd_here=$PWD
 	fi
 
 	overlay_dir="$HOME/deterministic-kernel/overlay-dir/"
-	overlay_flag="--overlay-dir $overlay_dir"
-
+	overlay_dir="${pwd_here}/../../overlay-dir"
+	if [ ! -d $overlay_dir ] ; then
+		echo "ERROR: The overlay_dir=$overlay_dir is not existing directory!"
+		exit 1
+	fi
+#	echo $overlay_dir
+#	echo $PWD
+#	echo "IN BASH"
+#	bash
+#	echo "DONE BASH"
 	echo "* Using CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
 	echo "* Using PATH=$PATH"
-	echo "* Using Overlay=$overlay_flag"
+	echo "* Using overlay_dir=$overlay_dir"
 
 	set -x
-	faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" "$overlay_flag" 2>1 | tee ../buildlog/build.result
+	faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" --overlay-dir "$overlay_dir" 2>1 | tee ../buildlog/build.result
 	set +x
 
 	# faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" --overlay-dir $overlay-dir 2>1 | tee ../buildlog/build.result
