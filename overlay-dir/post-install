@@ -1,18 +1,27 @@
 #/bin/bash
-echo "post-install started"
+
+script_name="overlay-dir post-install"
+
+echo "$script_name: started"
+
 
 if [ ! -d ruleset ] ; then
-	echo "ignoring this execution, wrong dir"
+	echo "$script_name: ignoring this execution, wrong dir"
 exit
 fi
 
 # I am in debian/
 
 if [ -d script_overlay_was_run  ] ; then
-	echo "ignoring this execution, was done already"
+	echo "$script_name: ignoring this execution, was done applied"
 exit
 fi
 
 mkdir script_overlay_was_run
 
+echo "$script_name: applying"
+
 patch -p 0 < ../../../../patch-gz
+
+
+echo "$script_name: done"
