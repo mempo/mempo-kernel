@@ -5,6 +5,7 @@ linux-image (linux-3.2.53-mempo-0.1.20) UNRELEASED; urgency=low
 	* fixed copy to ~/Downloads/ after wget
 	* configured new config option
 	* configure concurency level on make
+	* overaly dir for debian to make gzip files deterministic
 
  -- mempo <mempo@mempo.org>  Fri, 04 Jan 2014 01:00:00 +0200
 

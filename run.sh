@@ -32,7 +32,7 @@ then
 			download_wget "https://www.kernel.org/pub/linux/kernel/v3.x/$kernel_file_download" -O "kernel-sources/kernel/${kernel_file_download}"
 
 			echo "We downloaded the file from internet, and we will now save it into $user_download_folder"
-			mkdir -p "{$user_download_folder}/"
+			mkdir -p "${user_download_folder}/"
 			cp "kernel-sources/kernel/${kernel_file_download}" "${user_download_folder}/" # cache it
 
 		else 
