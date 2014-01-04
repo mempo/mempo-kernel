@@ -18,7 +18,7 @@ export BUILD_NICENESS=0
 
 echo "Starting build in $linuxdir"
 
-(
+pwd_here=$PWD
 
 	echo "CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
 	echo "Will faketime: $TIMESTAMP_RFC3339"
@@ -46,6 +46,7 @@ echo "Starting build in $linuxdir"
 	echo "Using .config with ID=$config_id"
 
 
+	overlay-dir=$HOME/deterministic-kernel/overlay-dir	
 
 	echo ""
 	echo "=== BUILD MAIN ================================="
@@ -55,8 +56,9 @@ echo "Starting build in $linuxdir"
 	if [[ -z $CONCURENCY_LEVEL ]] ; then
 		echo "Will try to auto-detect proper CONCURENCY_LEVEL since none was set in variable"
 		cores=2
-		if command -v nproc 2>/dev/null; then
-			cores=$((nproc) 2>&1)	
+		if command -v nproc 2>/dev/null 
+		then
+			cores=$(nproc 2>&1)	
 			if (( $cores > $cores_max_autodetect )) ; then
 				cores=$cores_max_autodetect
 				echo "Limied to cores=$cores (because free RAM limitation) you can override by setting CONCURENCY_LEVEL env"
@@ -73,18 +75,24 @@ echo "Starting build in $linuxdir"
 		PATH="$ccache_path_dir:$PATH"
 	fi
 
+	overlay_flag="--overlay-dir $overlay-dir"
+
 	echo "* Using CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
 	echo "* Using PATH=$PATH"
+	echo "* Using Overlay=$overlay_flag"
 
 	set -x
-	faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" 2>1 | tee ../buildlog/build.result
+	faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" "$overlay_flag" 2>1 | tee ../buildlog/build.result
 	set +x
 
+	# faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" --overlay-dir $overlay-dir 2>1 | tee ../buildlog/build.result
+	
 	echo "... returned from the main BUILD program"
 	echo
 	date
 	echo "================================================"
-)
+
+cd $pwd_here
 
 echo 
 echo "Done building in $linuxdir"

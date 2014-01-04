@@ -1,0 +1,6 @@
+#/bin/bash
+
+#variable!?
+cd $HOME/deterministic-kernel/kernel-build/linux-3.2.53-mempo-0.1.18-shell/linux-3.2.53/debian
+patch -p 0 < $HOME/deterministic-kernel/patch-gz1
+cd -
