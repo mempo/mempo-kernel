@@ -1,4 +1,12 @@
 
+linux-image (linux-3.2.54-mempo-0.1.21) UNRELEASED; urgency=low
+
+  * updated to linux 3.2.54 
+	* TODO use non-vlinux version TODO
+	* fixed kernel version name
+
+ -- mempo <mempo@mempo.org>  Tue, 07 Jan 2014 14:00:00 +0200
+
 linux-image (linux-3.2.53-mempo-0.1.20) UNRELEASED; urgency=low
 
   * using ccache when detected
