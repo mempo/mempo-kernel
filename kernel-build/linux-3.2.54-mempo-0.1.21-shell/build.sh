@@ -9,7 +9,7 @@ fi
 echo "Building linuxdir=$linuxdir"
 
 echo "Creating sources info"
-bash /home/kernelbuild/make-source-info
+bash $HOME/make-source-info
 
 echo "Loading env"
 . env.sh
