@@ -2,7 +2,7 @@
 linux-image (linux-3.2.54-mempo-0.1.21) UNRELEASED; urgency=low
 
   * updated to linux 3.2.54 
-	* TODO use non-vlinux version TODO
+	* TODO use non-vserver version TODO
 	* fixed kernel version name
 
  -- mempo <mempo@mempo.org>  Tue, 07 Jan 2014 14:00:00 +0200
