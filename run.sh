@@ -4,8 +4,8 @@
 # set -x 
 mkdir -p kernel-sources/kernel
 
-
-kernel_file="linux-3.2.53.tar" # the file that we want
+kernel_version="3.2.54"
+kernel_file="linux-${kernel_version}.tar"
 kernel_file_download="${kernel_file}.xz" # the compressed for download version of file
 user_download_folder="${HOME}/Downloads/" # where user stores downloads, use this as download cache (read it, write ther)
 
@@ -43,9 +43,10 @@ then
 	fi
 	(
 		echo "Unpacking the downloaded file"
-		cd "kernel-sources/kernel/"
-		unxz linux-3.2.53.tar.xz
-		chmod 755 linux-3.2.53.tar*
+		cd "kernel-sources/kernel/" 
+                unxz linux-${kernel_version}.tar.xz
+                chmod 755 linux-${kernel_version}.tar*
+
 	)
 )
 #cd ..
@@ -55,7 +56,7 @@ fi
 #cd ..
 
 # TODO nicer way of entering the correct one / warning if more then one
-cd kernel-build/linux-3.2.53-mempo-*-shell
+cd kernel-build/linux-${kernel_version}-mempo-*-shell
 echo 
 echo "Executing the build script"
 echo 
