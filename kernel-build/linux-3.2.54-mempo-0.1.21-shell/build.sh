@@ -70,6 +70,8 @@ pwd_here=$PWD
 	if [ -d "$ccache_path_dir" ] ; then
 		echo "Detected ccache directory, adding to path: $ccache_path_dir"
 		PATH="$ccache_path_dir:$PATH"
+	else
+		echo "WARNING: not using ccache (this is OK, but will take longer overall)"
 	fi
 
 	overlay_dir="$HOME/deterministic-kernel/overlay-dir/"

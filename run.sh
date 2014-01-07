@@ -44,9 +44,8 @@ then
 	(
 		echo "Unpacking the downloaded file"
 		cd "kernel-sources/kernel/" 
-                unxz linux-${kernel_version}.tar.xz
-                chmod 755 linux-${kernel_version}.tar*
-
+		unxz linux-${kernel_version}.tar.xz
+		chmod 755 linux-${kernel_version}.tar*
 	)
 )
 #cd ..
