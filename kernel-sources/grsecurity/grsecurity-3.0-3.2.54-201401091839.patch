@@ -44214,43 +44214,10 @@ index 9350af9..68623c4 100644
  	int retval = -ENOMEM;
  
 diff --git a/drivers/pci/pci-sysfs.c b/drivers/pci/pci-sysfs.c
-index 106be0d..4a79e67 100644
+index 106be0d..45a52b5 100644
 --- a/drivers/pci/pci-sysfs.c
 +++ b/drivers/pci/pci-sysfs.c
-@@ -505,6 +505,10 @@ pci_write_config(struct file* filp, struct kobject *kobj,
- 	loff_t init_off = off;
- 	u8 *data = (u8*) buf;
- 
-+#ifdef CONFIG_GRKERNSEC_KMEM
-+	return -EPERM;
-+#endif
-+
- 	if (off > dev->cfg_size)
- 		return 0;
- 	if (off + count > dev->cfg_size) {
-@@ -807,6 +811,10 @@ pci_mmap_resource(struct kobject *kobj, struct bin_attribute *attr,
- 	resource_size_t start, end;
- 	int i;
- 
-+#ifdef CONFIG_GRKERNSEC_KMEM
-+	return -EPERM;
-+#endif
-+
- 	for (i = 0; i < PCI_ROM_RESOURCE; i++)
- 		if (res == &pdev->resource[i])
- 			break;
-@@ -914,6 +922,10 @@ pci_write_resource_io(struct file *filp, struct kobject *kobj,
- 		      struct bin_attribute *attr, char *buf,
- 		      loff_t off, size_t count)
- {
-+#ifdef CONFIG_GRKERNSEC_KMEM
-+	return -EPERM;
-+#endif
-+
- 	return pci_resource_io(filp, kobj, attr, buf, off, count, true);
- }
- 
-@@ -950,7 +962,7 @@ static int pci_create_attr(struct pci_dev *pdev, int num, int write_combine)
+@@ -950,7 +950,7 @@ static int pci_create_attr(struct pci_dev *pdev, int num, int write_combine)
  {
  	/* allocate attribute structure, piggyback attribute name */
  	int name_len = write_combine ? 13 : 10;
@@ -44259,7 +44226,7 @@ index 106be0d..4a79e67 100644
  	int retval;
  
  	res_attr = kzalloc(sizeof(*res_attr) + name_len, GFP_ATOMIC);
-@@ -1135,7 +1147,7 @@ static struct device_attribute reset_attr = __ATTR(reset, 0200, NULL, reset_stor
+@@ -1135,7 +1135,7 @@ static struct device_attribute reset_attr = __ATTR(reset, 0200, NULL, reset_stor
  static int pci_create_capabilities_sysfs(struct pci_dev *dev)
  {
  	int retval;
@@ -44268,7 +44235,7 @@ index 106be0d..4a79e67 100644
  
  	/* If the device has VPD, try to expose it in sysfs. */
  	if (dev->vpd) {
-@@ -1182,7 +1194,7 @@ int __must_check pci_create_sysfs_dev_files (struct pci_dev *pdev)
+@@ -1182,7 +1182,7 @@ int __must_check pci_create_sysfs_dev_files (struct pci_dev *pdev)
  {
  	int retval;
  	int rom_size = 0;
@@ -44321,43 +44288,10 @@ index 9005380..c497080 100644
  	if (!dev->mmio_always_on) {
  		pci_read_config_word(dev, PCI_COMMAND, &orig_cmd);
 diff --git a/drivers/pci/proc.c b/drivers/pci/proc.c
-index 27911b5..2bf4653 100644
+index 27911b5..5b6db88 100644
 --- a/drivers/pci/proc.c
 +++ b/drivers/pci/proc.c
-@@ -135,6 +135,10 @@ proc_bus_pci_write(struct file *file, const char __user *buf, size_t nbytes, lof
- 	int size = dp->size;
- 	int cnt;
- 
-+#ifdef CONFIG_GRKERNSEC_KMEM
-+	return -EPERM;
-+#endif
-+
- 	if (pos >= size)
- 		return 0;
- 	if (nbytes >= size)
-@@ -211,6 +215,10 @@ static long proc_bus_pci_ioctl(struct file *file, unsigned int cmd,
- #endif /* HAVE_PCI_MMAP */
- 	int ret = 0;
- 
-+#ifdef CONFIG_GRKERNSEC_KMEM
-+	return -EPERM;
-+#endif
-+
- 	switch (cmd) {
- 	case PCIIOC_CONTROLLER:
- 		ret = pci_domain_nr(dev->bus);
-@@ -251,6 +259,10 @@ static int proc_bus_pci_mmap(struct file *file, struct vm_area_struct *vma)
- 	struct pci_filp_private *fpriv = file->private_data;
- 	int i, ret;
- 
-+#ifdef CONFIG_GRKERNSEC_KMEM
-+	return -EPERM;
-+#endif
-+
- 	if (!capable(CAP_SYS_RAWIO))
- 		return -EPERM;
- 
-@@ -476,7 +488,16 @@ static const struct file_operations proc_bus_pci_dev_operations = {
+@@ -476,7 +476,16 @@ static const struct file_operations proc_bus_pci_dev_operations = {
  static int __init pci_proc_init(void)
  {
  	struct pci_dev *dev = NULL;
@@ -44374,21 +44308,6 @@ index 27911b5..2bf4653 100644
  	proc_create("devices", 0, proc_bus_pci_dir,
  		    &proc_bus_pci_dev_operations);
  	proc_initialized = 1;
-diff --git a/drivers/pci/syscall.c b/drivers/pci/syscall.c
-index e1c1ec5..bef4210 100644
---- a/drivers/pci/syscall.c
-+++ b/drivers/pci/syscall.c
-@@ -92,6 +92,10 @@ SYSCALL_DEFINE5(pciconfig_write, unsigned long, bus, unsigned long, dfn,
- 	u32 dword;
- 	int err = 0;
- 
-+#ifdef CONFIG_GRKERNSEC_KMEM
-+	return -EPERM
-+#endif
-+
- 	if (!capable(CAP_SYS_ADMIN))
- 		return -EPERM;
- 
 diff --git a/drivers/platform/x86/asus-wmi.c b/drivers/platform/x86/asus-wmi.c
 index 26fba2d..693b4d3 100644
 --- a/drivers/platform/x86/asus-wmi.c
