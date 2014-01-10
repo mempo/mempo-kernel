@@ -1,6 +1,7 @@
 
 
 === THINGS TODO ===
+(newest added on top)
 
 * in run.sh check version of other tools then just the dpkg
 * record version of cruciall tools like dpkg, gcc, etc in the generated build log
@@ -12,15 +13,16 @@
 
 
 === BUGS TODO ===
-
-* there is wrong file "1" created, missdirected output from log in script
+(newest added on top)
 
 =================================================
 
 
 
 === BUGS FIXED ===
+(newest fixed on top)
 
+* there is wrong file "1" created, missdirected output from log in script
 * copy to ~/Downloads/ after wget is broken (can not copy to "Downloads//")
 
 =================================================
