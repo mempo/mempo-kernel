@@ -2,6 +2,10 @@
 
 === THINGS TODO ===
 
+* in run.sh check version of other tools then just the dpkg
+* record version of cruciall tools like dpkg, gcc, etc in the generated build log
+* are we using gcc plugins?
+* are we using all proper compiler options of fortify-source type?
 
 =================================================
 
@@ -9,6 +13,7 @@
 
 === BUGS TODO ===
 
+* there is wrong file "1" created, missdirected output from log in script
 
 =================================================
 

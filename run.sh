@@ -9,6 +9,43 @@ kernel_file="linux-${kernel_version}.tar"
 kernel_file_download="${kernel_file}.xz" # the compressed for download version of file
 user_download_folder="${HOME}/Downloads/" # where user stores downloads, use this as download cache (read it, write ther)
 
+
+echo "Tools: checking prerequisites..."
+DPKG_VER=$(dpkg-query -W --showformat='${Version}\n' dpkg)
+DPKG_VER_NEEDED="1.17.5"
+
+function show_dpkg_why {
+	echo "We need dpkg version that packs files in same way, see http://tinyurl.com/pcrrvag and https://wiki.debian.org/ReproducibleBuildsKernel"
+}
+
+function show_mempo_contact {
+	echo "~~ Problems, questions, suggestions or will to help us? ~~ Contact Mempo at IRC" 
+	echo "IRC channel #mempo on irc.oftc.net (tor allowed), irc2p (i2p2.de then localhost 6668) or irc.freenode.org."
+	echo "We will gladly help fellow Hackers and security researchers."
+}
+
+echo " * Dpkg version is $DPKG_VER (version >= $DPKG_VER_NEEDED is recommended)"
+
+. dpkg-vercomp.sh 
+vercomp $DPKG_VER $DPKG_VER_NEEDED
+case $? in
+	2) 
+	echo "Wrong DPKG version..." ;
+	echo "If you want to force and try despite this problem, edit this script that shows this error." 
+	show_dpkg_why
+	show_mempo_contact
+	echo 
+	echo "On Debian (wheezy) the SOLUTION is to install dpkg in version from jessy (download sources, build only this one package, install it), search for more info on our Wiki."
+	echo 
+	exit 1
+	;;
+esac
+
+echo "(TODO check if packets like build-essentials etc are installed, warn if not)" # TODO
+echo "Tools: all ok, prerequisites seem fine"
+
+echo ""
+
 echo "Will get kernel sources (will verify checksum later - before actually using them)"
 
 function download_wget() {
