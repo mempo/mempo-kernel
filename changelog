@@ -1,4 +1,11 @@
 
+linux-image (linux-3.2.54-mempo-0.1.22) UNRELEASED; urgency=low
+
+  * updated to grsecurity-3.0-3.2.54-201401051649
+  * fixed --build-id=none
+
+ -- mempo <mempo@mempo.org>  Fri, 10 Jan 2014 05:00:00 +0200
+
 linux-image (linux-3.2.54-mempo-0.1.21) UNRELEASED; urgency=low
 
   * updated to linux 3.2.54 
