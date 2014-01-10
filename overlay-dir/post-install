@@ -4,6 +4,10 @@ script_name="overlay-dir post-install"
 
 echo "$script_name: started"
 
+echo "========================================================================================"
+echo "$script_name: applying"
+
+patch -p 0 < ../../../../fix-kpkg-gz.patch
 
 if [ ! -d ruleset ] ; then
 	echo "$script_name: ignoring this execution, wrong dir"
@@ -18,13 +22,6 @@ exit
 fi
 
 mkdir script_overlay_was_run
-
-echo "========================================================================================"
-
-echo "$script_name: applying"
-
-
-patch -p 0 < ../../../../fix-kpkg-gz.patch
 
 echo "fixing Makefile build-id"
 sed -i ../Makefile  -e 's/--build-id/--build-id=none/g' 
