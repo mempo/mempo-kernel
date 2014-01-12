@@ -1,0 +1,216 @@
+
+Found instances of "gzip" - in order to make it deterministic
+
+=== resolved - changed ===
+
+LINUX/scripts/package/builddeb:	gzip "$tmpdir/usr/share/doc/$packagename/config"
+LINUX/scripts/package/builddeb:	gzip -9 "$pdir/usr/share/doc/$pname/changelog.Debian"
+LINUX/scripts/package/buildtar:		compress="gzip -c9"
+LINUX/scripts/patch-kernel:		name="gzip"
+LINUX/scripts/patch-kernel:# gzip, bzip, bzip2, zip, compress, and plaintext. 
+
+
+=== Makefile - possibly fix THIS ===
+
+... (all done for now) ... 
+
+
+=== unchanged - readme  ===
+
+LINUX/README:		gzip -cd ../patch-3.x.gz | patch -p1
+LINUX/README:		gzip -cd linux-3.X.tar.gz | tar xvf -
+LINUX/README:   distributed in the traditional gzip and the newer bzip2 format.  To
+
+
+=== resolved - unchanged ===
+
+LINUX/arch/x86/boot/compressed/Makefile:	$(call if_changed,gzip)
+LINUX/scripts/Makefile.lib:#		$(if_changed,ld/objcopy/gzip)
+LINUX/scripts/Makefile.lib:# append the size as a 32-bit littleendian number as gzip does.
+LINUX/scripts/Makefile.lib:cmd_gzip = (cat $(filter-out FORCE,$^) | gzip -n -f -9 > $@) || \
+LINUX/scripts/Makefile.lib:quiet_cmd_gzip = GZIP    $@
+LINUX/scripts/gen_initramfs_list.sh:		echo "$output_file" | grep -q "\.gz$" && compr="gzip -n -9 -f"
+LINUX/scripts/gen_initramfs_list.sh:compr="gzip -n -9 -f"
+LINUX/scripts/package/Makefile:	@echo '  targz-pkg           - Build the kernel as a gzip compressed tarball'
+LINUX/scripts/package/Makefile:$(if $(findstring gz,$@),gzip,                                      \
+
+
+
+=== other arch - TODO LATER === -----------------------------------------------------------
+
+LINUX/arch/alpha/boot/Makefile:	$(call if_changed,gzip)
+LINUX/arch/alpha/boot/Makefile:	$(call if_changed,gzip)
+LINUX/arch/alpha/boot/misc.c: * This is a collection of several routines from gzip-1.0.3 
+LINUX/arch/alpha/boot/misc.c: * gzip delarations
+LINUX/arch/alpha/boot/misc.c:#define CONTINUATION 0x02 /* bit 1 set: continuation of multi-part gzip file */
+LINUX/arch/alpha/boot/misc.c:/* gzip flag byte */
+LINUX/arch/alpha/boot/misc.c:static void gzip_mark(void **);
+LINUX/arch/alpha/boot/misc.c:static void gzip_release(void **);
+LINUX/arch/arm/boot/compressed/.gitignore:piggy.gzip
+LINUX/arch/arm/boot/compressed/Makefile:extra-y       += piggy.gzip piggy.lzo piggy.lzma lib1funcs.S $(libfdt) $(libfdt_hdrs)
+LINUX/arch/arm/boot/compressed/Makefile:suffix_$(CONFIG_KERNEL_GZIP) = gzip
+LINUX/arch/arm/boot/compressed/misc.c: * This is a collection of several routines from gzip-1.0.3 
+LINUX/arch/arm/boot/compressed/misc.c: * gzip declarations
+LINUX/arch/arm/boot/compressed/piggy.gzip.S:	.incbin	"arch/arm/boot/compressed/piggy.gzip"
+LINUX/arch/avr32/boot/images/Makefile:		-C gzip -a $(CONFIG_LOAD_ADDRESS) -e $(CONFIG_ENTRY_ADDRESS)	\
+LINUX/arch/avr32/boot/images/Makefile:	$(call if_changed,gzip)
+LINUX/arch/blackfin/boot/Makefile:	$(call if_changed,gzip)
+LINUX/arch/blackfin/boot/Makefile:	$(call if_changed,uimage,gzip)
+LINUX/arch/cris/boot/compressed/Makefile:	$(call if_changed,gzip)
+LINUX/arch/cris/boot/compressed/README:They can also be catted together and compressed with gzip, which is what
+LINUX/arch/cris/boot/compressed/misc.c: * This is a collection of several routines from gzip-1.0.3
+LINUX/arch/cris/boot/compressed/misc.c: * gzip declarations
+LINUX/arch/cris/boot/compressed/misc.c:#define CONTINUATION 0x02 /* bit 1 set: continuation of multi-part gzip file */
+LINUX/arch/cris/boot/compressed/misc.c:/* gzip flag byte */
+LINUX/arch/h8300/boot/compressed/Makefile:	$(call if_changed,gzip)
+LINUX/arch/h8300/boot/compressed/misc.c: * This is a collection of several routines from gzip-1.0.3
+LINUX/arch/h8300/boot/compressed/misc.c: * gzip declarations
+LINUX/arch/h8300/boot/compressed/misc.c:#define CONTINUATION 0x02 /* bit 1 set: continuation of multi-part gzip file */
+LINUX/arch/h8300/boot/compressed/misc.c:/* gzip flag byte */
+LINUX/arch/ia64/hp/sim/boot/Makefile:	$(call if_changed,gzip)
+LINUX/arch/microblaze/boot/Makefile:	$(call if_changed,gzip)
+LINUX/arch/mips/boot/compressed/Makefile:tool_$(CONFIG_KERNEL_GZIP)    = gzip
+LINUX/arch/mips/lasat/image/Makefile:	gzip -cf -9 $< > $@
+LINUX/arch/mn10300/boot/compressed/Makefile:	$(call if_changed,gzip)
+LINUX/arch/mn10300/boot/compressed/misc.c: * gzip declarations
+LINUX/arch/mn10300/boot/compressed/misc.c:#define CONTINUATION 0x02 /* bit 1 set: continuation of multi-part gzip file */
+LINUX/arch/mn10300/boot/compressed/misc.c:/* gzip flag byte */
+LINUX/arch/powerpc/boot/gunzip_util.c:			fatal("bad gzipped data\n\r");
+LINUX/arch/powerpc/boot/gunzip_util.c:		/* gzip data, initialize zlib parameters */
+LINUX/arch/powerpc/boot/gunzip_util.c:	/* Check for gzip magic number */
+LINUX/arch/powerpc/boot/gunzip_util.c: * @src:       buffer containing gzip compressed or uncompressed data
+LINUX/arch/powerpc/boot/gunzip_util.c: * @state:     gzip state structure previously initialized by gunzip_start()
+LINUX/arch/powerpc/boot/gunzip_util.c: * @state:     gzip state structure previously initialized by gunzip_start()
+LINUX/arch/powerpc/boot/gunzip_util.c: * @state:     gzip state structure previously initialized by gunzip_start()
+LINUX/arch/powerpc/boot/gunzip_util.c: * @state:     gzip state structure previously initialized by gunzip_start()
+LINUX/arch/powerpc/boot/gunzip_util.c: * If the buffer at @src contains a gzip header, this function
+LINUX/arch/powerpc/boot/gunzip_util.c: * If the buffer at @src does not contain a gzip header, it is assumed
+LINUX/arch/powerpc/boot/gunzip_util.c: * gunzip_discard - discard bytes from a gzip data stream
+LINUX/arch/powerpc/boot/gunzip_util.c: * gunzip_exactly - extract a fixed number of bytes from a gzip data stream
+LINUX/arch/powerpc/boot/gunzip_util.c: * gunzip_finish - extract all remaining bytes from a gzip data stream
+LINUX/arch/powerpc/boot/gunzip_util.c: * gunzip_partial - extract bytes from a gzip data stream
+LINUX/arch/powerpc/boot/gunzip_util.c: * gunzip_start - prepare to decompress gzip data
+LINUX/arch/powerpc/boot/gunzip_util.c: * to decompress data from the gzipped stream.
+LINUX/arch/powerpc/boot/gunzip_util.h: * kernel images, initrd images or any other gzip compressed image,
+LINUX/arch/powerpc/boot/main.c:	/* We need to alloc the memsize: gzip will expand the kernel
+LINUX/arch/powerpc/boot/wrapper:	mv -f "$vmz.$$$gzip" "$vmz$gzip"
+LINUX/arch/powerpc/boot/wrapper:        gzip -n -f -9 "$vmz.$$"
+LINUX/arch/powerpc/boot/wrapper:        gzip=
+LINUX/arch/powerpc/boot/wrapper:    # The ps3's loader supports loading a gzipped binary image from flash
+LINUX/arch/powerpc/boot/wrapper:    ${MKIMAGE} -A ppc -O linux -T kernel -C gzip -a "$base" -e "$entry" \
+LINUX/arch/powerpc/boot/wrapper:    ${MKIMAGE} -A ppc -O linux -T kernel -C gzip -a $membase -e $membase \
+LINUX/arch/powerpc/boot/wrapper:    --no-gzip)
+LINUX/arch/powerpc/boot/wrapper:    echo '       [-D datadir] [-W workingdir] [--no-gzip] [vmlinux]' >&2
+LINUX/arch/powerpc/boot/wrapper:    gzip -n --force -9 --stdout "$ofile.bin" > "$odir/otheros.bld"
+LINUX/arch/powerpc/boot/wrapper:    gzip -n -f -9 "$ofile"
+LINUX/arch/powerpc/boot/wrapper:    gzip=
+LINUX/arch/powerpc/boot/wrapper:    gzip=
+LINUX/arch/powerpc/boot/wrapper:    if [ -n "$gzip" ]; then
+LINUX/arch/powerpc/boot/wrapper:gzip=.gz
+LINUX/arch/powerpc/boot/wrapper:if [ -z "$cacheit" -o ! -f "$vmz$gzip" -o "$vmz$gzip" -ot "$kernel" ]; then
+LINUX/arch/powerpc/boot/wrapper:vmz="$vmz$gzip"
+LINUX/arch/s390/boot/compressed/Makefile:	$(call if_changed,gzip)
+LINUX/arch/s390/boot/compressed/misc.c: * gzip declarations
+LINUX/arch/sh/Makefile:	@echo '* uImage.gz	           - Kernel-only image for U-Boot (gzip)'
+LINUX/arch/sh/boot/Makefile:	$(call if_changed,gzip)
+LINUX/arch/sh/boot/Makefile:	$(call if_changed,uimage,gzip)
+LINUX/arch/sh/boot/compressed/Makefile:	$(call if_changed,gzip)
+LINUX/arch/sh/boot/compressed/misc.c: * This is a collection of several routines from gzip-1.0.3
+LINUX/arch/sh/boot/compressed/misc.c: * gzip declarations
+LINUX/arch/sparc/boot/Makefile:	$(call if_changed,gzip)
+LINUX/arch/sparc/boot/Makefile:	$(call if_changed,gzip)
+LINUX/arch/sparc/boot/Makefile:               -C gzip -a $(CONFIG_UBOOT_LOAD_ADDR) \
+LINUX/arch/unicore32/.gitignore:boot/compressed/piggy.gzip
+LINUX/arch/unicore32/boot/compressed/Makefile:extra-y		+= piggy.gzip piggy.bz2 piggy.lzo piggy.lzma
+LINUX/arch/unicore32/boot/compressed/Makefile:suffix_$(CONFIG_KERNEL_GZIP)	:= gzip
+LINUX/arch/unicore32/boot/compressed/misc.c: * gzip delarations
+
+LINUX/arch/xtensa/Kconfig:	string "Filename of gzipped ramdisk image"
+LINUX/arch/xtensa/boot/boot-elf/Makefile:GZIP = gzip
+LINUX/arch/xtensa/boot/boot-redboot/Makefile:	gzip -vf9 vmlinux.tmp
+LINUX/arch/xtensa/boot/boot-redboot/Makefile:GZIP = gzip
+LINUX/arch/xtensa/boot/lib/zmem.c:                //puts("bad gzipped data\n");
+
+
+
+
+
+=== other source code - leave it ===
+
+LINUX/arch/x86/boot/compressed/misc.c: * This is a collection of several routines from gzip-1.0.3
+LINUX/arch/x86/boot/compressed/misc.c: * gzip declarations
+
+LINUX/drivers/message/i2o/i2o_block.c: *	gzipped tar and not one requiring a proprietary or patent encumbered
+LINUX/drivers/message/i2o/i2o_block.h: *	gzipped tar and not one requiring a proprietary or patent encumbered
+
+LINUX/drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c:		BNX2X_ERR("Bad gzip header\n");
+LINUX/drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c:	/* check gzip header */
+LINUX/drivers/net/ethernet/broadcom/bnx2x/bnx2x_main.c: * gzip service functions
+LINUX/drivers/net/ppp/Kconfig:	  Deflate algorithm (the same algorithm that gzip uses) to compress
+LINUX/drivers/net/ppp/ppp_deflate.c: * and decompression (as used by gzip) to the PPP code.
+LINUX/fs/binfmt_flat.c:	/* Check gzip flags */
+LINUX/fs/binfmt_flat.c:	/* Check gzip magic number */
+LINUX/fs/binfmt_flat.c:	/* Check gzip method */
+LINUX/fs/binfmt_flat.c:	/* Check minimum size -- gzip header */
+LINUX/fs/binfmt_flat.c:	/* Read in first chunk of data and parse gzip header. */
+LINUX/fs/binfmt_flat.c:#define CONTINUATION 0x02 /* bit 1 set: continuation of multi-part gzip file */
+LINUX/fs/binfmt_flat.c:/* gzip flag byte */
+
+LINUX/fs/jffs2/Kconfig:	  hardware and operating system. See <http://www.gzip.org/zlib/> for
+
+LINUX/include/linux/zconf.h: * WARNING: reducing MAX_WBITS makes minigzip unable to extract .gz files
+LINUX/include/linux/zconf.h: * created by gzip. (Files created by minigzip can still be extracted by
+LINUX/include/linux/zconf.h: * gzip.)
+LINUX/include/linux/zlib.h:     The library also supports reading and writing files in gzip (.gz) format
+LINUX/include/linux/zlib.h:     windowBits can also be greater than 15 for optional gzip decoding. Add
+LINUX/include/linux/zlib.h:    inflate() will decompress and check either zlib-wrapped or gzip-wrapped
+LINUX/include/linux/zlib.h:   32 to windowBits to enable zlib and gzip decoding with automatic header
+LINUX/include/linux/zlib.h:   detection, or add 16 to decode only the gzip format (the zlib format will
+LINUX/include/linux/zlib.h:   not looking for a zlib or gzip header, not generating a check value, and not
+LINUX/include/linux/zlib.h:   return a Z_DATA_ERROR).  If a gzip stream is being decoded, strm->adler is
+LINUX/include/linux/zlib.h:   the uncompressed data as is done in the zlib, gzip, and zip formats.  For
+LINUX/include/linux/zlib.h:  (zlib format), rfc1951.txt (deflate format) and rfc1952.txt (gzip format).
+LINUX/include/linux/zlib.h:  and on communications channels.  The gzip format was designed for single-
+LINUX/include/linux/zlib.h:  contained in the gzip header is not retained, so applications that need that
+LINUX/include/linux/zlib.h:  inflateBack() and perform their own processing of the gzip header and
+LINUX/include/linux/zlib.h:  jloup@gzip.org          madler@alumni.caltech.edu
+LINUX/include/linux/zlib.h:  zlib or gzip format, this will cause inflate() to return immediately after
+
+LINUX/kernel/Makefile:	$(call if_changed,gzip)
+LINUX/kernel/Makefile:# config_data.h contains the same information as ikconfig.h but gzipped.
+LINUX/kernel/configs.c: * with gzip and then bounded by two eight byte magic numbers to allow
+
+LINUX/lib/decompress.c:	{ {037, 0213}, "gzip", gunzip },
+LINUX/lib/decompress.c:	{ {037, 0236}, "gzip", gunzip },
+LINUX/lib/decompress_inflate.c:		error("Not a gzip file");
+LINUX/lib/decompress_inflate.c:	/* skip over gzip header (1f,8b,08... 10 bytes total +
+LINUX/lib/decompress_inflate.c:	/* verify the gzip header */
+LINUX/lib/decompress_unxz.c: * Note that the margin with XZ is bigger than with Deflate (gzip)!
+
+LINUX/lib/inflate.c:	    error("bad gzip magic numbers");
+LINUX/lib/inflate.c: * based on gzip-1.0.3 
+LINUX/lib/inflate.c: * gzip-1.0.3/makecrc.c.
+LINUX/lib/inflate.c:#define CONTINUATION 0x02 /* bit 1 set: continuation of multi-part gzip file */
+LINUX/lib/inflate.c:#include "gzip.h"
+LINUX/lib/inflate.c:/* gzip flag byte */
+
+LINUX/lib/zlib_deflate/defutil.h:     *     This is applicable only for zip (not gzip or zlib).
+LINUX/lib/zlib_inflate/inflate.c:/* check function to use adler32() for zlib or crc32() for gzip */
+LINUX/lib/zlib_inflate/inflate.h:        (gzip) -> FLAGS -> TIME -> OS -> EXLEN -> EXTRA -> NAME
+LINUX/lib/zlib_inflate/inflate.h:        HEAD -> (gzip) or (zlib)
+LINUX/lib/zlib_inflate/inflate.h:    COMMENT,    /* i: waiting for end of comment (gzip) */
+LINUX/lib/zlib_inflate/inflate.h:    EXLEN,      /* i: waiting for extra length (gzip) */
+LINUX/lib/zlib_inflate/inflate.h:    EXTRA,      /* i: waiting for extra bytes (gzip) */
+LINUX/lib/zlib_inflate/inflate.h:    FLAGS,      /* i: waiting for method and flags (gzip) */
+LINUX/lib/zlib_inflate/inflate.h:    HCRC,       /* i: waiting for header crc (gzip) */
+LINUX/lib/zlib_inflate/inflate.h:    LENGTH,     /* i: waiting for 32-bit length (gzip) */
+LINUX/lib/zlib_inflate/inflate.h:    NAME,       /* i: waiting for end of file name (gzip) */
+LINUX/lib/zlib_inflate/inflate.h:    OS,         /* i: waiting for extra flags and operating system (gzip) */
+LINUX/lib/zlib_inflate/inflate.h:    TIME,       /* i: waiting for modification time (gzip) */
+LINUX/lib/zlib_inflate/inflate.h:    int flags;                  /* gzip header method and flags (0 if zlib) */
+LINUX/lib/zlib_inflate/inflate.h:    int wrap;                   /* bit 0 true for zlib, bit 1 true for gzip */
+LINUX/lib/zlib_inflate/inflate.h: /*   gz_headerp head; */           /* where to save gzip header information */
+LINUX/lib/zlib_inflate/infutil.c:	/* gzip header (1f,8b,08... 10 bytes total + possible asciz filename)
+
+
+
