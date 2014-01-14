@@ -7,6 +7,8 @@ linux-image (linux-3.2.54-mempo-0.1.22) UNRELEASED; urgency=low
   * fixed the gzip files fix to be applied on each step of overlay
   * fixed bug that created part of log in file named "1"
   * fixed gzip in more places in Makefile
+  * LC_ALL="C"
+  * using tar with --faketime and FAKETIME_TIME
 
  -- mempo <mempo@mempo.org>  Sun, 12 Jan 2014 06:20:00 +0200
 

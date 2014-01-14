@@ -9,6 +9,7 @@ kernel_file="linux-${kernel_version}.tar"
 kernel_file_download="${kernel_file}.xz" # the compressed for download version of file
 user_download_folder="${HOME}/Downloads/" # where user stores downloads, use this as download cache (read it, write ther)
 
+export LC_ALL="C"
 
 echo "Tools: checking prerequisites..."
 DPKG_VER=$(dpkg-query -W --showformat='${Version}\n' dpkg)
@@ -42,6 +43,9 @@ case $? in
 esac
 
 echo "(TODO check if packets like build-essentials etc are installed, warn if not)" # TODO
+
+. prepare-toolchain.sh
+
 echo "Tools: all ok, prerequisites seem fine"
 
 echo ""

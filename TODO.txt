@@ -13,6 +13,7 @@
 
 
 === BUGS TODO ===
+* dpkg still does not sort the input files?
 (newest added on top)
 
 =================================================
