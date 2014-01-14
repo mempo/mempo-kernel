@@ -80,6 +80,11 @@ pwd_here=$PWD
 		echo "ERROR: The overlay_dir=$overlay_dir is not existing directory!"
 		exit 1
 	fi
+
+	export FAKETIME_TIME="$TIMESTAMP_RFC3339" ; # '1970-12-30 18:00:01'
+	PATH="$HOME/.local/usr/lib/faketime-wrappers/:$PATH"
+
+
 #	echo $overlay_dir
 #	echo $PWD
 #	echo "IN BASH"

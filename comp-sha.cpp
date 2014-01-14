@@ -1,7 +1,7 @@
 /*
  * Compare two files with checksums paths
  * 
- * sha256deep -r -l linux-image-3.2.52-grsec-good.0.2.0_01_amd64 | sort > sums
+ * sha256deep -r -l -of somedir > sums
 */
 
 
