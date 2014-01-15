@@ -18,9 +18,9 @@ tar -xf "$linuxfile"
 
 (
 	echo "Entering Linux sources in $linuxdir"
-	cd "$linuxdir"
+	cd "$linuxdir" || { echo "ERROR can not enter directory"; exit 1; }
 
-	mkdir -p ../buildlog
+	mkdir -p ../buildlog || { echo "ERROR can not create buildlog"; exit 1; }
 
 	while IFS=, read -r kind reserved1 reserved2 subdir filename hash_type hash localdir
 	do
