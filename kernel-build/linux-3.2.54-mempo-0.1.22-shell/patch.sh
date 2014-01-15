@@ -14,7 +14,7 @@ if [ -d "$linuxdir" ] ; then
 fi
 
 echo "Unpacking/patching sources: $linuxfile"
-tar -xf "$linuxfile"
+tar -xf "$linuxfile" || { echo "Can not unpack linuxfile=$linuxfile" ; exit 1; }
 
 (
 	echo "Entering Linux sources in $linuxdir"
@@ -33,6 +33,7 @@ tar -xf "$linuxfile"
 	done < ../sources.list
 	echo "Done patching"
 )
+err=$? ; if [[ $err != 0 ]] ; then exit $err; fi
 
 echo "Done with $linuxdir patching"
 

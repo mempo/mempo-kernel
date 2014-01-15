@@ -25,9 +25,9 @@ pwd_here=$PWD
 
 
 	echo "Entering Linux sources in $linuxdir"
-	cd "$linuxdir"
+	cd "$linuxdir" || { echo "ERROR can not enter $linuxdir"; exit 1; }
 
-	rm -rf ../buildlog ; mkdir -p ../buildlog
+	rm -rf ../buildlog ; mkdir -p ../buildlog || { echo "Can not create buildlog"; exit 1; }
 
 	echo -n "Calculating checksum of the system: "
 	rm -f "../system_id.txt"

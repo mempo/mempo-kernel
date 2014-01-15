@@ -19,15 +19,15 @@ out="mempo-report-$kernel_general_name-5.txt"
 
 echo ""
 echo "=== PATCH ======================================"
-bash patch.sh "$linuxdir" || { echo "ERROR in patch" ; exit 1 ; }
+bash patch.sh "$linuxdir" || { echo "ERROR: in the patch.sh step" ; exit 1 ; }
 
 echo ""
 echo "=== BUILD ======================================"
-bash build.sh "$linuxdir" || { echo "ERROR in build" ; exit 1 ; }
+bash build.sh "$linuxdir" || { echo "ERROR: in the build.sh step" ; exit 1 ; }
 
 echo ""
 echo "=== READY ======================================"
-echo "Securian (debian+grsecurity+patches) - build report (5 - output)" > $out
+echo "Mempo kernel (debian+grsecurity+patches) - build report (5 - output)" > $out
 
 echo "Builded from sources_id:" >> $out
 cat sources_id.txt >> $out
