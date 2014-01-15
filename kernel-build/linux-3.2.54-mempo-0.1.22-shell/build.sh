@@ -96,7 +96,8 @@ pwd_here=$PWD
 	echo "* Using overlay_dir=$overlay_dir"
 
 	set -x
-	faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" --overlay-dir "$overlay_dir" 2>&1 | tee ../buildlog/build.result
+	# kernel_debug  kernel_doc kernel_manual
+	faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers --initrd --revision "$DEBIAN_REVISION" --overlay-dir "$overlay_dir" 2>&1 | tee ../buildlog/build.result
 	set +x
 
 	# faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers kernel_debug  kernel_doc kernel_manual  --initrd --revision "$DEBIAN_REVISION" --overlay-dir $overlay-dir 2>1 | tee ../buildlog/build.result
