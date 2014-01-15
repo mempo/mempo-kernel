@@ -15,6 +15,12 @@ calculated the sha sums there.
 Under some conditions - try same user name/path, maybe host - see the Wiki.
 
 
+see
+====================
+
+Read also instruction.txt 
+
+
 
 updating this project
 ====================
