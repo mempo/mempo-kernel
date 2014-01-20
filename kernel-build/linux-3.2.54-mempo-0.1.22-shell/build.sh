@@ -83,8 +83,9 @@ pwd_here=$PWD
 	fi
 
 	export FAKETIME_TIME="$TIMESTAMP_RFC3339" ; # '1970-12-30 18:00:01'
-	PATH="$HOME/.local/usr/lib/faketime-wrappers/:$PATH"
+	# DEB_BUILD_TIMESTAMP could be in env.sh
 
+	PATH="$HOME/.local/usr/lib/faketime-wrappers/:$PATH"
 
 #	echo $overlay_dir
 #	echo $PWD
@@ -94,6 +95,8 @@ pwd_here=$PWD
 	echo "* Using CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
 	echo "* Using PATH=$PATH"
 	echo "* Using overlay_dir=$overlay_dir"
+	echo "* Using FAKETIME_TIME=$FAKETIME_TIME"
+	echo "* DEB_BUILD_TIMESTAMP=$DEB_BUILD_TIMESTAMP"
 
 	set -x
 	# kernel_debug  kernel_doc kernel_manual
