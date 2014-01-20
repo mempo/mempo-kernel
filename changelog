@@ -15,6 +15,9 @@ linux-image (linux-3.2.54-mempo-0.1.22) UNRELEASED; urgency=low
   * (temp) use option --sort-input ""
   * use tar wrapper for our version of tar (was missing previously?)
 	* v0.1.22-rc7
+	* correct format in DEB_BUILD_TIMESTAMP
+	* test for fixed tar version with --sort-input without empty arg
+	* v0.1.22-rc8
 
  -- mempo <mempo@mempo.org>  Sun, 12 Jan 2014 06:20:00 +0200
 

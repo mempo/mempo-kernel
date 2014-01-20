@@ -8,7 +8,7 @@ echo "Looking for toolchian..."
 
 
 touch testfile.txt
-tar --faketime "2013-12-24 23:59:01" --sort-input "" -c -f testfile.tar testfile.txt
+tar --faketime "2013-12-24 23:59:01" --sort-input  -c -f testfile.tar testfile.txt
 exitcode=$?
 rm -f testfile.txt ; rm -f testfile.tar
 
@@ -21,7 +21,7 @@ if [[ 0 != "$exitcode" ]]  ; then
 	echo "Trying with other PATH=$PATH"
 
 	touch testfile.txt
-	tar --faketime "2013-12-24 23:59:01" --sort-input "" -c -f testfile.tar testfile.txt
+	tar --faketime "2013-12-24 23:59:01" --sort-input  -c -f testfile.tar testfile.txt
 	exitcode=$?
 	rm -f testfile.txt ; rm -f testfile.tar
 
