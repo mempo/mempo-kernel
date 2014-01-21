@@ -17,7 +17,7 @@ if [[ 0 == "$exitcode" ]]  ; then
 fi
 
 if [[ 0 != "$exitcode" ]]  ; then
-        PATH="$HOME/.local/usr/lib/faketime-wrapper/:$PATH"
+  PATH="$HOME/.local/usr/bin/:$PATH"
 	echo "Trying with other PATH=$PATH"
 
 	touch testfile.txt
@@ -35,8 +35,9 @@ if [[ 0 != "$exitcode" ]]  ; then
 		echo "  https://github.com/mempo/various/tree/master/tar once this is ready, or while not available use:"
 		exit 1 # error
 	fi
-	
 fi
+
+# TODO test also /opt/ and /usr/local/ ?
 
 echo "Final PATH=$PATH"
 

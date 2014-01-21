@@ -83,6 +83,7 @@ pwd_here=$PWD
 	fi
 
 	export FAKETIME_TIME="$TIMESTAMP_RFC3339" ; # '1970-12-30 18:00:01'
+	export TAR_OPTIONS="--faketime $FAKETIME_TIME --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
 	# DEB_BUILD_TIMESTAMP could be in env.sh
 
 	PATH="$HOME/.local/usr/lib/faketime-wrappers/:$PATH"
@@ -95,7 +96,7 @@ pwd_here=$PWD
 	echo "* Using CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
 	echo "* Using PATH=$PATH"
 	echo "* Using overlay_dir=$overlay_dir"
-	echo "* Using FAKETIME_TIME=$FAKETIME_TIME"
+	echo "* Using TAR_OPTIONS=$TAR_OPTIONS"
 	echo "* DEB_BUILD_TIMESTAMP=$DEB_BUILD_TIMESTAMP"
 
 	set -x
