@@ -82,11 +82,16 @@ pwd_here=$PWD
 		exit 1
 	fi
 
-	export FAKETIME_TIME="$TIMESTAMP_RFC3339" ; # '1970-12-30 18:00:01'
-	export TAR_OPTIONS="--faketime $FAKETIME_TIME --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
-	# DEB_BUILD_TIMESTAMP could be in env.sh
+	export KCONFIG_NOTIMESTAMP=1
+	export KBUILD_BUILD_TIMESTAMP=`date -u -d "${TIMESTAMP_RFC3339}"`
+	export DEB_BUILD_TIMESTAMP=`date -u +%s -d "${TIMESTAMP_RFC3339}"`
+	export KBUILD_BUILD_USER=user
+	export KBUILD_BUILD_HOST=host
+	export ROOT_DEV=FLOPPY
 
-	PATH="$HOME/.local/usr/lib/faketime-wrappers/:$PATH"
+	export TAR_OPTIONS="--faketime $FAKETIME_TIME --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
+
+	# PATH="$HOME/.local/usr/lib/faketime-wrappers/:$PATH" # should be prepared by prepare-toolchain.sh
 
 #	echo $overlay_dir
 #	echo $PWD
