@@ -8,8 +8,9 @@ fi
 
 echo "Building linuxdir=$linuxdir"
 
-echo "Creating sources info"
-bash $HOME/make-source-info
+# TODO
+# echo "Creating sources info"
+# bash $HOME/make-source-info
 
 echo "Loading env"
 . env.sh
@@ -31,7 +32,7 @@ pwd_here=$PWD
 
 	echo -n "Calculating checksum of the system: "
 	rm -f "../system_id.txt"
-	system_id=`sha256deep -l -r kernel/ kernel-img.conf  kernel-pkg.conf | sort | sha256sum | cut -d" " -f1 `
+	system_id=`sha256deep -l -r /etc/kernel/ /etc/kernel-img.conf  /etc/kernel-pkg.conf | sort | sha256sum | cut -d" " -f1 `
 	echo "$system_id"
 	echo "$system_id" > "../system_id.txt"
 
@@ -89,7 +90,7 @@ pwd_here=$PWD
 	export KBUILD_BUILD_HOST=host
 	export ROOT_DEV=FLOPPY
 
-	export TAR_OPTIONS="--faketime $FAKETIME_TIME --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
+	export TAR_OPTIONS="--faketime $TIMESTAMP_RFC3339 --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
 
 	# PATH="$HOME/.local/usr/lib/faketime-wrappers/:$PATH" # should be prepared by prepare-toolchain.sh
 
@@ -103,6 +104,7 @@ pwd_here=$PWD
 	echo "* Using overlay_dir=$overlay_dir"
 	echo "* Using TAR_OPTIONS=$TAR_OPTIONS"
 	echo "* DEB_BUILD_TIMESTAMP=$DEB_BUILD_TIMESTAMP"
+	echo "* TIMESTAMP_RFC3339=$TIMESTAMP_RFC3339"
 
 	set -x
 	# kernel_debug  kernel_doc kernel_manual
