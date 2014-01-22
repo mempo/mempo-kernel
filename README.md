@@ -27,10 +27,15 @@ updating this project
 
 Maintainers of this project should do following in reaction to new version of codes:
 
+When releasing new tag -rcX
+* write to changelog
+* write DEBIAN REVISION="X" to env.sh (was "0X" like "09" at some point)
+
 When doing an increase version of this script, then update:
 * linux-3.2.53-mempo-X.Y.Z-shell/ - rename this directory to proper version
 * linux-3.2.53-mempo-X.Y.Z-shell/configs/XYZ.config - write the proper version in CONFIG LOCALVERSION
 * changelog
+* write DEBIAN REVISION="X" to env.sh for finall tag. Maybe 50 = final?
 
 Also when upstream vanilla kernel changes (version from kernel.org), then update:
 * increase version

@@ -23,6 +23,8 @@ linux-image (linux-3.2.54-mempo-0.1.22) UNRELEASED; urgency=low
   * removed kernel sources info and fixed /etc/kernel checksum
   * refactored time handing (1 var in env.sh)
   * refactored tar wrapper and tar local binary finding
+  * using DEBIAN_REVISION (incremented on rc)
+  * v0.1.22-rc9
 
  -- mempo <mempo@mempo.org>  Sun, 12 Jan 2014 06:20:00 +0200
 
