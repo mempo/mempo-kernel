@@ -8,6 +8,7 @@ echo "==========================================================================
 echo "$script_name: applying"
 
 patch -p 0 < ../../../../fix-kpkg-gz.patch
+patch -p 0 < ../../../../fix-deterministic-buildinfo.patch
 
 if [ ! -d ruleset ] ; then
 	echo "$script_name: ignoring this execution, wrong dir"

@@ -1,0 +1,16 @@
+diff -Nuar ruleset/targets/common.mk ../debian/ruleset/targets/common.mk
+--- ruleset/targets/common.mk	2014-01-22 10:55:41.389023361 +0100
++++ ../debian/ruleset/targets/common.mk	2014-01-22 11:18:01.397018764 +0100
+@@ -336,10 +336,8 @@
+ 	$(PMAKE) -C $(architecture)/compile/GENERIC
+   endif
+ endif
+-	COLUMNS=150 dpkg -l 'gcc*' perl dpkg 'libc6*' binutils make dpkg-dev |\
+-	 awk '$$1 ~ /[hi]i/ { printf("%s-%s\n", $$2, $$3) }'> debian/stamp/build/info
+-	@echo this was built on a machine with the kernel: >> debian/stamp/build/info
+-	uname -a >> debian/stamp/build/info
++	COLUMNS=150 dpkg -l 'gcc*plugin-dev' |\
++         awk '$$1 ~ /[hi]i/ { printf("%s-%s\n", $$2, $$3) }'> debian/stamp/build/info
+ 	echo using the compiler: >> debian/stamp/build/info
+ 	if [ -f include/generated/compile.h ]; then                      \
+ 	   grep LINUX_COMPILER include/generated/compile.h |             \
