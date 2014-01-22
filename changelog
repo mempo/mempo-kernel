@@ -25,6 +25,7 @@ linux-image (linux-3.2.54-mempo-0.1.22) UNRELEASED; urgency=low
   * refactored tar wrapper and tar local binary finding
   * using DEBIAN_REVISION (incremented on rc)
   * v0.1.22-rc9
+  * added missing tools
 
  -- mempo <mempo@mempo.org>  Sun, 12 Jan 2014 06:20:00 +0200
 
