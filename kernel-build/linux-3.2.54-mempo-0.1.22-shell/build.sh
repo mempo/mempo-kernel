@@ -94,7 +94,7 @@ pwd_here=$PWD
 #	export TAR_OPTIONS="--faketime $TIMESTAMP_RFC3339 --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
 # ^--- tar options will be implemented as local wrapper script
 
-	# should be prepared by prepare-toolchain.sh : 
+	# should be prepared by prepare-toolchain.sh :
 	export PATH="$HOME/.local/usr/bin/:$PATH" # first add the upgraded tar mempo-tar https://wiki.debian.org/Mempo/mempo-deb/tar that is probably installed locally 
 	export real_tar_binary=`which tar` # the real mempo-tar binary full path
 	export PATH="$PWD/../../../tools/wrapper:$PATH" # now add our wrapper so it is used instead of any other tar
@@ -110,12 +110,12 @@ pwd_here=$PWD
 	echo ""
 	echo "--- TESTING TAR --- "
 	# (TODO: move outside, to prepare-toolchain.sh again)"
-	rm -f test1.tar ; rm -f test1 
-	touch test1 
-	tar -c -f test1.tar test1 --sort-input # test tar 
+	rm -f test1.tar ; rm -f test1
+	touch test1
+	tar -c -f test1.tar test1 --sort-input # test tar
 	exitcode=$?
 	echo "tar exitcode=$exitcode"
-	rm -f test1.tar ; rm -f test1 
+	rm -f test1.tar ; rm -f test1
 	if [[ 0 != "$exitcode" ]]  ; then
 		echo "Error: you need special version of tar, search internet for 'mempo debian tar' for details"
 		# echo "see why - starting bash:"
