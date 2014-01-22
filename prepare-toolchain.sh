@@ -6,6 +6,12 @@ all_ok=1
 
 echo "Looking for toolchian..."
 
+echo "Checks DISABLED for now (TODO), assuming you are using the correct tar."
+echo "(Will check in other place probably)"
+echo ""
+
+
+if false ; then
 
 touch testfile.txt
 tar --faketime "2013-12-24 23:59:01" --sort-input  -c -f testfile.tar testfile.txt
@@ -42,3 +48,7 @@ fi
 echo "Final PATH=$PATH"
 
 # export FAKETIME_TIME="$TIMESTAMP_RFC3339" ; # '1970-12-30 18:00:01'
+
+fi
+
+
