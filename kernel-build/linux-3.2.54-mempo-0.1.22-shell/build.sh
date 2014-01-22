@@ -91,7 +91,7 @@ pwd_here=$PWD
 	export ROOT_DEV=FLOPPY
 	export FAKETIME_TIME="$TIMESTAMP_RFC3339"
 
-#	export TAR_OPTIONS="--faketime $TIMESTAMP_RFC3339 --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
+#	export TAR_OPTIONS="--mtime $TIMESTAMP_RFC3339 --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
 # ^--- tar options will be implemented as local wrapper script
 
 	# should be prepared by prepare-toolchain.sh :

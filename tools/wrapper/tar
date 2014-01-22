@@ -4,8 +4,8 @@
 # normally should have $FAKETIME_TIME env set
 
 if [[ ! -z $FAKETIME_TIME ]] ; then
-	# export TAR_OPTIONS="--faketime $TIMESTAMP_RFC3339 --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
-	$real_tar_binary "$@" --faketime "$FAKETIME_TIME" --sort-input --owner root --group root --numeric-owner
+	# export TAR_OPTIONS="--mtime $TIMESTAMP_RFC3339 --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
+	$real_tar_binary "$@" --mtime "$FAKETIME_TIME" --sort-input --owner root --group root --numeric-owner
 	exit $?
 else
 	$real_tar_binary "$@"
