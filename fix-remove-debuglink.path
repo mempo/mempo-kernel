@@ -1,0 +1,12 @@
+diff -Nuar ruleset/targets/image.mk ../debian/ruleset/targets/image.mk
+--- ruleset/targets/image.mk	2014-01-23 10:55:59.047940998 +0100
++++ ../debian/ruleset/targets/image.mk	2014-01-23 10:58:55.427944070 +0100
+@@ -109,8 +109,6 @@
+                 origfile=`echo $$file | sed -e 's,$(DEBUGDIR),,g'`;                   \
+                 echo $(OBJCOPY) --only-keep-debug   $$file;                              \
+                 $(OBJCOPY) --only-keep-debug   $$file;                                   \
+-                echo $(OBJCOPY) --add-gnu-debuglink=$$file $$origfile;                   \
+-                $(OBJCOPY) --add-gnu-debuglink=$$file $$origfile;                        \
+              done
+ 	rm -rf $(TMPTOP)$(DEBUGDIR)
+       ifneq ($(strip $(KERNEL_CROSS)),)
