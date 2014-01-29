@@ -1,0 +1,12 @@
+diff -Nuar ruleset/common/install_cmds.mk ../debian/ruleset/common/install_cmds.mk
+--- ruleset/common/install_cmds.mk	2014-01-29 09:39:28.406964085 +0100
++++ ../debian/ruleset/common/install_cmds.mk	2014-01-29 09:40:02.990963967 +0100
+@@ -46,7 +46,7 @@
+        find . -type f                                              \
+               ! -regex './DEBIAN/.*'                               \
+               ! -regex './var/.*'     $(EXTRA_MD5SUM_EXCLUDE)      \
+-              -printf '%P\0' | xargs -r0 md5sum > DEBIAN/md5sums ; \
++              -printf '%P\0' | xargs -r0 md5sum | sort > DEBIAN/md5sums ; \
+        if [ -z "DEBIAN/md5sums" ] ; then                           \
+            rm -f "DEBIAN/md5sums" ;                                \
+        fi ;                                                        \
