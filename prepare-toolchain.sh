@@ -10,6 +10,7 @@ echo "Checks DISABLED for now (TODO), assuming you are using the correct tar."
 echo "(Will check in other place probably)"
 echo ""
 PATH="$HOME/.local/bin:$PATH"
+PATH="$HOME/.local/usr/bin:$PATH"
 
 if false ; then
 

@@ -105,6 +105,7 @@ pwd_here=$PWD
 	echo ""
 	# Where to find Dpkg/Util.pm perl module:
 	export PERL5LIB=$HOME/.local/share/perl5
+	export DH_AUTOSCRIPTDIR=$HOME/.local/usr/share/debhelper/autoscripts
 
 	set -x
 	# kernel_debug  kernel_doc kernel_manual
