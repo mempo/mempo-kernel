@@ -97,8 +97,9 @@ pwd_here=$PWD
 	PATH="$HOME/.local/usr/bin:$PATH"
 	PATH="$HOME/.local/bin:$PATH"
 	
-	export DH_AUTOSCRIPTDIR=$HOME/.local/usr/share/debhelper/autoscripts
-	export PERL5LIB=$HOME/.local/share/perl5
+	export DH_AUTOSCRIPTDIR="$HOME/.local/usr/share/debhelper/autoscripts"
+	export PERL5LIB="$HOME/.local/share/perl5"
+	export PERL5LIB="$HOME/.local/usr/share/perl5:$PERL5LIB"
 	
 	echo "* Using CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
 	echo "* Using PATH=$PATH"
