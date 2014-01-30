@@ -25,23 +25,6 @@ function show_mempo_contact {
 	echo "We will gladly help fellow Hackers and security researchers."
 }
 
-echo " * Dpkg version is $DPKG_VER (version >= $DPKG_VER_NEEDED is recommended)"
-
-. dpkg-vercomp.sh 
-vercomp $DPKG_VER $DPKG_VER_NEEDED
-case $? in
-	2) 
-	echo "Wrong DPKG version..." ;
-	echo "If you want to force and try despite this problem, edit this script that shows this error." 
-	show_dpkg_why
-	show_mempo_contact
-	echo 
-	echo "On Debian (wheezy) the SOLUTION is to install dpkg in version from jessy (download sources, build only this one package, install it), search for more info on our Wiki."
-	echo 
-	exit 1
-	;;
-esac
-
 echo "(TODO check if packets like build-essentials etc are installed, warn if not)" # TODO
 
 . prepare-toolchain.sh
