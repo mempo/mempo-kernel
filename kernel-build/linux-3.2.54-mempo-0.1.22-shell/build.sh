@@ -94,12 +94,12 @@ pwd_here=$PWD
 #	export TAR_OPTIONS="--mtime $TIMESTAMP_RFC3339 --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
 # ^--- tar options will be implemented as local wrapper script
 
-	PATH="$HOME/.local/usr/bin:$PATH"
+	#iPATH="$HOME/.local/usr/bin:$PATH"
 	PATH="$HOME/.local/bin:$PATH"
 	
-	export DH_AUTOSCRIPTDIR="$HOME/.local/usr/share/debhelper/autoscripts"
+	#export DH_AUTOSCRIPTDIR="$HOME/.local/usr/share/debhelper/autoscripts"
 	export PERL5LIB="$HOME/.local/share/perl5"
-	export PERL5LIB="$HOME/.local/usr/share/perl5:$PERL5LIB"
+	#export PERL5LIB="$HOME/.local/usr/share/perl5:$PERL5LIB"
 	
 	echo "* Using CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
 	echo "* Using PATH=$PATH"
