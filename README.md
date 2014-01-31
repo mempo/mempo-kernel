@@ -27,24 +27,30 @@ updating this project
 
 Maintainers of this project should do following in reaction to new version of codes:
 
-When releasing new tag -rcX
-* write to changelog
-* write DEBIAN REVISION="X" to env.sh (was "0X" like "09" at some point)
+    linux-image-3.2.54-grsec-mempo.good.0.1.21_01_amd64.deb
+		            VVVVVV             LLLL MMMMMM RR AAAAA
 
-When doing an increase version of this script, then update:
-* linux-3.2.53-mempo-X.Y.Z-shell/ - rename this directory to proper version
-* linux-3.2.53-mempo-X.Y.Z-shell/configs/XYZ.config - write the proper version in CONFIG LOCALVERSION
+V.V.V - vanilla kernel
+M.M.M - version of Mempo, increased with grsecurity updates; usullay with other config
+RR    - release. for now is set to -RC (and 50 for finall)
+LLLLL - level of security (will be option in future)
+AAAAA - architecture (will be option in future)
+
+When releasing new tag (_RR_)
 * changelog
-* write DEBIAN REVISION="X" to env.sh for finall tag. Maybe 50 = final?
+* `DEBIAN_REVISION="X"` in env.sh
 
-Also when upstream vanilla kernel changes (version from kernel.org), then update:
-* increase version
+When incresing Mempo (_M.M.M_)
+* reset _RR_=0
+* linux-mempo/configs/(every).config - write the proper version in `CONFIG_LOCALVERSION`
+
+When new kernel (_V.V.V_)
 * sources.list - the checksum and file name of kernel
-* linux-3.2.53-mempo-0.1.20-shell/env.sh - this date of sources
-* run.sh - the kernel file variable - the file name
+* linux-mempo/env.sh - `kernel_general_version` and `KERNEL_DATE`
+* changelog
 
 When upstream grsecurity/patches change, then update:
-* increase version
 * sources.list - the checksum and file name of patch
-* linux-3.2.53-mempo-0.1.20-shell/env.sh - the date of sources
+* increase _M.M.M_
+* linux-mempo/env.sh - `KERNEL_DATE`
 

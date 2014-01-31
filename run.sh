@@ -4,7 +4,9 @@
 # set -x 
 mkdir -p kernel-sources/kernel
 
-kernel_version="3.2.54"
+. kernel-build/linux-mempo/env.sh
+
+kernel_version="$kernel_general_version" # from env.sh
 kernel_file="linux-${kernel_version}.tar"
 kernel_file_download="${kernel_file}.xz" # the compressed for download version of file
 user_download_folder="${HOME}/Downloads/" # where user stores downloads, use this as download cache (read it, write ther)
@@ -39,6 +41,8 @@ function download_wget() {
 	echo "Downloading: " $@
 	wget $@
 }
+
+echo "Kernel: $kernel_version"
 
 if [ ! -r "kernel-sources/kernel/${kernel_file}" ]
 then
