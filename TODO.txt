@@ -3,6 +3,7 @@
 === THINGS TODO ===
 (newest added on top)
 
+* test if we have correct reproducible dpkg
 * support other architectures building
 * support make kpkg instead of deprecated make-kpkg
 * in run.sh check version of other tools then just the dpkg
