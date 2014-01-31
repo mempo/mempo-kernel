@@ -47,7 +47,7 @@ then
 
 	if [ ! -r "kernel-sources/kernel/${kernel_file_download}" ]
 	then
-		echo "Kernel sources are not downloaded locally yet (${kernel_file_download})"
+		echo "Kernel sources are not downloaded to kernel-sources yet (${kernel_file_download})"
 		if [ ! -r "${user_download_folder}/${kernel_file_download}" ]
 		then
 			echo "Kernel sources are not cached in ${user_download_folder}"
@@ -59,15 +59,19 @@ then
 			mkdir -p "${user_download_folder}/"
 			cp "kernel-sources/kernel/${kernel_file_download}" "${user_download_folder}/" # cache it
 
-		else 
+		else
 			echo "Kernel sources ARE cached in ${user_download_folder}. If this file would be bad then delete it and try again to really download."
 			cp "${user_download_folder}/${kernel_file_download}" "kernel-sources/kernel/${kernel_file_download}" # load from cache
 		fi
-
+	
+	else
+		echo "Kernel sources were downloaded to kernel-sources already."
 	fi
+
 	(
 		echo "Unpacking the downloaded file"
 		cd "kernel-sources/kernel/" 
+		file linux-${kernel_version}.tar.xz
 		unxz linux-${kernel_version}.tar.xz
 		chmod 755 linux-${kernel_version}.tar*
 	)
@@ -79,7 +83,7 @@ fi
 #cd ..
 
 # TODO nicer way of entering the correct one / warning if more then one
-cd kernel-build/linux-${kernel_version}-mempo-*-shell
+cd kernel-build/linux-mempo || { echo "Can not enter build directory." ; exit 1; }
 echo 
 echo "Executing the build script"
 echo 

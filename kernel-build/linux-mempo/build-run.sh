@@ -5,11 +5,10 @@
 # linuxdir = linux-3.2.48   used to create linux-3.2.48.tar file name,
 # dir names etc.
 
-pwd=`pwd`
-kernel_general_name=`basename $pwd`
-linuxdir=`echo "$kernel_general_name" | sed -e 's/\(linux-[0-9.]*\).*$/\1/g'`
-export linuxdir="$linuxdir"
 
+. env.sh
+echo "kernel_general_name=$kernel_general_version" # from env.sh
+export linuxdir="linux-$kernel_general_version" # e.g.: linux-3.2.53
 echo "Working on linux sources in linuxdir=$linuxdir"
 
 match='^[-a-zA-Z0-9]+[-.a-zA-Z0-9]*$'; dir="$linuxdir" ; [[ "$dir" =~ $match ]] || { echo "ERROR invalid directory name ($dir)"; exit 1 ; }
