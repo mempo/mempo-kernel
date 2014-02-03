@@ -94,19 +94,13 @@ pwd_here=$PWD
 #	export TAR_OPTIONS="--mtime $TIMESTAMP_RFC3339 --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
 # ^--- tar options will be implemented as local wrapper script
 
-	#iPATH="$HOME/.local/usr/bin:$PATH"
-	PATH="$HOME/.local/bin:$PATH"
-	
-	#export DH_AUTOSCRIPTDIR="$HOME/.local/usr/share/debhelper/autoscripts"
-	export PERL5LIB="$HOME/.local/share/perl5"
-	#export PERL5LIB="$HOME/.local/usr/share/perl5:$PERL5LIB"
-	
 	echo "* Using CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
 	echo "* Using PATH=$PATH"
 	echo "* Using overlay_dir=$overlay_dir"
 	echo "* Using FAKETIME_TIME=$FAKETIME_TIME"
 	echo "* DEB_BUILD_TIMESTAMP=$DEB_BUILD_TIMESTAMP"
 	echo "* TIMESTAMP_RFC3339=$TIMESTAMP_RFC3339"
+	echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo)"
 
 	echo ""
 	# Where to find Dpkg/Util.pm perl module:

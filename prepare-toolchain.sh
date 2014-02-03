@@ -6,12 +6,40 @@ all_ok=1
 
 echo "Looking for toolchian..."
 
-echo "Checks DISABLED for now (TODO), assuming you are using the correct tar."
-echo "(Will check in other place probably)"
-echo ""
 #PATH="$HOME/.local/bin:$PATH"
 #PATH="$HOME/.local/usr/bin:$PATH"
 
+
+PATH="$HOME/.local/bin:$PATH" # dpkg
+export PERL5LIB="$HOME/.local/share/perl5" # dpkg needs this
+#export DH_AUTOSCRIPTDIR="$HOME/.local/usr/share/debhelper/autoscripts"
+#export PERL5LIB="$HOME/.local/usr/share/perl5:$PERL5LIB"
+
+echo " * testing with PATH=$PATH"
+echo "Testing dpkg version"
+tools_dpkg_which=$(which dpkg)
+tools_dpkg_ver=$( $tools_dpkg_which --version | head -n 1 | sed -e 's/.*program version \([^ ]*\).*/\1/' )
+tools_dpkg_vermempo=$( echo $tools_dpkg_ver | sed -e 's/.*-mempo\([0-9.]*\).*/\1/g' )
+if [[ $tools_dpkg_vermempo == $tools_dpkg_ver ]] ; then tools_dpkg_vermempo="NONE"; echo "WARNING: no mempo version detected in dpkg, you are not using mempo version of dpkg" ; fi ;
+# | head -n 1 | sed -e 's/.*program version \([^ ]*\).*/\1/' | sed -e 's/.*-mempo\([0-9.]*\).*/\1/g'
+
+. dpkg-vercomp.sh 
+
+ver_have=$tools_dpkg_vermempo ; ver_need="0.1.23"
+vercomp $ver_have $ver_need
+case $? in
+  2) echo ; echo "ERROR: dpkg mempo version is bad (too old?)"
+		echo "We have mempo-version=$ver_have (from dpkg ver $tools_dpkg_ver) while we need mempo-version=$ver_need" ; 
+		echo "You probably did not install our special dpkg version, or you use too old version of it."
+		echo "Please see information on https://wiki.debian.org/SameKernel/#dpkg how to install the required version."  
+		echo "Usually it should be enough to install the speciall dpkg only locally as user (does not require root) so it should be very easy."
+		exit 1;
+	;;
+esac
+echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo)"
+
+
+# deprecated tests - to remove later?
 if false ; then
 
 touch testfile.txt
