@@ -27,6 +27,7 @@ updating this project
 
 Maintainers of this project should do following in reaction to new version of codes:
 
+```
     linux-image-3.2.54-grsec-mempo.good.0.1.21_01_amd64.deb
 		            VVVVVV             LLLL MMMMMM RR AAAAA
 
@@ -35,6 +36,7 @@ M.M.M - version of Mempo, increased with grsecurity updates; usullay with other 
 RR    - release. for now is set to -RC (and 50 for finall)
 LLLLL - level of security (will be option in future)
 AAAAA - architecture (will be option in future)
+```
 
 When releasing new tag (_RR_)
 * changelog
@@ -44,13 +46,14 @@ When incresing Mempo (_M.M.M_)
 * reset _RR_=0
 * linux-mempo/configs/(every).config - write the proper version in `CONFIG_LOCALVERSION`
 
-When new kernel (_V.V.V_)
-* sources.list - the checksum and file name of kernel
-* linux-mempo/env.sh - `kernel_general_version` and `KERNEL_DATE`
-* changelog
-
 When upstream grsecurity/patches change, then update:
 * sources.list - the checksum and file name of patch
 * increase _M.M.M_
 * linux-mempo/env.sh - `KERNEL_DATE`
+
+When new upstream vanilla kernel (_V.V.V_)
+* sources.list - the checksum and file name of kernel
+* linux-mempo/env.sh - `kernel_general_version` and `KERNEL_DATE`
+* increase _M.M.M_
+* changelog
 

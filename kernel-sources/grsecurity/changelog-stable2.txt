@@ -1,3 +1,612 @@
+commit 9a257eeac61664e3a7b17f6e89e10bd8e3dc8285
+Author: Weston Andros Adamson <dros@netapp.com>
+Date:   Tue Dec 17 12:16:11 2013 -0500
+
+    Upstream commit: 6ff33b7dd0228b7d7ed44791bbbc98b03fd15d9d
+    
+    sunrpc: Fix infinite loop in RPC state machine
+    
+    When a task enters call_refreshresult with status 0 from call_refresh and
+    !rpcauth_uptodatecred(task) it enters call_refresh again with no rate-limiting
+    or max number of retries.
+    
+    Instead of trying forever, make use of the retry path that other errors use.
+    
+    This only seems to be possible when the crrefresh callback is gss_refresh_null,
+    which only happens when destroying the context.
+    
+    To reproduce:
+    
+    1) mount with sec=krb5 (or sec=sys with krb5 negotiated for non FSID specific
+       operations).
+    
+    2) reboot - the client will be stuck and will need to be hard rebooted
+    
+    BUG: soft lockup - CPU#0 stuck for 22s! [kworker/0:2:46]
+    Modules linked in: rpcsec_gss_krb5 nfsv4 nfs fscache ppdev crc32c_intel aesni_intel aes_x86_64 glue_helper lrw gf128mul ablk_helper cryptd serio_raw i2c_piix4 i2c_core e1000 parport_pc parport shpchp nfsd auth_rpcgss oid_registry exportfs nfs_acl lockd sunrpc autofs4 mptspi scsi_transport_spi mptscsih mptbase ata_generic floppy
+    irq event stamp: 195724
+    hardirqs last  enabled at (195723): [<ffffffff814a925c>] restore_args+0x0/0x30
+    hardirqs last disabled at (195724): [<ffffffff814b0a6a>] apic_timer_interrupt+0x6a/0x80
+    softirqs last  enabled at (195722): [<ffffffff8103f583>] __do_softirq+0x1df/0x276
+    softirqs last disabled at (195717): [<ffffffff8103f852>] irq_exit+0x53/0x9a
+    CPU: 0 PID: 46 Comm: kworker/0:2 Not tainted 3.13.0-rc3-branch-dros_testing+ #4
+    Hardware name: VMware, Inc. VMware Virtual Platform/440BX Desktop Reference Platform, BIOS 6.00 07/31/2013
+    Workqueue: rpciod rpc_async_schedule [sunrpc]
+    task: ffff8800799c4260 ti: ffff880079002000 task.ti: ffff880079002000
+    RIP: 0010:[<ffffffffa0064fd4>]  [<ffffffffa0064fd4>] __rpc_execute+0x8a/0x362 [sunrpc]
+    RSP: 0018:ffff880079003d18  EFLAGS: 00000246
+    RAX: 0000000000000005 RBX: 0000000000000007 RCX: 0000000000000007
+    RDX: 0000000000000007 RSI: ffff88007aecbae8 RDI: ffff8800783d8900
+    RBP: ffff880079003d78 R08: ffff88006e30e9f8 R09: ffffffffa005a3d7
+    R10: ffff88006e30e7b0 R11: ffff8800783d8900 R12: ffffffffa006675e
+    R13: ffff880079003ce8 R14: ffff88006e30e7b0 R15: ffff8800783d8900
+    FS:  0000000000000000(0000) GS:ffff88007f200000(0000) knlGS:0000000000000000
+    CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+    CR2: 00007f3072333000 CR3: 0000000001a0b000 CR4: 00000000001407f0
+    Stack:
+     ffff880079003d98 0000000000000246 0000000000000000 ffff88007a9a4830
+     ffff880000000000 ffffffff81073f47 ffff88007f212b00 ffff8800799c4260
+     ffff8800783d8988 ffff88007f212b00 ffffe8ffff604800 0000000000000000
+    Call Trace:
+     [<ffffffff81073f47>] ? trace_hardirqs_on_caller+0x145/0x1a1
+     [<ffffffffa00652d3>] rpc_async_schedule+0x27/0x32 [sunrpc]
+     [<ffffffff81052974>] process_one_work+0x211/0x3a5
+     [<ffffffff810528d5>] ? process_one_work+0x172/0x3a5
+     [<ffffffff81052eeb>] worker_thread+0x134/0x202
+     [<ffffffff81052db7>] ? rescuer_thread+0x280/0x280
+     [<ffffffff81052db7>] ? rescuer_thread+0x280/0x280
+     [<ffffffff810584a0>] kthread+0xc9/0xd1
+     [<ffffffff810583d7>] ? __kthread_parkme+0x61/0x61
+     [<ffffffff814afd6c>] ret_from_fork+0x7c/0xb0
+     [<ffffffff810583d7>] ? __kthread_parkme+0x61/0x61
+    Code: e8 87 63 fd e0 c6 05 10 dd 01 00 01 48 8b 43 70 4c 8d 6b 70 45 31 e4 a8 02 0f 85 d5 02 00 00 4c 8b 7b 48 48 c7 43 48 00 00 00 00 <4c> 8b 4b 50 4d 85 ff 75 0c 4d 85 c9 4d 89 cf 0f 84 32 01 00 00
+    
+    And the output of "rpcdebug -m rpc -s all":
+    
+    RPC:    61 call_refresh (status 0)
+    RPC:    61 call_refresh (status 0)
+    RPC:    61 refreshing RPCSEC_GSS cred ffff88007a413cf0
+    RPC:    61 refreshing RPCSEC_GSS cred ffff88007a413cf0
+    RPC:    61 call_refreshresult (status 0)
+    RPC:    61 refreshing RPCSEC_GSS cred ffff88007a413cf0
+    RPC:    61 call_refreshresult (status 0)
+    RPC:    61 refreshing RPCSEC_GSS cred ffff88007a413cf0
+    RPC:    61 call_refresh (status 0)
+    RPC:    61 call_refreshresult (status 0)
+    RPC:    61 call_refresh (status 0)
+    RPC:    61 call_refresh (status 0)
+    RPC:    61 refreshing RPCSEC_GSS cred ffff88007a413cf0
+    RPC:    61 call_refreshresult (status 0)
+    RPC:    61 call_refresh (status 0)
+    RPC:    61 refreshing RPCSEC_GSS cred ffff88007a413cf0
+    RPC:    61 call_refresh (status 0)
+    RPC:    61 refreshing RPCSEC_GSS cred ffff88007a413cf0
+    RPC:    61 refreshing RPCSEC_GSS cred ffff88007a413cf0
+    RPC:    61 call_refreshresult (status 0)
+    RPC:    61 call_refresh (status 0)
+    RPC:    61 call_refresh (status 0)
+    RPC:    61 call_refresh (status 0)
+    RPC:    61 call_refresh (status 0)
+    RPC:    61 call_refreshresult (status 0)
+    RPC:    61 refreshing RPCSEC_GSS cred ffff88007a413cf0
+    
+    Signed-off-by: Weston Andros Adamson <dros@netapp.com>
+    Cc: stable@vger.kernel.org # 2.6.37+
+    Signed-off-by: Trond Myklebust <trond.myklebust@primarydata.com>
+
+ net/sunrpc/clnt.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit fd1beb50c5eaa0858d30d8f9699857daea7c98db
+Merge: aaf7afa 49b27c8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 28 18:26:23 2014 -0500
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit 49b27c8baad9a11219a62bffe9fd9c26a395e8bc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 28 18:25:38 2014 -0500
+
+    Update to pax-linux-3.2.54-test135.patch:
+    - fixed a constify plugin regression for real, reported by spender
+    - fixed the TRACE_IRQFLAGS/KERNEXEC problem for real, 3rd time's a charm, by minipli
+    - fixed a size overflow false positive in skb_network_offset due to an intentional overflow, by Emese Revfy, reported by Nikita Matovs
+
+ arch/x86/kernel/entry_64.S |   22 ++++++++++++----------
+ include/linux/skbuff.h     |    2 +-
+ 2 files changed, 13 insertions(+), 11 deletions(-)
+
+commit aaf7afa0bc1a4d10383c863dbbeab107168c8228
+Merge: df449a2 944ffc0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 27 23:30:39 2014 -0500
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit 944ffc0c46fb368461f52f3520f7876b8db6e175
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 27 23:30:12 2014 -0500
+
+    backport gcc assert fix from 3.13 constify plugin
+
+ tools/gcc/constify_plugin.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit df449a264e347238c119b0fdcdb3e5d83c08d61e
+Merge: 1b28d35 99f43f7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 27 23:16:35 2014 -0500
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit 99f43f743906732e811f76041355a4e460571223
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 27 23:15:52 2014 -0500
+
+    Update to pax-linux-3.2.54-test134.patch:
+    - gcc plugin updates
+      - ported them to gcc trunk (future 4.9)
+      - introduced gcc-common.h to simplify gcc version dependencies
+      - updated size overflow hash table from spender
+      - fixed kallocstat to detect constant size arguments early
+      - fixed constify to preserve type qualifiers on pointer-to-self fields
+    - added a few sparse/checker annotations and changes to satisfy gcc's address space logic
+    - fixed the TRACE_IRQFLAGS problem reported by minipli again
+    - fixed a constify plugin regression, reported by spender
+    - updated gcc-common.h
+    - fixed the size overflow plugin for gcc 4.9, by Emese Revfy
+
+ arch/x86/ia32/ia32_signal.c               |    6 +-
+ arch/x86/kernel/entry_64.S                |   86 ++-----
+ arch/x86/kernel/tboot.c                   |    2 +-
+ block/compat_ioctl.c                      |    2 +-
+ drivers/gpu/drm/drm_crtc.c                |    2 +-
+ drivers/media/video/v4l2-compat-ioctl32.c |   10 +-
+ drivers/media/video/v4l2-ctrls.c          |    4 +-
+ drivers/media/video/v4l2-ioctl.c          |    2 +-
+ drivers/mmc/card/block.c                  |    2 +-
+ drivers/net/macvtap.c                     |    2 +-
+ drivers/video/fbmem.c                     |    2 +-
+ fs/compat_ioctl.c                         |    2 +-
+ fs/exec.c                                 |    2 +-
+ include/linux/videodev2.h                 |    2 +-
+ net/9p/client.c                           |    6 +-
+ net/socket.c                              |    6 +-
+ tools/gcc/Makefile                        |    2 +-
+ tools/gcc/checker_plugin.c                |   30 +--
+ tools/gcc/colorize_plugin.c               |   62 +++--
+ tools/gcc/constify_plugin.c               |  105 ++++----
+ tools/gcc/gcc-common.h                    |  267 +++++++++++++++++++
+ tools/gcc/kallocstat_plugin.c             |  164 +++++++------
+ tools/gcc/kernexec_plugin.c               |  333 ++++++++++++++-----------
+ tools/gcc/latent_entropy_plugin.c         |  146 +++++------
+ tools/gcc/size_overflow_plugin.c          |  400 +++++++++++++----------------
+ tools/gcc/stackleak_plugin.c              |  236 +++++++++--------
+ tools/gcc/structleak_plugin.c             |   90 +++----
+ 27 files changed, 1108 insertions(+), 865 deletions(-)
+
+commit 1b28d3560eaa3295b735bcc4c6d61b320a1cba9a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 27 20:30:10 2014 -0500
+
+    Make all grsecurity code GPLv2 only for future releases.  Not really
+    important as grsecurity is a derivative work of the Linux kernel and
+    thus forced to be GPLv2, the "or higher" was superfluous.
+
+ grsecurity/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c904fd3f64736a669cc112e7c1efe8f2e544cc0c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 19 08:42:54 2014 -0500
+
+    update size_overflow hash table
+
+ tools/gcc/size_overflow_hash.data |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 9ad0ac28c8d7407657f7685eaa00a6f18f9039ee
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Tue Dec 17 21:16:39 2013 -0500
+
+    Upstream commit: a9f069e38cc36d6c4ab3c831bc4bef2ae1a16e96
+    
+    random: use the architectural HWRNG for the SHA's IV in extract_buf()
+    
+    To help assuage the fears of those who think the NSA can introduce a
+    massive hack into the instruction decode and out of order execution
+    engine in the CPU without hundreds of Intel engineers knowing about
+    it (only one of which woud need to have the conscience and courage of
+    Edward Snowden to spill the beans to the public), use the HWRNG to
+    initialize the SHA starting value, instead of xor'ing it in
+    afterwards.
+    
+    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
+
+ drivers/char/random.c |   16 ++++++++--------
+ 1 files changed, 8 insertions(+), 8 deletions(-)
+
+commit bc3de2373709b9c953076c1496be6e871c777036
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 18 20:43:43 2014 -0500
+
+    Since the reworking of recvmsg handlers by Hannes Frederic Sowa,
+    it should be safe to revert our workaround for large number of
+    infoleaks the previous interface made possible, restoring some
+    performance to these syscalls
+
+ net/socket.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit f0d137f2b202f4b2c7cb4bdbf89888e5c3f2751d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 18 20:09:43 2014 -0500
+
+    sync with PaX code from 3.12
+
+ arch/x86/kernel/traps.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 7978ab13fe239d3dd6d27d868c9fd4c67f9f77cf
+Merge: 34e52ab 0623c43
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 18 17:26:44 2014 -0500
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit 34e52ab70ab870616b6c3714f5ed7d39f66c48ec
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 18 17:26:32 2014 -0500
+
+    Revert "Revert recent PaX marking change that broke a significant number"
+    
+    This reverts commit 40065cc405e7c8bf859610ce7b10e94b7292564b.
+
+ fs/binfmt_elf.c |   53 ++++++++++++++++++++++++++++++-----------------------
+ 1 files changed, 30 insertions(+), 23 deletions(-)
+
+commit 0623c43f4c0a9a0817d514139bf9a054bbfb8f99
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 18 17:25:12 2014 -0500
+
+    Update to pax-linux-3.2.54-test133.patch:
+    - new size overflow plugin and hash table from Emese
+    - reworked the interaction between the various PaX control flag mechanisms for better consistency
+    - fixed type attribute handling in the constify plugin, reported by spender
+
+ fs/binfmt_elf.c                  |  144 +++++++++++++++++++++-----------------
+ include/linux/sched.h            |    1 +
+ include/linux/sysctl.h           |    6 --
+ tools/gcc/constify_plugin.c      |   20 +++---
+ tools/gcc/size_overflow_plugin.c |   64 +++++++++++------
+ 5 files changed, 132 insertions(+), 103 deletions(-)
+
+commit 78348f5b6093f576ea68aa18c23f15750c08c0e3
+Author: Steven Rostedt <rostedt@goodmis.org>
+Date:   Thu Jan 9 21:46:34 2014 -0500
+
+    Upstream commit: 3dc91d4338d698ce77832985f9cb183d8eeaf6be
+    
+    SELinux: Fix possible NULL pointer dereference in selinux_inode_permission()
+    
+    While running stress tests on adding and deleting ftrace instances I hit
+    this bug:
+    
+      BUG: unable to handle kernel NULL pointer dereference at 0000000000000020
+      IP: selinux_inode_permission+0x85/0x160
+      PGD 63681067 PUD 7ddbe067 PMD 0
+      Oops: 0000 [#1] PREEMPT
+      CPU: 0 PID: 5634 Comm: ftrace-test-mki Not tainted 3.13.0-rc4-test-00033-gd2a6dde-dirty #20
+      Hardware name:                  /DG965MQ, BIOS MQ96510J.86A.0372.2006.0605.1717 06/05/2006
+      task: ffff880078375800 ti: ffff88007ddb0000 task.ti: ffff88007ddb0000
+      RIP: 0010:[<ffffffff812d8bc5>]  [<ffffffff812d8bc5>] selinux_inode_permission+0x85/0x160
+      RSP: 0018:ffff88007ddb1c48  EFLAGS: 00010246
+      RAX: 0000000000000000 RBX: 0000000000800000 RCX: ffff88006dd43840
+      RDX: 0000000000000001 RSI: 0000000000000081 RDI: ffff88006ee46000
+      RBP: ffff88007ddb1c88 R08: 0000000000000000 R09: ffff88007ddb1c54
+      R10: 6e6576652f6f6f66 R11: 0000000000000003 R12: 0000000000000000
+      R13: 0000000000000081 R14: ffff88006ee46000 R15: 0000000000000000
+      FS:  00007f217b5b6700(0000) GS:ffffffff81e21000(0000) knlGS:0000000000000000
+      CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033^M
+      CR2: 0000000000000020 CR3: 000000006a0fe000 CR4: 00000000000007f0
+      Call Trace:
+        security_inode_permission+0x1c/0x30
+        __inode_permission+0x41/0xa0
+        inode_permission+0x18/0x50
+        link_path_walk+0x66/0x920
+        path_openat+0xa6/0x6c0
+        do_filp_open+0x43/0xa0
+        do_sys_open+0x146/0x240
+        SyS_open+0x1e/0x20
+        system_call_fastpath+0x16/0x1b
+      Code: 84 a1 00 00 00 81 e3 00 20 00 00 89 d8 83 c8 02 40 f6 c6 04 0f 45 d8 40 f6 c6 08 74 71 80 cf 02 49 8b 46 38 4c 8d 4d cc 45 31 c0 <0f> b7 50 20 8b 70 1c 48 8b 41 70 89 d9 8b 78 04 e8 36 cf ff ff
+      RIP  selinux_inode_permission+0x85/0x160
+      CR2: 0000000000000020
+    
+    Investigating, I found that the inode->i_security was NULL, and the
+    dereference of it caused the oops.
+    
+    in selinux_inode_permission():
+    
+    	isec = inode->i_security;
+    
+    	rc = avc_has_perm_noaudit(sid, isec->sid, isec->sclass, perms, 0, &avd);
+    
+    Note, the crash came from stressing the deletion and reading of debugfs
+    files.  I was not able to recreate this via normal files.  But I'm not
+    sure they are safe.  It may just be that the race window is much harder
+    to hit.
+    
+    What seems to have happened (and what I have traced), is the file is
+    being opened at the same time the file or directory is being deleted.
+    As the dentry and inode locks are not held during the path walk, nor is
+    the inodes ref counts being incremented, there is nothing saving these
+    structures from being discarded except for an rcu_read_lock().
+    
+    The rcu_read_lock() protects against freeing of the inode, but it does
+    not protect freeing of the inode_security_struct.  Now if the freeing of
+    the i_security happens with a call_rcu(), and the i_security field of
+    the inode is not changed (it gets freed as the inode gets freed) then
+    there will be no issue here.  (Linus Torvalds suggested not setting the
+    field to NULL such that we do not need to check if it is NULL in the
+    permission check).
+    
+    Note, this is a hack, but it fixes the problem at hand.  A real fix is
+    to restructure the destroy_inode() to call all the destructor handlers
+    from the RCU callback.  But that is a major job to do, and requires a
+    lot of work.  For now, we just band-aid this bug with this fix (it
+    works), and work on a more maintainable solution in the future.
+    
+    Link: http://lkml.kernel.org/r/20140109101932.0508dec7@gandalf.local.home
+    Link: http://lkml.kernel.org/r/20140109182756.17abaaa8@gandalf.local.home
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ security/selinux/hooks.c          |   20 ++++++++++++++++++--
+ security/selinux/include/objsec.h |    5 ++++-
+ 2 files changed, 22 insertions(+), 3 deletions(-)
+
+commit e23872879b4d23dc790ccad86aaf9ec2e9ae8e6f
+Author: Hannes Frederic Sowa <hannes@stressinduktion.org>
+Date:   Mon Jan 13 02:45:22 2014 +0100
+
+    Upstream commit: 95f4a45de1a0f172b35451fc52283290adb21f6e
+    
+    net: avoid reference counter overflows on fib_rules in multicast forwarding
+    
+    Bob Falken reported that after 4G packets, multicast forwarding stopped
+    working. This was because of a rule reference counter overflow which
+    freed the rule as soon as the overflow happend.
+    
+    This patch solves this by adding the FIB_LOOKUP_NOREF flag to
+    fib_rules_lookup calls. This is safe even from non-rcu locked sections
+    as in this case the flag only implies not taking a reference to the rule,
+    which we don't need at all.
+    
+    Rules only hold references to the namespace, which are guaranteed to be
+    available during the call of the non-rcu protected function reg_vif_xmit
+    because of the interface reference which itself holds a reference to
+    the net namespace.
+    
+    Fixes: f0ad0860d01e47 ("ipv4: ipmr: support multiple tables")
+    Fixes: d1db275dd3f6e4 ("ipv6: ip6mr: support multiple tables")
+    Reported-by: Bob Falken <NetFestivalHaveFun@gmx.com>
+    Cc: Patrick McHardy <kaber@trash.net>
+    Cc: Thomas Graf <tgraf@suug.ch>
+    Cc: Julian Anastasov <ja@ssi.bg>
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Signed-off-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/ipmr.c  |    7 +++++--
+ net/ipv6/ip6mr.c |    7 +++++--
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+commit 78d6bf0dd1b3d5512b8a5f8ef0655f1e15bfcd7d
+Author: NeilBrown <neilb@suse.de>
+Date:   Mon Jan 6 10:35:34 2014 +1100
+
+    Upstream commit: e8b849158508565e0cd6bc80061124afc5879160
+    
+    md/raid10: fix bug when raid10 recovery fails to recover a block.
+    
+    commit e875ecea266a543e643b19e44cf472f1412708f9
+        md/raid10 record bad blocks as needed during recovery.
+    
+    added code to the "cannot recover this block" path to record a bad
+    block rather than fail the whole recovery.
+    Unfortunately this new case was placed *after* r10bio was freed rather
+    than *before*, yet it still uses r10bio.
+    This is will crash with a null dereference.
+    
+    So move the freeing of r10bio down where it is safe.
+    
+    Cc: stable@vger.kernel.org (v3.1+)
+    Fixes: e875ecea266a543e643b19e44cf472f1412708f9
+    Reported-by: Damian Nowak <spam@nowaker.net>
+    URL: https://bugzilla.kernel.org/show_bug.cgi?id=68181
+    Signed-off-by: NeilBrown <neilb@suse.de>
+
+ drivers/md/raid10.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 19ce1cd7bf18f03cf143d7cc12ae3f52e6ba3dd9
+Author: NeilBrown <neilb@suse.de>
+Date:   Tue Jan 14 10:38:09 2014 +1100
+
+    Upstream commit: b50c259e25d9260b9108dc0c2964c26e5ecbe1c1
+    
+    md/raid10: fix two bugs in handling of known-bad-blocks.
+    
+    If we discover a bad block when reading we split the request and
+    potentially read some of it from a different device.
+    
+    The code path of this has two bugs in RAID10.
+    1/ we get a spin_lock with _irq, but unlock without _irq!!
+    2/ The calculation of 'sectors_handled' is wrong, as can be clearly
+       seen by comparison with raid1.c
+    
+    This leads to at least 2 warnings and a probable crash is a RAID10
+    ever had known bad blocks.
+    
+    Cc: stable@vger.kernel.org (v3.1+)
+    Fixes: 856e08e23762dfb92ffc68fd0a8d228f9e152160
+    Reported-by: Damian Nowak <spam@nowaker.net>
+    URL: https://bugzilla.kernel.org/show_bug.cgi?id=68181
+    Signed-off-by: NeilBrown <neilb@suse.de>
+
+ drivers/md/raid10.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 84b9921ab57d01dc6ef681fbc7aed654431af347
+Author: Andreas Rohner <andreas.rohner@gmx.net>
+Date:   Tue Jan 14 17:56:36 2014 -0800
+
+    Upstream commit: 70f2fe3a26248724d8a5019681a869abdaf3e89a
+    
+    nilfs2: fix segctor bug that causes file system corruption
+    
+    There is a bug in the function nilfs_segctor_collect, which results in
+    active data being written to a segment, that is marked as clean.  It is
+    possible, that this segment is selected for a later segment
+    construction, whereby the old data is overwritten.
+    
+    The problem shows itself with the following kernel log message:
+    
+      nilfs_sufile_do_cancel_free: segment 6533 must be clean
+    
+    Usually a few hours later the file system gets corrupted:
+    
+      NILFS: bad btree node (blocknr=8748107): level = 0, flags = 0x0, nchildren = 0
+      NILFS error (device sdc1): nilfs_bmap_last_key: broken bmap (inode number=114660)
+    
+    The issue can be reproduced with a file system that is nearly full and
+    with the cleaner running, while some IO intensive task is running.
+    Although it is quite hard to reproduce.
+    
+    This is what happens:
+    
+     1. The cleaner starts the segment construction
+     2. nilfs_segctor_collect is called
+     3. sc_stage is on NILFS_ST_SUFILE and segments are freed
+     4. sc_stage is on NILFS_ST_DAT current segment is full
+     5. nilfs_segctor_extend_segments is called, which
+        allocates a new segment
+     6. The new segment is one of the segments freed in step 3
+     7. nilfs_sufile_cancel_freev is called and produces an error message
+     8. Loop around and the collection starts again
+     9. sc_stage is on NILFS_ST_SUFILE and segments are freed
+        including the newly allocated segment, which will contain active
+        data and can be allocated at a later time
+    10. A few hours later another segment construction allocates the
+        segment and causes file system corruption
+    
+    This can be prevented by simply reordering the statements.  If
+    nilfs_sufile_cancel_freev is called before nilfs_segctor_extend_segments
+    the freed segments are marked as dirty and cannot be allocated any more.
+    
+    Signed-off-by: Andreas Rohner <andreas.rohner@gmx.net>
+    Reviewed-by: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
+    Tested-by: Andreas Rohner <andreas.rohner@gmx.net>
+    Signed-off-by: Ryusuke Konishi <konishi.ryusuke@lab.ntt.co.jp>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/nilfs2/segment.c |   10 ++++++----
+ 1 files changed, 6 insertions(+), 4 deletions(-)
+
+commit b5081910f95ef6c358d157e59a8dda19fcf9c64a
+Author: Salva Peiró <speiro@ai2.upv.es>
+Date:   Tue Dec 17 10:06:30 2013 +0100
+
+    Upstream commit: 8e3fbf870481eb53b2d3a322d1fc395ad8b367ed
+    
+    hamradio/yam: fix info leak in ioctl
+    
+    The yam_ioctl() code fails to initialise the cmd field
+    of the struct yamdrv_ioctl_cfg. Add an explicit memset(0)
+    before filling the structure to avoid the 4-byte info leak.
+    
+    Signed-off-by: Salva Peiró <speiro@ai2.upv.es>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/hamradio/yam.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit f36c812008cc490985bd62198500e2555edf7cce
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 18 16:31:17 2014 -0500
+
+    Upstream commit: 807a0c12941850ddaff2ed62ba26a748e542c599
+    
+    x86, fpu, amd: Clear exceptions in AMD FXSAVE workaround
+    commit 26bef1318adc1b3a530ecc807ef99346db2aa8b0 upstream.
+    
+    Before we do an EMMS in the AMD FXSAVE information leak workaround we
+    need to clear any pending exceptions, otherwise we trap with a
+    floating-point exception inside this code.
+    
+    Reported-by: halfdog <me@halfdog.net>
+    Tested-by: Borislav Petkov <bp@suse.de>
+    Link: http://lkml.kernel.org/r/CA%2B55aFxQnY_PCG_n4=0w-VG=YLXL-yr7oMxyy0WU2gCBAf3ydg@mail.gmail.com
+    Signed-off-by: H. Peter Anvin <hpa@zytor.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ arch/x86/kernel/traps.c |   13 +++++++------
+ 1 files changed, 7 insertions(+), 6 deletions(-)
+
+commit 40065cc405e7c8bf859610ce7b10e94b7292564b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 26 19:23:25 2013 -0500
+
+    Revert recent PaX marking change that broke a significant number
+    of existing systems.  The marking system will be revamped in a later
+    patch to fix softmode support while making XT markings more usable.
+
+ fs/binfmt_elf.c |   53 +++++++++++++++++++++++------------------------------
+ 1 files changed, 23 insertions(+), 30 deletions(-)
+
+commit 7e6ea015eb7f3d172b7cd9a458fff143c35e794b
+Merge: 841a673 bec704a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 16 07:03:53 2014 -0500
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit bec704a790bd9b7e3b3906849cc164c4c67eef67
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 16 07:02:25 2014 -0500
+
+    Update to pax-linux-3.2.54-test132.patch:
+    - fixed an inconsistency in handling softmode and user.pax.flags, reported by jacekalex (http://forums.grsecurity.net/viewtopic.php?f=3&t=3877)
+    - fixed silly code in kvm_clear_guest_page detected by USERCOPY, reported by remnix (http://forums.grsecurity.net/viewtopic.php?f=3&t=3899)
+    - Emese worked around a few intentional overflows that triggered the size overflow plugin
+      - in cpuset_common_file_read, reported by Alexander Tsoy (https://bugs.gentoo.org/show_bug.cgi?id=496490) and boris64 (http://forums.grsecurity.net/viewtopic.php?f=3&t=3907)
+    - fixed powerpc compilation, by Purushothama Siddaiah <psiddaiah@mvista.com>
+    - fixed incorrent module parameter type in vivi, caught by the size overflow plugin
+    - use plugins while building more kernel targets (asm-offsets.c, etc)
+    - small cleanup in no_const attribute handling, reported by spender
+
+ Makefile                               |    2 +
+ arch/powerpc/kernel/module_32.c        |    2 +-
+ drivers/gpu/drm/nouveau/nouveau_bios.c |    2 +-
+ drivers/media/video/vivi.c             |    4 +-
+ drivers/usb/core/devio.c               |    2 +-
+ fs/binfmt_elf.c                        |   53 ++++++----
+ include/linux/devfreq.h                |    2 +-
+ include/linux/netfilter/ipset/ip_set.h |    2 +-
+ security/Kconfig                       |    1 -
+ tools/gcc/constify_plugin.c            |   47 ++++-----
+ tools/gcc/size_overflow_hash.data      |   71 +++++++------
+ tools/gcc/size_overflow_plugin.c       |  173 +++++++++++++++++++++++++++-----
+ virt/kvm/kvm_main.c                    |   13 ++-
+ 13 files changed, 258 insertions(+), 116 deletions(-)
+
 commit 841a673ac30f4c753efec687702296ccbdd04f90
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Jan 8 17:46:46 2014 -0500

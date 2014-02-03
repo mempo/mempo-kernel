@@ -1,25 +1,6 @@
-Needed packages:
-apt-get install faketime git build-essential libncurses5-dev libncursesw5-dev kernel-package md5deep gcc-4.7-plugin-dev -y  
 
-Optional packages: 
-apt-get install ccache -y 
+Instructions moved to online wiki:
+https://wiki.debian.org/SameKernel
 
-Needed upgraded dpkg:
-follow instructions from debian wiki, get new dpkg
-
-Needed upgraded tar (work in progress, experimental):
-https://github.com/rfree/various/tree/master/tar
-build it with ./bootstrap && ./configure && make
-then cd scripts and run ./install-faketime-local.sh
-
-Download tools:
-git clone git@github.com:Happuri/deterministic-kernel.git
-
-Compile:
-./run.sh
-
-Important: You must run compilation every time in the same path (You can create user for this) e.g. /home/kernel-builder/
-
-Git commits might be signed with GPG.
 
 

@@ -24,6 +24,23 @@
 =================================================
 
 
+=== MISC TODO ===
+
+kernel/exit.c:327:13: warning: ‘reparent_to_kthreadd’ defined but not used [-Wunused-function]
+kernel/exit.c:363:13: warning: ‘set_special_pids’ defined but not used [-Wunused-function]
+
+drivers/infiniband/hw/mlx4/qp.c:1441:62: warning: ‘vlan’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+drivers/infiniband/hw/mlx4/qp.c:1366:6: note: ‘vlan’ was declared here
+
+drivers/gpu/drm/nouveau/nv50_instmem.c: In function ‘nv50_instmem_init’:
+drivers/gpu/drm/nouveau/nv50_instmem.c:206:6: warning: ‘chan’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+
+and other warnings
+
+=================================================
+
+
+
 
 === BUGS FIXED ===
 (newest fixed on top)

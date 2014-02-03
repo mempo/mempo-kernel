@@ -1,4 +1,9 @@
 
+linux-image (linux-3.2.55-mempo-0.1.22) UNRELEASED; urgency=low
+  * updated to grsecurity-3.0-3.2.54-201401281850.patch
+	* doc updates etc
+	* v0.1.23-rc1
+
 linux-image (linux-3.2.54-mempo-0.1.22) UNRELEASED; urgency=low
 
   * updated to grsecurity-3.0-3.2.54-201401051649
