@@ -270,7 +270,7 @@ index 88fd7f5..b318a78 100644
  ==============================================================
  
 diff --git a/Makefile b/Makefile
-index 848be26..3deab0e 100644
+index 848be26..67efb38f 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,9 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -389,7 +389,13 @@ index 848be26..3deab0e 100644
  	$(Q)$(MAKE) $(build)=$@
  
  # Store (new) KERNELRELASE string in include/config/kernel.release
-@@ -985,6 +1047,7 @@ prepare0: archprepare FORCE
+@@ -981,10 +1043,13 @@ prepare1: prepare2 include/linux/version.h include/generated/utsrelease.h \
+ 
+ archprepare: archscripts prepare1 scripts_basic
+ 
++prepare0: KBUILD_CFLAGS += $(GCC_PLUGINS_CFLAGS)
++prepare0: KBUILD_AFLAGS += $(GCC_PLUGINS_AFLAGS)
+ prepare0: archprepare FORCE
  	$(Q)$(MAKE) $(build)=.
  
  # All the preparing..
@@ -397,7 +403,7 @@ index 848be26..3deab0e 100644
  prepare: prepare0
  
  # Generate some files
-@@ -1089,6 +1152,8 @@ all: modules
+@@ -1089,6 +1154,8 @@ all: modules
  #	using awk while concatenating to the final file.
  
  PHONY += modules
@@ -406,7 +412,7 @@ index 848be26..3deab0e 100644
  modules: $(vmlinux-dirs) $(if $(KBUILD_BUILTIN),vmlinux) modules.builtin
  	$(Q)$(AWK) '!x[$$0]++' $(vmlinux-dirs:%=$(objtree)/%/modules.order) > $(objtree)/modules.order
  	@$(kecho) '  Building modules, stage 2.';
-@@ -1104,7 +1169,7 @@ modules.builtin: $(vmlinux-dirs:%=%/modules.builtin)
+@@ -1104,7 +1171,7 @@ modules.builtin: $(vmlinux-dirs:%=%/modules.builtin)
  
  # Target to prepare building external modules
  PHONY += modules_prepare
@@ -415,7 +421,7 @@ index 848be26..3deab0e 100644
  
  # Target to install modules
  PHONY += modules_install
-@@ -1163,7 +1228,7 @@ CLEAN_FILES +=	vmlinux System.map \
+@@ -1163,7 +1230,7 @@ CLEAN_FILES +=	vmlinux System.map \
  MRPROPER_DIRS  += include/config usr/include include/generated          \
                    arch/*/include/generated
  MRPROPER_FILES += .config .config.old .version .old_version             \
@@ -424,7 +430,7 @@ index 848be26..3deab0e 100644
  		  Module.symvers tags TAGS cscope* GPATH GTAGS GRTAGS GSYMS
  
  # clean - Delete most, but leave enough to build external modules
-@@ -1201,6 +1266,7 @@ distclean: mrproper
+@@ -1201,6 +1268,7 @@ distclean: mrproper
  		\( -name '*.orig' -o -name '*.rej' -o -name '*~' \
  		-o -name '*.bak' -o -name '#*#' -o -name '.*.orig' \
  		-o -name '.*.rej' \
@@ -432,7 +438,7 @@ index 848be26..3deab0e 100644
  		-o -name '*%' -o -name '.*.cmd' -o -name 'core' \) \
  		-type f -print | xargs rm -f
  
-@@ -1361,6 +1427,8 @@ PHONY += $(module-dirs) modules
+@@ -1361,6 +1429,8 @@ PHONY += $(module-dirs) modules
  $(module-dirs): crmodverdir $(objtree)/Module.symvers
  	$(Q)$(MAKE) $(build)=$(patsubst _module_%,%,$@)
  
@@ -441,7 +447,7 @@ index 848be26..3deab0e 100644
  modules: $(module-dirs)
  	@$(kecho) '  Building modules, stage 2.';
  	$(Q)$(MAKE) -f $(srctree)/scripts/Makefile.modpost
-@@ -1487,17 +1555,21 @@ else
+@@ -1487,17 +1557,21 @@ else
          target-dir = $(if $(KBUILD_EXTMOD),$(dir $<),$(dir $@))
  endif
  
@@ -467,7 +473,7 @@ index 848be26..3deab0e 100644
  	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
  %.symtypes: %.c prepare scripts FORCE
  	$(Q)$(MAKE) $(build)=$(build-dir) $(target-dir)$(notdir $@)
-@@ -1507,11 +1579,15 @@ endif
+@@ -1507,11 +1581,15 @@ endif
  	$(cmd_crmodverdir)
  	$(Q)$(MAKE) KBUILD_MODULES=$(if $(CONFIG_MODULES),1) \
  	$(build)=$(build-dir)
@@ -5315,7 +5321,7 @@ index 745c1e7..59d97a6 100644
  			break;
  		}
 diff --git a/arch/powerpc/kernel/module_32.c b/arch/powerpc/kernel/module_32.c
-index 2e3200c..72095ce 100644
+index 2e3200c..7118986 100644
 --- a/arch/powerpc/kernel/module_32.c
 +++ b/arch/powerpc/kernel/module_32.c
 @@ -162,7 +162,7 @@ int module_frob_arch_sections(Elf32_Ehdr *hdr,
@@ -5347,6 +5353,15 @@ index 2e3200c..72095ce 100644
  
  	/* Find this entry, or if that fails, the next avail. entry */
  	while (entry->jump[0]) {
+@@ -300,7 +305,7 @@ int apply_relocate_add(Elf32_Shdr *sechdrs,
+ 	}
+ #ifdef CONFIG_DYNAMIC_FTRACE
+ 	module->arch.tramp =
+-		do_plt_call(module->module_core,
++		do_plt_call(module->module_core_rx,
+ 			    (unsigned long)ftrace_caller,
+ 			    sechdrs, module);
+ #endif
 diff --git a/arch/powerpc/kernel/process.c b/arch/powerpc/kernel/process.c
 index d687e3f..074a8cd 100644
 --- a/arch/powerpc/kernel/process.c
@@ -10561,7 +10576,7 @@ index fd84387..887aa7e 100644
  		(unsigned long)create_aout_tables((char __user *)bprm->p, bprm);
  	/* start thread */
 diff --git a/arch/x86/ia32/ia32_signal.c b/arch/x86/ia32/ia32_signal.c
-index 6557769..dfa8ead 100644
+index 6557769..c135ca5 100644
 --- a/arch/x86/ia32/ia32_signal.c
 +++ b/arch/x86/ia32/ia32_signal.c
 @@ -73,6 +73,10 @@ int copy_siginfo_to_user32(compat_siginfo_t __user *to, siginfo_t *from)
@@ -10584,6 +10599,15 @@ index 6557769..dfa8ead 100644
  	set_fs(seg);
  	if (ret >= 0 && uoss_ptr)  {
  		if (!access_ok(VERIFY_WRITE, uoss_ptr, sizeof(stack_ia32_t)))
+@@ -276,7 +280,7 @@ asmlinkage long sys32_sigreturn(struct pt_regs *regs)
+ 	if (__get_user(set.sig[0], &frame->sc.oldmask)
+ 	    || (_COMPAT_NSIG_WORDS > 1
+ 		&& __copy_from_user((((char *) &set.sig) + 4),
+-				    &frame->extramask,
++				    frame->extramask,
+ 				    sizeof(frame->extramask))))
+ 		goto badframe;
+ 
 @@ -370,7 +374,7 @@ static int ia32_setup_sigcontext(struct sigcontext_ia32 __user *sc,
   */
  static void __user *get_sigframe(struct k_sigaction *ka, struct pt_regs *regs,
@@ -10611,6 +10635,15 @@ index 6557769..dfa8ead 100644
  	return (void __user *) sp;
  }
  
+@@ -447,7 +451,7 @@ int ia32_setup_frame(int sig, struct k_sigaction *ka,
+ 			restorer = VDSO32_SYMBOL(current->mm->context.vdso,
+ 						 sigreturn);
+ 		else
+-			restorer = &frame->retcode;
++			restorer = frame->retcode;
+ 	}
+ 
+ 	put_user_try {
 @@ -457,7 +461,7 @@ int ia32_setup_frame(int sig, struct k_sigaction *ka,
  		 * These are actually not used anymore, but left because some
  		 * gdb versions depend on them as a marker.
@@ -10639,7 +10672,7 @@ index 6557769..dfa8ead 100644
  		else
 -			restorer = VDSO32_SYMBOL(current->mm->context.vdso,
 -						 rt_sigreturn);
-+			restorer = &frame->retcode;
++			restorer = frame->retcode;
  		put_user_ex(ptr_to_compat(restorer), &frame->pretcode);
  
  		/*
@@ -18472,7 +18505,7 @@ index d2d488b8..a4f589f 100644
  
  /*
 diff --git a/arch/x86/kernel/entry_64.S b/arch/x86/kernel/entry_64.S
-index 6274f5f..65df16d 100644
+index 6274f5f..7b23dca 100644
 --- a/arch/x86/kernel/entry_64.S
 +++ b/arch/x86/kernel/entry_64.S
 @@ -55,6 +55,8 @@
@@ -18885,7 +18918,24 @@ index 6274f5f..65df16d 100644
  	je 1f
  	SWAPGS
  	/*
-@@ -345,19 +633,22 @@ ENDPROC(native_usergs_sysret64)
+@@ -340,24 +628,39 @@ ENDPROC(native_usergs_sysret64)
+ 			0x06 /* DW_OP_deref */, \
+ 			0x08 /* DW_OP_const1u */, SS+8-RBP, \
+ 			0x22 /* DW_OP_plus */
++
++#ifdef CONFIG_PAX_MEMORY_UDEREF
++	testb $3, CS(%rdi)
++	jnz 1f
++	pax_enter_kernel
++	jmp 2f
++1:	pax_enter_kernel_user
++2:
++#else
++	pax_enter_kernel
++#endif
++
+ 	/* We entered an interrupt context - irqs are off: */
+ 	TRACE_IRQS_OFF
  	.endm
  
  ENTRY(save_rest)
@@ -18912,20 +18962,32 @@ index 6274f5f..65df16d 100644
  
  /* save complete stack frame */
  	.pushsection .kprobes.text, "ax"
-@@ -386,9 +677,10 @@ ENTRY(save_paranoid)
+@@ -386,10 +689,21 @@ ENTRY(save_paranoid)
  	js 1f	/* negative -> in kernel */
  	SWAPGS
  	xorl %ebx,%ebx
 -1:	ret
-+1:	pax_force_retaddr_bts
++1:
++#ifdef CONFIG_PAX_MEMORY_UDEREF
++	testb $3, CS+8(%rsp)
++	jnz 1f
++	pax_enter_kernel
++	jmp 2f
++1:	pax_enter_kernel_user
++2:
++#else
++	pax_enter_kernel
++#endif
++	pax_force_retaddr
 +	ret
  	CFI_ENDPROC
 -END(save_paranoid)
+-	.popsection
 +ENDPROC(save_paranoid)
- 	.popsection
  
  /*
-@@ -410,7 +702,7 @@ ENTRY(ret_from_fork)
+  * A newly forked process directly context switches into this address.
+@@ -410,7 +724,7 @@ ENTRY(ret_from_fork)
  
  	RESTORE_REST
  
@@ -18934,7 +18996,7 @@ index 6274f5f..65df16d 100644
  	je   int_ret_from_sys_call
  
  	testl $_TIF_IA32, TI_flags(%rcx)	# 32-bit compat task needs IRET
-@@ -420,7 +712,7 @@ ENTRY(ret_from_fork)
+@@ -420,7 +734,7 @@ ENTRY(ret_from_fork)
  	jmp ret_from_sys_call			# go to the SYSRET fastpath
  
  	CFI_ENDPROC
@@ -18943,7 +19005,7 @@ index 6274f5f..65df16d 100644
  
  /*
   * System call entry. Up to 6 arguments in registers are supported.
-@@ -456,7 +748,7 @@ END(ret_from_fork)
+@@ -456,7 +770,7 @@ END(ret_from_fork)
  ENTRY(system_call)
  	CFI_STARTPROC	simple
  	CFI_SIGNAL_FRAME
@@ -18952,7 +19014,7 @@ index 6274f5f..65df16d 100644
  	CFI_REGISTER	rip,rcx
  	/*CFI_REGISTER	rflags,r11*/
  	SWAPGS_UNSAFE_STACK
-@@ -469,12 +761,18 @@ ENTRY(system_call_after_swapgs)
+@@ -469,12 +783,18 @@ ENTRY(system_call_after_swapgs)
  
  	movq	%rsp,PER_CPU_VAR(old_rsp)
  	movq	PER_CPU_VAR(kernel_stack),%rsp
@@ -18972,7 +19034,7 @@ index 6274f5f..65df16d 100644
  	movq  %rax,ORIG_RAX-ARGOFFSET(%rsp)
  	movq  %rcx,RIP-ARGOFFSET(%rsp)
  	CFI_REL_OFFSET rip,RIP-ARGOFFSET
-@@ -503,6 +801,8 @@ sysret_check:
+@@ -503,6 +823,8 @@ sysret_check:
  	andl %edi,%edx
  	jnz  sysret_careful
  	CFI_REMEMBER_STATE
@@ -18981,7 +19043,7 @@ index 6274f5f..65df16d 100644
  	/*
  	 * sysretq will re-enable interrupts:
  	 */
-@@ -561,6 +861,9 @@ auditsys:
+@@ -561,6 +883,9 @@ auditsys:
  	movq %rax,%rsi			/* 2nd arg: syscall number */
  	movl $AUDIT_ARCH_X86_64,%edi	/* 1st arg: audit arch */
  	call audit_syscall_entry
@@ -18991,7 +19053,7 @@ index 6274f5f..65df16d 100644
  	LOAD_ARGS 0		/* reload call-clobbered registers */
  	jmp system_call_fastpath
  
-@@ -591,12 +894,15 @@ tracesys:
+@@ -591,12 +916,15 @@ tracesys:
  	FIXUP_TOP_OF_STACK %rdi
  	movq %rsp,%rdi
  	call syscall_trace_enter
@@ -19008,7 +19070,7 @@ index 6274f5f..65df16d 100644
  	RESTORE_REST
  	cmpq $__NR_syscall_max,%rax
  	ja   int_ret_from_sys_call	/* RAX(%rsp) set to -ENOSYS above */
-@@ -612,7 +918,7 @@ tracesys:
+@@ -612,7 +940,7 @@ tracesys:
  GLOBAL(int_ret_from_sys_call)
  	DISABLE_INTERRUPTS(CLBR_NONE)
  	TRACE_IRQS_OFF
@@ -19017,7 +19079,7 @@ index 6274f5f..65df16d 100644
  	je retint_restore_args
  	movl $_TIF_ALLWORK_MASK,%edi
  	/* edi:	mask to check */
-@@ -623,7 +929,9 @@ GLOBAL(int_with_check)
+@@ -623,7 +951,9 @@ GLOBAL(int_with_check)
  	andl %edi,%edx
  	jnz   int_careful
  	andl    $~TS_COMPAT,TI_status(%rcx)
@@ -19028,7 +19090,7 @@ index 6274f5f..65df16d 100644
  
  	/* Either reschedule or signal or syscall exit tracking needed. */
  	/* First do a reschedule test. */
-@@ -669,7 +977,7 @@ int_restore_rest:
+@@ -669,7 +999,7 @@ int_restore_rest:
  	TRACE_IRQS_OFF
  	jmp int_with_check
  	CFI_ENDPROC
@@ -19037,7 +19099,7 @@ index 6274f5f..65df16d 100644
  
  /*
   * Certain special system calls that need to save a complete full stack frame.
-@@ -677,15 +985,13 @@ END(system_call)
+@@ -677,15 +1007,13 @@ END(system_call)
  	.macro PTREGSCALL label,func,arg
  ENTRY(\label)
  	PARTIAL_FRAME 1 8		/* offset 8: return address */
@@ -19054,7 +19116,7 @@ index 6274f5f..65df16d 100644
  	.endm
  
  	PTREGSCALL stub_clone, sys_clone, %r8
-@@ -700,12 +1006,17 @@ ENTRY(ptregscall_common)
+@@ -700,12 +1028,17 @@ ENTRY(ptregscall_common)
  	movq_cfi_restore R15+8, r15
  	movq_cfi_restore R14+8, r14
  	movq_cfi_restore R13+8, r13
@@ -19074,7 +19136,7 @@ index 6274f5f..65df16d 100644
  
  ENTRY(stub_execve)
  	CFI_STARTPROC
-@@ -720,7 +1031,7 @@ ENTRY(stub_execve)
+@@ -720,7 +1053,7 @@ ENTRY(stub_execve)
  	RESTORE_REST
  	jmp int_ret_from_sys_call
  	CFI_ENDPROC
@@ -19083,7 +19145,7 @@ index 6274f5f..65df16d 100644
  
  /*
   * sigreturn is special because it needs to restore all registers on return.
-@@ -738,7 +1049,7 @@ ENTRY(stub_rt_sigreturn)
+@@ -738,7 +1071,7 @@ ENTRY(stub_rt_sigreturn)
  	RESTORE_REST
  	jmp int_ret_from_sys_call
  	CFI_ENDPROC
@@ -19092,7 +19154,7 @@ index 6274f5f..65df16d 100644
  
  /*
   * Build the entry stubs and pointer table with some assembler magic.
-@@ -773,7 +1084,7 @@ vector=vector+1
+@@ -773,7 +1106,7 @@ vector=vector+1
  2:	jmp common_interrupt
  .endr
  	CFI_ENDPROC
@@ -19101,7 +19163,7 @@ index 6274f5f..65df16d 100644
  
  .previous
  END(interrupt)
-@@ -790,9 +1101,19 @@ END(interrupt)
+@@ -790,8 +1123,8 @@ END(interrupt)
  /* 0(%rsp): ~(interrupt number) */
  	.macro interrupt func
  	/* reserve pt_regs for scratch regs and rbp */
@@ -19110,20 +19172,9 @@ index 6274f5f..65df16d 100644
 +	subq $ORIG_RAX, %rsp
 +	CFI_ADJUST_CFA_OFFSET ORIG_RAX
  	SAVE_ARGS_IRQ
-+#ifdef CONFIG_PAX_MEMORY_UDEREF
-+	testb $3, CS(%rdi)
-+	jnz 1f
-+	pax_enter_kernel
-+	jmp 2f
-+1:	pax_enter_kernel_user
-+2:
-+#else
-+	pax_enter_kernel
-+#endif
  	call \func
  	.endm
- 
-@@ -818,13 +1139,13 @@ ret_from_intr:
+@@ -818,13 +1151,13 @@ ret_from_intr:
  	/* Restore saved previous stack */
  	popq %rsi
  	CFI_DEF_CFA_REGISTER	rsi
@@ -19140,7 +19191,7 @@ index 6274f5f..65df16d 100644
  	je retint_kernel
  
  	/* Interrupt came from user space */
-@@ -846,12 +1167,16 @@ retint_swapgs:		/* return to user-space */
+@@ -846,12 +1179,16 @@ retint_swapgs:		/* return to user-space */
  	 * The iretq could re-enable interrupts:
  	 */
  	DISABLE_INTERRUPTS(CLBR_ANY)
@@ -19157,7 +19208,7 @@ index 6274f5f..65df16d 100644
  	/*
  	 * The iretq could re-enable interrupts:
  	 */
-@@ -940,7 +1265,7 @@ ENTRY(retint_kernel)
+@@ -940,7 +1277,7 @@ ENTRY(retint_kernel)
  #endif
  
  	CFI_ENDPROC
@@ -19166,7 +19217,7 @@ index 6274f5f..65df16d 100644
  /*
   * End of kprobes section
   */
-@@ -956,7 +1281,7 @@ ENTRY(\sym)
+@@ -956,7 +1293,7 @@ ENTRY(\sym)
  	interrupt \do_sym
  	jmp ret_from_intr
  	CFI_ENDPROC
@@ -19175,22 +19226,7 @@ index 6274f5f..65df16d 100644
  .endm
  
  #ifdef CONFIG_SMP
-@@ -1021,12 +1346,22 @@ ENTRY(\sym)
- 	CFI_ADJUST_CFA_OFFSET ORIG_RAX-R15
- 	call error_entry
- 	DEFAULT_FRAME 0
-+#ifdef CONFIG_PAX_MEMORY_UDEREF
-+	testb $3, CS(%rsp)
-+	jnz 1f
-+	pax_enter_kernel
-+	jmp 2f
-+1:	pax_enter_kernel_user
-+2:
-+#else
-+	pax_enter_kernel
-+#endif
- 	movq %rsp,%rdi		/* pt_regs pointer */
- 	xorl %esi,%esi		/* no error code */
+@@ -1026,7 +1363,7 @@ ENTRY(\sym)
  	call \do_sym
  	jmp error_exit		/* %ebx: no swapgs flag */
  	CFI_ENDPROC
@@ -19199,22 +19235,7 @@ index 6274f5f..65df16d 100644
  .endm
  
  .macro paranoidzeroentry sym do_sym
-@@ -1038,15 +1373,25 @@ ENTRY(\sym)
- 	CFI_ADJUST_CFA_OFFSET ORIG_RAX-R15
- 	call save_paranoid
- 	TRACE_IRQS_OFF
-+#ifdef CONFIG_PAX_MEMORY_UDEREF
-+	testb $3, CS(%rsp)
-+	jnz 1f
-+	pax_enter_kernel
-+	jmp 2f
-+1:	pax_enter_kernel_user
-+2:
-+#else
-+	pax_enter_kernel
-+#endif
- 	movq %rsp,%rdi		/* pt_regs pointer */
- 	xorl %esi,%esi		/* no error code */
+@@ -1043,10 +1380,10 @@ ENTRY(\sym)
  	call \do_sym
  	jmp paranoid_exit	/* %ebx: no swapgs flag */
  	CFI_ENDPROC
@@ -19227,20 +19248,8 @@ index 6274f5f..65df16d 100644
  .macro paranoidzeroentry_ist sym do_sym ist
  ENTRY(\sym)
  	INTR_FRAME
-@@ -1056,14 +1401,30 @@ ENTRY(\sym)
- 	CFI_ADJUST_CFA_OFFSET ORIG_RAX-R15
- 	call save_paranoid
+@@ -1058,12 +1395,18 @@ ENTRY(\sym)
  	TRACE_IRQS_OFF
-+#ifdef CONFIG_PAX_MEMORY_UDEREF
-+	testb $3, CS(%rsp)
-+	jnz 1f
-+	pax_enter_kernel
-+	jmp 2f
-+1:	pax_enter_kernel_user
-+2:
-+#else
-+	pax_enter_kernel
-+#endif
  	movq %rsp,%rdi		/* pt_regs pointer */
  	xorl %esi,%esi		/* no error code */
 +#ifdef CONFIG_SMP
@@ -19259,23 +19268,7 @@ index 6274f5f..65df16d 100644
  .endm
  
  .macro errorentry sym do_sym
-@@ -1074,13 +1435,23 @@ ENTRY(\sym)
- 	CFI_ADJUST_CFA_OFFSET ORIG_RAX-R15
- 	call error_entry
- 	DEFAULT_FRAME 0
-+#ifdef CONFIG_PAX_MEMORY_UDEREF
-+	testb $3, CS(%rsp)
-+	jnz 1f
-+	pax_enter_kernel
-+	jmp 2f
-+1:	pax_enter_kernel_user
-+2:
-+#else
-+	pax_enter_kernel
-+#endif
- 	movq %rsp,%rdi			/* pt_regs pointer */
- 	movq ORIG_RAX(%rsp),%rsi	/* get error code */
- 	movq $-1,ORIG_RAX(%rsp)		/* no syscall to restart */
+@@ -1080,7 +1423,7 @@ ENTRY(\sym)
  	call \do_sym
  	jmp error_exit			/* %ebx: no swapgs flag */
  	CFI_ENDPROC
@@ -19284,23 +19277,7 @@ index 6274f5f..65df16d 100644
  .endm
  
  	/* error code is on the stack already */
-@@ -1093,13 +1464,23 @@ ENTRY(\sym)
- 	call save_paranoid
- 	DEFAULT_FRAME 0
- 	TRACE_IRQS_OFF
-+#ifdef CONFIG_PAX_MEMORY_UDEREF
-+	testb $3, CS(%rsp)
-+	jnz 1f
-+	pax_enter_kernel
-+	jmp 2f
-+1:	pax_enter_kernel_user
-+2:
-+#else
-+	pax_enter_kernel
-+#endif
- 	movq %rsp,%rdi			/* pt_regs pointer */
- 	movq ORIG_RAX(%rsp),%rsi	/* get error code */
- 	movq $-1,ORIG_RAX(%rsp)		/* no syscall to restart */
+@@ -1099,7 +1442,7 @@ ENTRY(\sym)
  	call \do_sym
  	jmp paranoid_exit		/* %ebx: no swapgs flag */
  	CFI_ENDPROC
@@ -19309,7 +19286,7 @@ index 6274f5f..65df16d 100644
  .endm
  
  zeroentry divide_error do_divide_error
-@@ -1129,9 +1510,10 @@ gs_change:
+@@ -1129,9 +1472,10 @@ gs_change:
  2:	mfence		/* workaround */
  	SWAPGS
  	popfq_cfi
@@ -19321,7 +19298,7 @@ index 6274f5f..65df16d 100644
  
  	.section __ex_table,"a"
  	.align 8
-@@ -1153,13 +1535,14 @@ ENTRY(kernel_thread_helper)
+@@ -1153,13 +1497,14 @@ ENTRY(kernel_thread_helper)
  	 * Here we are in the child and the registers are set as they were
  	 * at kernel_thread() invocation in the parent.
  	 */
@@ -19337,7 +19314,7 @@ index 6274f5f..65df16d 100644
  
  /*
   * execve(). This function needs to use IRET, not SYSRET, to set up all state properly.
-@@ -1186,11 +1569,11 @@ ENTRY(kernel_execve)
+@@ -1186,11 +1531,11 @@ ENTRY(kernel_execve)
  	RESTORE_REST
  	testq %rax,%rax
  	je int_ret_from_sys_call
@@ -19351,7 +19328,7 @@ index 6274f5f..65df16d 100644
  
  /* Call softirq on interrupt stack. Interrupts are off. */
  ENTRY(call_softirq)
-@@ -1208,9 +1591,10 @@ ENTRY(call_softirq)
+@@ -1208,9 +1553,10 @@ ENTRY(call_softirq)
  	CFI_DEF_CFA_REGISTER	rsp
  	CFI_ADJUST_CFA_OFFSET   -8
  	decl PER_CPU_VAR(irq_count)
@@ -19363,7 +19340,7 @@ index 6274f5f..65df16d 100644
  
  #ifdef CONFIG_XEN
  zeroentry xen_hypervisor_callback xen_do_hypervisor_callback
-@@ -1248,7 +1632,7 @@ ENTRY(xen_do_hypervisor_callback)   # do_hypervisor_callback(struct *pt_regs)
+@@ -1248,7 +1594,7 @@ ENTRY(xen_do_hypervisor_callback)   # do_hypervisor_callback(struct *pt_regs)
  	decl PER_CPU_VAR(irq_count)
  	jmp  error_exit
  	CFI_ENDPROC
@@ -19372,7 +19349,7 @@ index 6274f5f..65df16d 100644
  
  /*
   * Hypervisor uses this for application faults while it executes.
-@@ -1307,7 +1691,7 @@ ENTRY(xen_failsafe_callback)
+@@ -1307,7 +1653,7 @@ ENTRY(xen_failsafe_callback)
  	SAVE_ALL
  	jmp error_exit
  	CFI_ENDPROC
@@ -19381,7 +19358,7 @@ index 6274f5f..65df16d 100644
  
  apicinterrupt XEN_HVM_EVTCHN_CALLBACK \
  	xen_hvm_callback_vector xen_evtchn_do_upcall
-@@ -1356,16 +1740,31 @@ ENTRY(paranoid_exit)
+@@ -1356,16 +1702,31 @@ ENTRY(paranoid_exit)
  	TRACE_IRQS_OFF
  	testl %ebx,%ebx				/* swapgs needed? */
  	jnz paranoid_restore
@@ -19414,7 +19391,7 @@ index 6274f5f..65df16d 100644
  	jmp irq_return
  paranoid_userspace:
  	GET_THREAD_INFO(%rcx)
-@@ -1394,7 +1793,7 @@ paranoid_schedule:
+@@ -1394,7 +1755,7 @@ paranoid_schedule:
  	TRACE_IRQS_OFF
  	jmp paranoid_userspace
  	CFI_ENDPROC
@@ -19423,7 +19400,7 @@ index 6274f5f..65df16d 100644
  
  /*
   * Exception entry point. This expects an error code/orig_rax on the stack.
-@@ -1421,12 +1820,13 @@ ENTRY(error_entry)
+@@ -1421,12 +1782,23 @@ ENTRY(error_entry)
  	movq_cfi r14, R14+8
  	movq_cfi r15, R15+8
  	xorl %ebx,%ebx
@@ -19433,35 +19410,8 @@ index 6274f5f..65df16d 100644
  error_swapgs:
  	SWAPGS
  error_sti:
- 	TRACE_IRQS_OFF
-+	pax_force_retaddr_bts
- 	ret
- 
- /*
-@@ -1453,7 +1853,7 @@ bstep_iret:
- 	movq %rcx,RIP+8(%rsp)
- 	jmp error_swapgs
- 	CFI_ENDPROC
--END(error_entry)
-+ENDPROC(error_entry)
- 
- 
- /* ebx:	no swapgs flag (1: don't need swapgs, 0: need it) */
-@@ -1473,7 +1873,7 @@ ENTRY(error_exit)
- 	jnz retint_careful
- 	jmp retint_swapgs
- 	CFI_ENDPROC
--END(error_exit)
-+ENDPROC(error_exit)
- 
- 
- 	/* runs on exception stack */
-@@ -1485,6 +1885,17 @@ ENTRY(nmi)
- 	CFI_ADJUST_CFA_OFFSET ORIG_RAX-R15
- 	call save_paranoid
- 	DEFAULT_FRAME 0
 +#ifdef CONFIG_PAX_MEMORY_UDEREF
-+	testb $3, CS(%rsp)
++	testb $3, CS+8(%rsp)
 +	jnz 1f
 +	pax_enter_kernel
 +	jmp 2f
@@ -19470,11 +19420,38 @@ index 6274f5f..65df16d 100644
 +#else
 +	pax_enter_kernel
 +#endif
+ 	TRACE_IRQS_OFF
++	pax_force_retaddr
+ 	ret
+ 
+ /*
+@@ -1453,7 +1825,7 @@ bstep_iret:
+ 	movq %rcx,RIP+8(%rsp)
+ 	jmp error_swapgs
+ 	CFI_ENDPROC
+-END(error_entry)
++ENDPROC(error_entry)
+ 
+ 
+ /* ebx:	no swapgs flag (1: don't need swapgs, 0: need it) */
+@@ -1473,7 +1845,7 @@ ENTRY(error_exit)
+ 	jnz retint_careful
+ 	jmp retint_swapgs
+ 	CFI_ENDPROC
+-END(error_exit)
++ENDPROC(error_exit)
+ 
+ 
+ 	/* runs on exception stack */
+@@ -1485,6 +1857,7 @@ ENTRY(nmi)
+ 	CFI_ADJUST_CFA_OFFSET ORIG_RAX-R15
+ 	call save_paranoid
+ 	DEFAULT_FRAME 0
 +
  	/* paranoidentry do_nmi, 0; without TRACE_IRQS_OFF */
  	movq %rsp,%rdi
  	movq $-1,%rsi
-@@ -1495,12 +1906,28 @@ ENTRY(nmi)
+@@ -1495,12 +1868,28 @@ ENTRY(nmi)
  	DISABLE_INTERRUPTS(CLBR_NONE)
  	testl %ebx,%ebx				/* swapgs needed? */
  	jnz nmi_restore
@@ -19504,7 +19481,7 @@ index 6274f5f..65df16d 100644
  	jmp irq_return
  nmi_userspace:
  	GET_THREAD_INFO(%rcx)
-@@ -1529,14 +1956,14 @@ nmi_schedule:
+@@ -1529,14 +1918,14 @@ nmi_schedule:
  	jmp paranoid_exit
  	CFI_ENDPROC
  #endif
@@ -22884,7 +22861,7 @@ index 9a0e312..e6f66f2 100644
  	.long sys_restart_syscall	/* 0 - old "setup()" system call, used for restarting */
  	.long sys_exit
 diff --git a/arch/x86/kernel/tboot.c b/arch/x86/kernel/tboot.c
-index e2410e2..b98a4fd 100644
+index e2410e2..5e8d841 100644
 --- a/arch/x86/kernel/tboot.c
 +++ b/arch/x86/kernel/tboot.c
 @@ -219,7 +219,7 @@ static int tboot_setup_sleep(void)
@@ -22901,7 +22878,7 @@ index e2410e2..b98a4fd 100644
  	switch_to_tboot_pt();
  
 -	shutdown = (void(*)(void))(unsigned long)tboot->shutdown_entry;
-+	shutdown = (void *)tboot->shutdown_entry;
++	shutdown = (void *)(unsigned long)tboot->shutdown_entry;
  	shutdown();
  
  	/* should not reach here */
@@ -23051,7 +23028,7 @@ index 09ff517..df19fbff 100644
  	.short 0
  	.quad	0x00cf9b000000ffff	# __KERNEL32_CS
 diff --git a/arch/x86/kernel/traps.c b/arch/x86/kernel/traps.c
-index e6fbb94..75e9d8c 100644
+index e6fbb94..b372995 100644
 --- a/arch/x86/kernel/traps.c
 +++ b/arch/x86/kernel/traps.c
 @@ -70,12 +70,6 @@ asmlinkage int system_call(void);
@@ -23196,7 +23173,7 @@ index e6fbb94..75e9d8c 100644
  	{
  		if (!fixup_exception(regs)) {
  			task->thread.error_code = error_code;
-@@ -576,8 +605,8 @@ asmlinkage void __attribute__((weak)) smp_threshold_interrupt(void)
+@@ -576,18 +605,19 @@ asmlinkage void __attribute__((weak)) smp_threshold_interrupt(void)
  void __math_state_restore(struct task_struct *tsk)
  {
  	/* We need a safe address that is cheap to find and that is already
@@ -23207,6 +23184,23 @@ index e6fbb94..75e9d8c 100644
  
  	/* AMD K7/K8 CPUs don't save/restore FDP/FIP/FOP unless an exception
  	   is pending.  Clear the x87 state here by setting it to fixed
+ 	   values. safe_address is a random variable that should be in L1 */
+-	alternative_input(
+-		ASM_NOP8 ASM_NOP2,
+-		"emms\n\t"	  	/* clear stack tags */
+-		"fildl %P[addr]",	/* set F?P to defined value */
+-		X86_FEATURE_FXSAVE_LEAK,
+-		[addr] "m" (safe_address));
++	if (unlikely(static_cpu_has(X86_FEATURE_FXSAVE_LEAK))) {
++		asm volatile(
++			"fnclex\n\t"
++			"emms\n\t"
++			"fildl %P[addr]"	/* set F?P to defined value */
++			: : [addr] "m" (init_tss[raw_smp_processor_id()].x86_tss.sp0));
++	}
+ 
+ 	/*
+ 	 * Paranoid restore. send a SIGSEGV if we fail to restore the state.
 diff --git a/arch/x86/kernel/verify_cpu.S b/arch/x86/kernel/verify_cpu.S
 index b9242ba..50c5edd 100644
 --- a/arch/x86/kernel/verify_cpu.S
@@ -31277,9 +31271,18 @@ index c0ab25c..9d49f8f 100644
  		if (blk_verify_command(rq->cmd, has_write_perm))
  			return -EPERM;
 diff --git a/block/compat_ioctl.c b/block/compat_ioctl.c
-index 7b72502..646105c 100644
+index 7b72502..3d7b647 100644
 --- a/block/compat_ioctl.c
 +++ b/block/compat_ioctl.c
+@@ -155,7 +155,7 @@ static int compat_cdrom_generic_command(struct block_device *bdev, fmode_t mode,
+ 	cgc = compat_alloc_user_space(sizeof(*cgc));
+ 	cgc32 = compat_ptr(arg);
+ 
+-	if (copy_in_user(&cgc->cmd, &cgc32->cmd, sizeof(cgc->cmd)) ||
++	if (copy_in_user(cgc->cmd, cgc32->cmd, sizeof(cgc->cmd)) ||
+ 	    get_user(data, &cgc32->buffer) ||
+ 	    put_user(compat_ptr(data), &cgc->buffer) ||
+ 	    copy_in_user(&cgc->buflen, &cgc32->buflen,
 @@ -340,7 +340,7 @@ static int compat_fd_ioctl(struct block_device *bdev, fmode_t mode,
  		err |= __get_user(f->spec1, &uf->spec1);
  		err |= __get_user(f->fmt_gap, &uf->fmt_gap);
@@ -33945,7 +33948,7 @@ index da3cfee..a5a6606 100644
  
  	*ppos = i;
 diff --git a/drivers/char/random.c b/drivers/char/random.c
-index c244f0e..fc574b2 100644
+index c244f0e..3f6ae58 100644
 --- a/drivers/char/random.c
 +++ b/drivers/char/random.c
 @@ -255,10 +255,8 @@
@@ -34680,7 +34683,7 @@ index c244f0e..fc574b2 100644
  }
  #endif
  
-@@ -835,97 +916,109 @@ static ssize_t extract_entropy(struct entropy_store *r, void *buf,
+@@ -835,104 +916,127 @@ static ssize_t extract_entropy(struct entropy_store *r, void *buf,
   * from the primary pool to the secondary extraction pool. We make
   * sure we pull enough for a 'catastrophic reseed'.
   */
@@ -34855,24 +34858,25 @@ index c244f0e..fc574b2 100644
  	} hash;
  	__u32 workspace[SHA_WORKSPACE_WORDS];
  	__u8 extract[64];
-@@ -938,6 +1031,17 @@ static void extract_buf(struct entropy_store *r, __u8 *out)
- 		sha_transform(hash.w, (__u8 *)(r->pool + i), workspace);
+ 	unsigned long flags;
  
- 	/*
+-	/* Generate a hash across the pool, 16 words (512 bits) at a time */
++	/*
 +	 * If we have an architectural hardware random number
-+	 * generator, mix that in, too.
++	 * generator, use it for SHA's initial vector
 +	 */
+ 	sha_init(hash.w);
 +	for (i = 0; i < LONGS(20); i++) {
 +		unsigned long v;
 +		if (!arch_get_random_long(&v))
 +			break;
-+		hash.l[i] ^= v;
++		hash.l[i] = v;
 +	}
 +
-+	/*
- 	 * We mix the hash back into the pool to prevent backtracking
- 	 * attacks (where the attacker knows the state of the pool
- 	 * plus the current outputs, and attempts to find previous
++	/* Generate a hash across the pool, 16 words (512 bits) at a time */
+ 	spin_lock_irqsave(&r->lock, flags);
+ 	for (i = 0; i < r->poolinfo->poolwords; i += 16)
+ 		sha_transform(hash.w, (__u8 *)(r->pool + i), workspace);
 @@ -966,27 +1070,43 @@ static void extract_buf(struct entropy_store *r, __u8 *out)
  	hash.w[1] ^= hash.w[4];
  	hash.w[2] ^= rol32(hash.w[2], 16);
@@ -36242,7 +36246,7 @@ index 98723cb..10ca85b 100644
  	return -EINVAL;
  }
 diff --git a/drivers/gpu/drm/drm_crtc.c b/drivers/gpu/drm/drm_crtc.c
-index 3f1799b..3a853eb 100644
+index 3f1799b..7d5796a 100644
 --- a/drivers/gpu/drm/drm_crtc.c
 +++ b/drivers/gpu/drm/drm_crtc.c
 @@ -1379,7 +1379,7 @@ int drm_mode_getconnector(struct drm_device *dev, void *data,
@@ -36310,6 +36314,15 @@ index 3f1799b..3a853eb 100644
  			list_for_each_entry(prop_enum, &property->enum_blob_list, head) {
  
  				if (copy_to_user(&enum_ptr[copied].value, &prop_enum->value, sizeof(uint64_t))) {
+@@ -2293,7 +2293,7 @@ int drm_mode_getproperty_ioctl(struct drm_device *dev,
+ 					goto done;
+ 				}
+ 
+-				if (copy_to_user(&enum_ptr[copied].name,
++				if (copy_to_user(enum_ptr[copied].name,
+ 						 &prop_enum->name, DRM_PROP_NAME_LEN)) {
+ 					ret = -EFAULT;
+ 					goto done;
 @@ -2308,7 +2308,7 @@ int drm_mode_getproperty_ioctl(struct drm_device *dev,
  		if ((out_resp->count_enum_blobs >= blob_count) && blob_count) {
  			copied = 0;
@@ -37067,18 +37080,9 @@ index 2581202..f230a8d9 100644
  
  	*sequence = cur_fence;
 diff --git a/drivers/gpu/drm/nouveau/nouveau_bios.c b/drivers/gpu/drm/nouveau/nouveau_bios.c
-index 5fc201b..7b032b9 100644
+index 5fc201b..20b6980 100644
 --- a/drivers/gpu/drm/nouveau/nouveau_bios.c
 +++ b/drivers/gpu/drm/nouveau/nouveau_bios.c
-@@ -201,7 +201,7 @@ struct methods {
- 	const char desc[8];
- 	void (*loadbios)(struct drm_device *, uint8_t *);
- 	const bool rw;
--};
-+} __do_const;
- 
- static struct methods shadow_methods[] = {
- 	{ "PRAMIN", load_vbios_pramin, true },
 @@ -5474,7 +5474,7 @@ parse_bit_U_tbl_entry(struct drm_device *dev, struct nvbios *bios,
  struct bit_table {
  	const char id;
@@ -40832,9 +40836,27 @@ index c706a7b..2cc7511 100644
  					       "md/raid1:%s: read error corrected "
  					       "(%d sectors at %llu on %s)\n",
 diff --git a/drivers/md/raid10.c b/drivers/md/raid10.c
-index 8bba438..f065cc3 100644
+index 8bba438..a579e8c 100644
 --- a/drivers/md/raid10.c
 +++ b/drivers/md/raid10.c
+@@ -997,7 +997,7 @@ read_again:
+ 			/* Could not read all from this device, so we will
+ 			 * need another r10_bio.
+ 			 */
+-			sectors_handled = (r10_bio->sectors + max_sectors
++			sectors_handled = (r10_bio->sector + max_sectors
+ 					   - bio->bi_sector);
+ 			r10_bio->sectors = max_sectors;
+ 			spin_lock_irq(&conf->device_lock);
+@@ -1005,7 +1005,7 @@ read_again:
+ 				bio->bi_phys_segments = 2;
+ 			else
+ 				bio->bi_phys_segments++;
+-			spin_unlock(&conf->device_lock);
++			spin_unlock_irq(&conf->device_lock);
+ 			/* Cannot call generic_make_request directly
+ 			 * as that will be queued in __generic_make_request
+ 			 * and subsequent mempool_alloc might block
 @@ -1465,7 +1465,7 @@ static void end_sync_read(struct bio *bio, int error)
  		/* The write handler will notice the lack of
  		 * R10BIO_Uptodate and record any errors etc
@@ -40894,6 +40916,28 @@ index 8bba438..f065cc3 100644
  			}
  
  			rdev_dec_pending(rdev, mddev);
+@@ -2563,10 +2563,6 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
+ 			if (j == conf->copies) {
+ 				/* Cannot recover, so abort the recovery or
+ 				 * record a bad block */
+-				put_buf(r10_bio);
+-				if (rb2)
+-					atomic_dec(&rb2->remaining);
+-				r10_bio = rb2;
+ 				if (any_working) {
+ 					/* problem is that there are bad blocks
+ 					 * on other device(s)
+@@ -2590,6 +2586,10 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
+ 					conf->mirrors[i].recovery_disabled
+ 						= mddev->recovery_disabled;
+ 				}
++				put_buf(r10_bio);
++				if (rb2)
++					atomic_dec(&rb2->remaining);
++				r10_bio = rb2;
+ 				break;
+ 			}
+ 		}
 diff --git a/drivers/md/raid5.c b/drivers/md/raid5.c
 index 26ef63a..bd587cd 100644
 --- a/drivers/md/raid5.c
@@ -41181,7 +41225,7 @@ index a0895bf..b451f5b 100644
  	.open		= timblogiw_open,
  	.release	= timblogiw_close,
 diff --git a/drivers/media/video/v4l2-compat-ioctl32.c b/drivers/media/video/v4l2-compat-ioctl32.c
-index c68531b..82a9ea0 100644
+index c68531b..5b2fb1d 100644
 --- a/drivers/media/video/v4l2-compat-ioctl32.c
 +++ b/drivers/media/video/v4l2-compat-ioctl32.c
 @@ -332,7 +332,7 @@ struct v4l2_buffer32 {
@@ -41202,6 +41246,66 @@ index c68531b..82a9ea0 100644
  				enum v4l2_memory memory)
  {
  	if (copy_in_user(up32, up, 2 * sizeof(__u32)) ||
+@@ -424,7 +424,7 @@ static int get_v4l2_buffer32(struct v4l2_buffer *kp, struct v4l2_buffer32 __user
+ 		 * by passing a very big num_planes value */
+ 		uplane = compat_alloc_user_space(num_planes *
+ 						sizeof(struct v4l2_plane));
+-		kp->m.planes = uplane;
++		kp->m.planes = (struct v4l2_plane __force_kernel *)uplane;
+ 
+ 		while (--num_planes >= 0) {
+ 			ret = get_v4l2_plane32(uplane, uplane32, kp->memory);
+@@ -491,7 +491,7 @@ static int put_v4l2_buffer32(struct v4l2_buffer *kp, struct v4l2_buffer32 __user
+ 		if (num_planes == 0)
+ 			return 0;
+ 
+-		uplane = kp->m.planes;
++		uplane = (struct v4l2_plane __force_user *)kp->m.planes;
+ 		if (get_user(p, &up->m.planes))
+ 			return -EFAULT;
+ 		uplane32 = compat_ptr(p);
+@@ -541,7 +541,7 @@ static int get_v4l2_framebuffer32(struct v4l2_framebuffer *kp, struct v4l2_frame
+ 		get_user(kp->capability, &up->capability) ||
+ 		get_user(kp->flags, &up->flags))
+ 			return -EFAULT;
+-	kp->base = compat_ptr(tmp);
++	kp->base = (void __force_kernel *)compat_ptr(tmp);
+ 	get_v4l2_pix_format(&kp->fmt, &up->fmt);
+ 	return 0;
+ }
+@@ -647,7 +647,7 @@ static int get_v4l2_ext_controls32(struct v4l2_ext_controls *kp, struct v4l2_ext
+ 			n * sizeof(struct v4l2_ext_control32)))
+ 		return -EFAULT;
+ 	kcontrols = compat_alloc_user_space(n * sizeof(struct v4l2_ext_control));
+-	kp->controls = kcontrols;
++	kp->controls = (struct v4l2_ext_control __force_kernel *)kcontrols;
+ 	while (--n >= 0) {
+ 		if (copy_in_user(kcontrols, ucontrols, sizeof(*ucontrols)))
+ 			return -EFAULT;
+@@ -669,7 +669,7 @@ static int get_v4l2_ext_controls32(struct v4l2_ext_controls *kp, struct v4l2_ext
+ static int put_v4l2_ext_controls32(struct v4l2_ext_controls *kp, struct v4l2_ext_controls32 __user *up)
+ {
+ 	struct v4l2_ext_control32 __user *ucontrols;
+-	struct v4l2_ext_control __user *kcontrols = kp->controls;
++	struct v4l2_ext_control __user *kcontrols = (struct v4l2_ext_control __force_user *)kp->controls;
+ 	int n = kp->count;
+ 	compat_caddr_t p;
+ 
+diff --git a/drivers/media/video/v4l2-ctrls.c b/drivers/media/video/v4l2-ctrls.c
+index 0f415da..5dc98ef 100644
+--- a/drivers/media/video/v4l2-ctrls.c
++++ b/drivers/media/video/v4l2-ctrls.c
+@@ -1075,8 +1075,8 @@ static int validate_new(const struct v4l2_ctrl *ctrl, struct v4l2_ext_control *c
+ 		return 0;
+ 
+ 	case V4L2_CTRL_TYPE_STRING:
+-		len = strlen(s);
+-		if (len < ctrl->minimum)
++		len = strlen_user(s);
++		if (!len || len < ctrl->minimum)
+ 			return -ERANGE;
+ 		if ((len - ctrl->minimum) % ctrl->step)
+ 			return -ERANGE;
 diff --git a/drivers/media/video/v4l2-device.c b/drivers/media/video/v4l2-device.c
 index 8b0777f..e29f31e 100644
 --- a/drivers/media/video/v4l2-device.c
@@ -41219,7 +41323,7 @@ index 8b0777f..e29f31e 100644
  
  	if (basename[len - 1] >= '0' && basename[len - 1] <= '9')
 diff --git a/drivers/media/video/v4l2-ioctl.c b/drivers/media/video/v4l2-ioctl.c
-index 639abee..e2336f4 100644
+index 639abee..a027e4f 100644
 --- a/drivers/media/video/v4l2-ioctl.c
 +++ b/drivers/media/video/v4l2-ioctl.c
 @@ -2197,7 +2197,7 @@ static unsigned long cmd_input_size(unsigned int cmd)
@@ -41249,6 +41353,30 @@ index 639abee..e2336f4 100644
  			*kernel_ptr = (void *)&ctrls->controls;
  			*array_size = sizeof(struct v4l2_ext_control)
  				    * ctrls->count;
+@@ -2312,7 +2312,7 @@ video_usercopy(struct file *file, unsigned int cmd, unsigned long arg,
+ 		err = -EINVAL;
+ 
+ 	if (has_array_args) {
+-		*kernel_ptr = user_ptr;
++		*kernel_ptr = (void __force_kernel *)user_ptr;
+ 		if (copy_to_user(user_ptr, mbuf, array_size))
+ 			err = -EFAULT;
+ 		goto out_array_args;
+diff --git a/drivers/media/video/vivi.c b/drivers/media/video/vivi.c
+index 7d754fb..474273b 100644
+--- a/drivers/media/video/vivi.c
++++ b/drivers/media/video/vivi.c
+@@ -51,8 +51,8 @@ MODULE_AUTHOR("Mauro Carvalho Chehab, Ted Walther and John Sokol");
+ MODULE_LICENSE("Dual BSD/GPL");
+ MODULE_VERSION(VIVI_VERSION);
+ 
+-static unsigned video_nr = -1;
+-module_param(video_nr, uint, 0644);
++static int video_nr = -1;
++module_param(video_nr, int, 0644);
+ MODULE_PARM_DESC(video_nr, "videoX start number, -1 is autodetect");
+ 
+ static unsigned n_devs = 1;
 diff --git a/drivers/memstick/host/r592.c b/drivers/memstick/host/r592.c
 index 668f5c6..65df5f2 100644
 --- a/drivers/memstick/host/r592.c
@@ -42047,6 +42175,19 @@ index ba168a7..399925d6 100644
  			skb_reserve(st_gdata->rx_skb,
  					st_gdata->list[type]->reserve);
  			/* next 2 required for BT only */
+diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+index 4802f7f..5ae431e 100644
+--- a/drivers/mmc/card/block.c
++++ b/drivers/mmc/card/block.c
+@@ -399,7 +399,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+ 	if (idata->ic.postsleep_min_us)
+ 		usleep_range(idata->ic.postsleep_min_us, idata->ic.postsleep_max_us);
+ 
+-	if (copy_to_user(&(ic_ptr->response), cmd.resp, sizeof(cmd.resp))) {
++	if (copy_to_user(ic_ptr->response, cmd.resp, sizeof(cmd.resp))) {
+ 		err = -EFAULT;
+ 		goto cmd_rel_host;
+ 	}
 diff --git a/drivers/mmc/host/sdhci-pci.c b/drivers/mmc/host/sdhci-pci.c
 index 83b51b5..ec2396c 100644
 --- a/drivers/mmc/host/sdhci-pci.c
@@ -42808,6 +42949,18 @@ index a4a3516..3b3a7e0 100644
  		s->hdlctx.calibrate = bi.data.calibrate * s->par.bitrate / 16;
  		return 0;
  
+diff --git a/drivers/net/hamradio/yam.c b/drivers/net/hamradio/yam.c
+index 96a98d2..e4260ab 100644
+--- a/drivers/net/hamradio/yam.c
++++ b/drivers/net/hamradio/yam.c
+@@ -1060,6 +1060,7 @@ static int yam_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
+ 		break;
+ 
+ 	case SIOCYAMGCFG:
++		memset(&yi, 0, sizeof(yi));
+ 		yi.cfg.mask = 0xffffffff;
+ 		yi.cfg.iobase = yp->iobase;
+ 		yi.cfg.irq = yp->irq;
 diff --git a/drivers/net/loopback.c b/drivers/net/loopback.c
 index d0893e4..14b0d44 100644
 --- a/drivers/net/loopback.c
@@ -42857,9 +43010,18 @@ index 301b39e..345c414 100644
  };
  
 diff --git a/drivers/net/macvtap.c b/drivers/net/macvtap.c
-index b0f9015..93da3cf 100644
+index b0f9015..edcb1f3 100644
 --- a/drivers/net/macvtap.c
 +++ b/drivers/net/macvtap.c
+@@ -924,7 +924,7 @@ static long macvtap_ioctl(struct file *file, unsigned int cmd,
+ 			return -ENOLINK;
+ 
+ 		ret = 0;
+-		if (copy_to_user(&ifr->ifr_name, vlan->dev->name, IFNAMSIZ) ||
++		if (copy_to_user(ifr->ifr_name, vlan->dev->name, IFNAMSIZ) ||
+ 		    put_user(q->flags, &ifr->ifr_flags))
+ 			ret = -EFAULT;
+ 		dev_put(vlan->dev);
 @@ -1085,7 +1085,7 @@ static int macvtap_device_event(struct notifier_block *unused,
  	return NOTIFY_DONE;
  }
@@ -47335,7 +47497,7 @@ index 3440812..2a4ef1f 100644
  		file->f_version = event_count;
  		return POLLIN | POLLRDNORM;
 diff --git a/drivers/usb/core/devio.c b/drivers/usb/core/devio.c
-index 49257b3..de27d93 100644
+index 49257b3..13133cd 100644
 --- a/drivers/usb/core/devio.c
 +++ b/drivers/usb/core/devio.c
 @@ -147,7 +147,7 @@ static ssize_t usbdev_read(struct file *file, char __user *buf, size_t nbytes,
@@ -47347,7 +47509,7 @@ index 49257b3..de27d93 100644
  	loff_t pos;
  	int i;
  
-@@ -189,16 +189,16 @@ static ssize_t usbdev_read(struct file *file, char __user *buf, size_t nbytes,
+@@ -189,22 +189,22 @@ static ssize_t usbdev_read(struct file *file, char __user *buf, size_t nbytes,
  	for (i = 0; nbytes && i < dev->descriptor.bNumConfigurations; i++) {
  		struct usb_config_descriptor *config =
  			(struct usb_config_descriptor *)dev->rawdescriptors[i];
@@ -47367,6 +47529,13 @@ index 49257b3..de27d93 100644
  			if (len > nbytes)
  				len = nbytes;
  
+ 			/* Simply don't write (skip over) unallocated parts */
+ 			if (alloclen > (*ppos - pos)) {
+-				alloclen -= (*ppos - pos);
++				alloclen = alloclen + pos - *ppos;
+ 				if (copy_to_user(buf,
+ 				    dev->rawdescriptors[i] + (*ppos - pos),
+ 				    min(len, alloclen))) {
 diff --git a/drivers/usb/core/hcd.c b/drivers/usb/core/hcd.c
 index 032e5a6..bc422e4 100644
 --- a/drivers/usb/core/hcd.c
@@ -47847,7 +48016,7 @@ index 5c3960d..15cf8fc 100644
  		goto out1;
  	}
 diff --git a/drivers/video/fbmem.c b/drivers/video/fbmem.c
-index 0a22808..130eafe 100644
+index 0a22808..b3bdf50 100644
 --- a/drivers/video/fbmem.c
 +++ b/drivers/video/fbmem.c
 @@ -428,7 +428,7 @@ static void fb_do_show_logo(struct fb_info *info, struct fb_image *image,
@@ -47877,6 +48046,15 @@ index 0a22808..130eafe 100644
  			return -EINVAL;
  		if (!registered_fb[con2fb.framebuffer])
  			request_module("fb%d", con2fb.framebuffer);
+@@ -1260,7 +1260,7 @@ static int do_fscreeninfo_to_user(struct fb_fix_screeninfo *fix,
+ 	__u32 data;
+ 	int err;
+ 
+-	err = copy_to_user(&fix32->id, &fix->id, sizeof(fix32->id));
++	err = copy_to_user(fix32->id, &fix->id, sizeof(fix32->id));
+ 
+ 	data = (__u32) (unsigned long) fix->smem_start;
+ 	err |= put_user(data, &fix32->smem_start);
 diff --git a/drivers/video/geode/gx1fb_core.c b/drivers/video/geode/gx1fb_core.c
 index 5a5d092..265c5ed 100644
 --- a/drivers/video/geode/gx1fb_core.c
@@ -51569,7 +51747,7 @@ index a6395bd..f1e376a 100644
  		(unsigned long) create_aout_tables((char __user *) bprm->p, bprm);
  #ifdef __alpha__
 diff --git a/fs/binfmt_elf.c b/fs/binfmt_elf.c
-index 8dd615c..cb7cd01 100644
+index 8dd615c..52ad259 100644
 --- a/fs/binfmt_elf.c
 +++ b/fs/binfmt_elf.c
 @@ -32,6 +32,7 @@
@@ -51742,7 +51920,7 @@ index 8dd615c..cb7cd01 100644
  	}
  
  	error = load_addr;
-@@ -528,6 +559,315 @@ out:
+@@ -528,6 +559,336 @@ out:
  	return error;
  }
  
@@ -51883,11 +52061,47 @@ index 8dd615c..cb7cd01 100644
 +#endif
 +
 +#if defined(CONFIG_PAX_NOEXEC) || defined(CONFIG_PAX_ASLR)
-+static unsigned long pax_parse_ei_pax(const struct elfhdr * const elf_ex)
++static unsigned long pax_parse_defaults(void)
 +{
 +	unsigned long pax_flags = 0UL;
 +
++#ifdef CONFIG_PAX_SOFTMODE
++	if (pax_softmode)
++		return pax_flags;
++#endif
++
++#ifdef CONFIG_PAX_PAGEEXEC
++	pax_flags |= MF_PAX_PAGEEXEC;
++#endif
++
++#ifdef CONFIG_PAX_SEGMEXEC
++	pax_flags |= MF_PAX_SEGMEXEC;
++#endif
++
++#ifdef CONFIG_PAX_MPROTECT
++	pax_flags |= MF_PAX_MPROTECT;
++#endif
++
++#ifdef CONFIG_PAX_RANDMMAP
++	if (randomize_va_space)
++		pax_flags |= MF_PAX_RANDMMAP;
++#endif
++
++	return pax_flags;
++}
++
++static unsigned long pax_parse_ei_pax(const struct elfhdr * const elf_ex)
++{
++	unsigned long pax_flags = PAX_PARSE_FLAGS_FALLBACK;
++
 +#ifdef CONFIG_PAX_EI_PAX
++
++#ifdef CONFIG_PAX_SOFTMODE
++	if (pax_softmode)
++		return pax_flags;
++#endif
++
++	pax_flags = 0UL;
 +
 +#ifdef CONFIG_PAX_PAGEEXEC
 +	if (!(elf_ex->e_ident[EI_PAX] & EF_PAX_PAGEEXEC))
@@ -51914,28 +52128,10 @@ index 8dd615c..cb7cd01 100644
 +		pax_flags |= MF_PAX_RANDMMAP;
 +#endif
 +
-+#else
-+
-+#ifdef CONFIG_PAX_PAGEEXEC
-+	pax_flags |= MF_PAX_PAGEEXEC;
-+#endif
-+
-+#ifdef CONFIG_PAX_SEGMEXEC
-+	pax_flags |= MF_PAX_SEGMEXEC;
-+#endif
-+
-+#ifdef CONFIG_PAX_MPROTECT
-+	pax_flags |= MF_PAX_MPROTECT;
-+#endif
-+
-+#ifdef CONFIG_PAX_RANDMMAP
-+	if (randomize_va_space)
-+		pax_flags |= MF_PAX_RANDMMAP;
-+#endif
-+
 +#endif
 +
 +	return pax_flags;
++
 +}
 +
 +static unsigned long pax_parse_pt_pax(const struct elfhdr * const elf_ex, const struct elf_phdr * const elf_phdata)
@@ -51951,7 +52147,7 @@ index 8dd615c..cb7cd01 100644
 +			    ((elf_phdata[i].p_flags & PF_EMUTRAMP) && (elf_phdata[i].p_flags & PF_NOEMUTRAMP)) ||
 +			    ((elf_phdata[i].p_flags & PF_MPROTECT) && (elf_phdata[i].p_flags & PF_NOMPROTECT)) ||
 +			    ((elf_phdata[i].p_flags & PF_RANDMMAP) && (elf_phdata[i].p_flags & PF_NORANDMMAP)))
-+				return ~0UL;
++				return PAX_PARSE_FLAGS_FALLBACK;
 +
 +#ifdef CONFIG_PAX_SOFTMODE
 +			if (pax_softmode)
@@ -51964,7 +52160,7 @@ index 8dd615c..cb7cd01 100644
 +		}
 +#endif
 +
-+	return ~0UL;
++	return PAX_PARSE_FLAGS_FALLBACK;
 +}
 +
 +static unsigned long pax_parse_xattr_pax(struct file * const file)
@@ -51976,23 +52172,23 @@ index 8dd615c..cb7cd01 100644
 +	unsigned long pax_flags_hardmode = 0UL, pax_flags_softmode = 0UL;
 +
 +	xattr_size = pax_getxattr(file->f_path.dentry, xattr_value, sizeof xattr_value);
-+	if (xattr_size <= 0 || xattr_size > sizeof xattr_value)
-+		return ~0UL;
++	if (xattr_size < 0 || xattr_size > sizeof xattr_value)
++		return PAX_PARSE_FLAGS_FALLBACK;
 +
 +	for (i = 0; i < xattr_size; i++)
 +		switch (xattr_value[i]) {
 +		default:
-+			return ~0UL;
++			return PAX_PARSE_FLAGS_FALLBACK;
 +
 +#define parse_flag(option1, option2, flag)			\
 +		case option1:					\
 +			if (pax_flags_hardmode & MF_PAX_##flag)	\
-+				return ~0UL;			\
++				return PAX_PARSE_FLAGS_FALLBACK;\
 +			pax_flags_hardmode |= MF_PAX_##flag;	\
 +			break;					\
 +		case option2:					\
 +			if (pax_flags_softmode & MF_PAX_##flag)	\
-+				return ~0UL;			\
++				return PAX_PARSE_FLAGS_FALLBACK;\
 +			pax_flags_softmode |= MF_PAX_##flag;	\
 +			break;
 +
@@ -52006,7 +52202,7 @@ index 8dd615c..cb7cd01 100644
 +		}
 +
 +	if (pax_flags_hardmode & pax_flags_softmode)
-+		return ~0UL;
++		return PAX_PARSE_FLAGS_FALLBACK;
 +
 +#ifdef CONFIG_PAX_SOFTMODE
 +	if (pax_softmode)
@@ -52016,27 +52212,30 @@ index 8dd615c..cb7cd01 100644
 +
 +		return pax_parse_xattr_pax_hardmode(pax_flags_hardmode);
 +#else
-+	return ~0UL;
++	return PAX_PARSE_FLAGS_FALLBACK;
 +#endif
 +
 +}
 +
 +static long pax_parse_pax_flags(const struct elfhdr * const elf_ex, const struct elf_phdr * const elf_phdata, struct file * const file)
 +{
-+	unsigned long pax_flags, pt_pax_flags, xattr_pax_flags;
++	unsigned long pax_flags, ei_pax_flags,  pt_pax_flags, xattr_pax_flags;
 +
-+	pax_flags = pax_parse_ei_pax(elf_ex);
++	pax_flags = pax_parse_defaults();
++	ei_pax_flags = pax_parse_ei_pax(elf_ex);
 +	pt_pax_flags = pax_parse_pt_pax(elf_ex, elf_phdata);
 +	xattr_pax_flags = pax_parse_xattr_pax(file);
 +
-+	if (pt_pax_flags == ~0UL)
-+		pt_pax_flags = xattr_pax_flags;
-+	else if (xattr_pax_flags == ~0UL)
-+		xattr_pax_flags = pt_pax_flags;
-+	if (pt_pax_flags != xattr_pax_flags)
++	if (pt_pax_flags != PAX_PARSE_FLAGS_FALLBACK &&
++	    xattr_pax_flags != PAX_PARSE_FLAGS_FALLBACK &&
++	    pt_pax_flags != xattr_pax_flags)
 +		return -EINVAL;
-+	if (pt_pax_flags != ~0UL)
++	if (xattr_pax_flags != PAX_PARSE_FLAGS_FALLBACK)
++		pax_flags = xattr_pax_flags;
++	else if (pt_pax_flags != PAX_PARSE_FLAGS_FALLBACK)
 +		pax_flags = pt_pax_flags;
++	else if (ei_pax_flags != PAX_PARSE_FLAGS_FALLBACK)
++		pax_flags = ei_pax_flags;
 +
 +#if defined(CONFIG_PAX_PAGEEXEC) && defined(CONFIG_PAX_SEGMEXEC)
 +	if ((pax_flags & (MF_PAX_PAGEEXEC | MF_PAX_SEGMEXEC)) == (MF_PAX_PAGEEXEC | MF_PAX_SEGMEXEC)) {
@@ -52058,7 +52257,7 @@ index 8dd615c..cb7cd01 100644
  /*
   * These are the functions used to load ELF style executables and shared
   * libraries.  There is no binary dependent code anywhere else.
-@@ -544,6 +884,11 @@ static unsigned long randomize_stack_top(unsigned long stack_top)
+@@ -544,6 +905,11 @@ static unsigned long randomize_stack_top(unsigned long stack_top)
  {
  	unsigned int random_variable = 0;
  
@@ -52070,7 +52269,7 @@ index 8dd615c..cb7cd01 100644
  	if ((current->flags & PF_RANDOMIZE) &&
  		!(current->personality & ADDR_NO_RANDOMIZE)) {
  		random_variable = get_random_int() & STACK_RND_MASK;
-@@ -562,7 +907,7 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
+@@ -562,7 +928,7 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
   	unsigned long load_addr = 0, load_bias = 0;
  	int load_addr_set = 0;
  	char * elf_interpreter = NULL;
@@ -52079,7 +52278,7 @@ index 8dd615c..cb7cd01 100644
  	struct elf_phdr *elf_ppnt, *elf_phdata;
  	unsigned long elf_bss, elf_brk;
  	int retval, i;
-@@ -572,11 +917,11 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
+@@ -572,11 +938,11 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
  	unsigned long start_code, end_code, start_data, end_data;
  	unsigned long reloc_func_desc __maybe_unused = 0;
  	int executable_stack = EXSTACK_DEFAULT;
@@ -52092,7 +52291,7 @@ index 8dd615c..cb7cd01 100644
  
  	loc = kmalloc(sizeof(*loc), GFP_KERNEL);
  	if (!loc) {
-@@ -713,11 +1058,82 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
+@@ -713,11 +1079,82 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
  
  	/* OK, This is the point of no return */
  	current->flags &= ~PF_FORKNOEXEC;
@@ -52176,7 +52375,7 @@ index 8dd615c..cb7cd01 100644
  	if (elf_read_implies_exec(loc->elf_ex, executable_stack))
  		current->personality |= READ_IMPLIES_EXEC;
  
-@@ -808,6 +1224,20 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
+@@ -808,6 +1245,20 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
  #else
  			load_bias = ELF_PAGESTART(ELF_ET_DYN_BASE - vaddr);
  #endif
@@ -52197,7 +52396,7 @@ index 8dd615c..cb7cd01 100644
  		}
  
  		error = elf_map(bprm->file, load_bias + vaddr, elf_ppnt,
-@@ -840,9 +1270,9 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
+@@ -840,9 +1291,9 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
  		 * allowed task size. Note that p_filesz must always be
  		 * <= p_memsz so it is only necessary to check p_memsz.
  		 */
@@ -52210,7 +52409,7 @@ index 8dd615c..cb7cd01 100644
  			/* set_brk can never work. Avoid overflows. */
  			send_sig(SIGKILL, current, 0);
  			retval = -EINVAL;
-@@ -881,17 +1311,44 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
+@@ -881,17 +1332,44 @@ static int load_elf_binary(struct linux_binprm *bprm, struct pt_regs *regs)
  		goto out_free_dentry;
  	}
  	if (likely(elf_bss != elf_brk) && unlikely(padzero(elf_bss))) {
@@ -52261,7 +52460,7 @@ index 8dd615c..cb7cd01 100644
  					    load_bias);
  		if (!IS_ERR((void *)elf_entry)) {
  			/*
-@@ -1098,7 +1555,7 @@ out:
+@@ -1098,7 +1576,7 @@ out:
   * Decide what to dump of a segment, part, all or none.
   */
  static unsigned long vma_dump_size(struct vm_area_struct *vma,
@@ -52270,7 +52469,7 @@ index 8dd615c..cb7cd01 100644
  {
  #define FILTER(type)	(mm_flags & (1UL << MMF_DUMP_##type))
  
-@@ -1132,7 +1589,7 @@ static unsigned long vma_dump_size(struct vm_area_struct *vma,
+@@ -1132,7 +1610,7 @@ static unsigned long vma_dump_size(struct vm_area_struct *vma,
  	if (vma->vm_file == NULL)
  		return 0;
  
@@ -52279,7 +52478,7 @@ index 8dd615c..cb7cd01 100644
  		goto whole;
  
  	/*
-@@ -1354,9 +1811,9 @@ static void fill_auxv_note(struct memelfnote *note, struct mm_struct *mm)
+@@ -1354,9 +1832,9 @@ static void fill_auxv_note(struct memelfnote *note, struct mm_struct *mm)
  {
  	elf_addr_t *auxv = (elf_addr_t *) mm->saved_auxv;
  	int i = 0;
@@ -52291,7 +52490,7 @@ index 8dd615c..cb7cd01 100644
  	fill_note(note, "CORE", NT_AUXV, i * sizeof(elf_addr_t), auxv);
  }
  
-@@ -1851,14 +2308,14 @@ static void fill_extnum_info(struct elfhdr *elf, struct elf_shdr *shdr4extnum,
+@@ -1851,14 +2329,14 @@ static void fill_extnum_info(struct elfhdr *elf, struct elf_shdr *shdr4extnum,
  }
  
  static size_t elf_core_vma_data_size(struct vm_area_struct *gate_vma,
@@ -52308,7 +52507,7 @@ index 8dd615c..cb7cd01 100644
  	return size;
  }
  
-@@ -1952,7 +2409,7 @@ static int elf_core_dump(struct coredump_params *cprm)
+@@ -1952,7 +2430,7 @@ static int elf_core_dump(struct coredump_params *cprm)
  
  	dataoff = offset = roundup(offset, ELF_EXEC_PAGESIZE);
  
@@ -52317,7 +52516,7 @@ index 8dd615c..cb7cd01 100644
  	offset += elf_core_extra_data_size();
  	e_shoff = offset;
  
-@@ -1966,10 +2423,12 @@ static int elf_core_dump(struct coredump_params *cprm)
+@@ -1966,10 +2444,12 @@ static int elf_core_dump(struct coredump_params *cprm)
  	offset = dataoff;
  
  	size += sizeof(*elf);
@@ -52330,7 +52529,7 @@ index 8dd615c..cb7cd01 100644
  	if (size > cprm->limit
  	    || !dump_write(cprm->file, phdr4note, sizeof(*phdr4note)))
  		goto end_coredump;
-@@ -1983,7 +2442,7 @@ static int elf_core_dump(struct coredump_params *cprm)
+@@ -1983,7 +2463,7 @@ static int elf_core_dump(struct coredump_params *cprm)
  		phdr.p_offset = offset;
  		phdr.p_vaddr = vma->vm_start;
  		phdr.p_paddr = 0;
@@ -52339,7 +52538,7 @@ index 8dd615c..cb7cd01 100644
  		phdr.p_memsz = vma->vm_end - vma->vm_start;
  		offset += phdr.p_filesz;
  		phdr.p_flags = vma->vm_flags & VM_READ ? PF_R : 0;
-@@ -1994,6 +2453,7 @@ static int elf_core_dump(struct coredump_params *cprm)
+@@ -1994,6 +2474,7 @@ static int elf_core_dump(struct coredump_params *cprm)
  		phdr.p_align = ELF_EXEC_PAGESIZE;
  
  		size += sizeof(phdr);
@@ -52347,7 +52546,7 @@ index 8dd615c..cb7cd01 100644
  		if (size > cprm->limit
  		    || !dump_write(cprm->file, &phdr, sizeof(phdr)))
  			goto end_coredump;
-@@ -2018,7 +2478,7 @@ static int elf_core_dump(struct coredump_params *cprm)
+@@ -2018,7 +2499,7 @@ static int elf_core_dump(struct coredump_params *cprm)
  		unsigned long addr;
  		unsigned long end;
  
@@ -52356,7 +52555,7 @@ index 8dd615c..cb7cd01 100644
  
  		for (addr = vma->vm_start; addr < end; addr += PAGE_SIZE) {
  			struct page *page;
-@@ -2027,6 +2487,7 @@ static int elf_core_dump(struct coredump_params *cprm)
+@@ -2027,6 +2508,7 @@ static int elf_core_dump(struct coredump_params *cprm)
  			page = get_dump_page(addr);
  			if (page) {
  				void *kaddr = kmap(page);
@@ -52364,7 +52563,7 @@ index 8dd615c..cb7cd01 100644
  				stop = ((size += PAGE_SIZE) > cprm->limit) ||
  					!dump_write(cprm->file, kaddr,
  						    PAGE_SIZE);
-@@ -2044,6 +2505,7 @@ static int elf_core_dump(struct coredump_params *cprm)
+@@ -2044,6 +2526,7 @@ static int elf_core_dump(struct coredump_params *cprm)
  
  	if (e_phnum == PN_XNUM) {
  		size += sizeof(*shdr4extnum);
@@ -52372,7 +52571,7 @@ index 8dd615c..cb7cd01 100644
  		if (size > cprm->limit
  		    || !dump_write(cprm->file, shdr4extnum,
  				   sizeof(*shdr4extnum)))
-@@ -2064,6 +2526,167 @@ out:
+@@ -2064,6 +2547,167 @@ out:
  
  #endif		/* CONFIG_ELF_CORE */
  
@@ -53485,7 +53684,7 @@ index 112e45a..b59845b 100644
  
  /*
 diff --git a/fs/compat_ioctl.c b/fs/compat_ioctl.c
-index f854cf9..d513829 100644
+index f854cf9..5132aab 100644
 --- a/fs/compat_ioctl.c
 +++ b/fs/compat_ioctl.c
 @@ -623,7 +623,7 @@ static int serial_struct_ioctl(unsigned fd, unsigned cmd,
@@ -53513,7 +53712,7 @@ index f854cf9..d513829 100644
  	    copy_in_user(&p->l_sysid,	&p32->l_sysid,	sizeof(s32)) ||
  	    copy_in_user(&p->l_pid,	&p32->l_pid,	sizeof(u32)) ||
 -	    copy_in_user(&p->l_pad,	&p32->l_pad,	4*sizeof(u32)))
-+	    copy_in_user(p->l_pad,	&p32->l_pad,	4*sizeof(u32)))
++	    copy_in_user(p->l_pad,	p32->l_pad,	4*sizeof(u32)))
  		return -EFAULT;
  
  	return ioctl_preallocate(file, p);
@@ -53776,7 +53975,7 @@ index 451b9b8..12e5a03 100644
  
  out_free_fd:
 diff --git a/fs/exec.c b/fs/exec.c
-index 78199eb..e6c84a8 100644
+index 78199eb..793dc44 100644
 --- a/fs/exec.c
 +++ b/fs/exec.c
 @@ -55,12 +55,35 @@
@@ -53977,7 +54176,7 @@ index 78199eb..e6c84a8 100644
  	mm_segment_t oldfs = get_fs();
  	struct user_arg_ptr argv = {
 -		.ptr.native = (const char __user *const  __user *)__argv,
-+		.ptr.native = (const char __force_user * const __force_user *)__argv,
++		.ptr.native = (const char __user * const __force_user *)__argv,
  	};
  
  	set_fs(KERNEL_DS);
@@ -58272,6 +58471,34 @@ index 6a66fc0..cfdadae 100644
  	set_fs(oldfs);
  
  	if (host_err < 0)
+diff --git a/fs/nilfs2/segment.c b/fs/nilfs2/segment.c
+index 233d3ed..3ceaced 100644
+--- a/fs/nilfs2/segment.c
++++ b/fs/nilfs2/segment.c
+@@ -1437,17 +1437,19 @@ static int nilfs_segctor_collect(struct nilfs_sc_info *sci,
+ 
+ 		nilfs_clear_logs(&sci->sc_segbufs);
+ 
+-		err = nilfs_segctor_extend_segments(sci, nilfs, nadd);
+-		if (unlikely(err))
+-			return err;
+-
+ 		if (sci->sc_stage.flags & NILFS_CF_SUFREED) {
+ 			err = nilfs_sufile_cancel_freev(nilfs->ns_sufile,
+ 							sci->sc_freesegs,
+ 							sci->sc_nfreesegs,
+ 							NULL);
+ 			WARN_ON(err); /* do not happen */
++			sci->sc_stage.flags &= ~NILFS_CF_SUFREED;
+ 		}
++
++		err = nilfs_segctor_extend_segments(sci, nilfs, nadd);
++		if (unlikely(err))
++			return err;
++
+ 		nadd = min_t(int, nadd << 1, SC_MAX_SEGDELTA);
+ 		sci->sc_stage = prev_stage;
+ 	}
 diff --git a/fs/nilfs2/super.c b/fs/nilfs2/super.c
 index 97bfbdd..e7f644a 100644
 --- a/fs/nilfs2/super.c
@@ -62611,7 +62838,7 @@ index 0000000..c4717f9
 +endmenu
 diff --git a/grsecurity/Makefile b/grsecurity/Makefile
 new file mode 100644
-index 0000000..2f8793f
+index 0000000..65d159f
 --- /dev/null
 +++ b/grsecurity/Makefile
 @@ -0,0 +1,43 @@
@@ -62621,7 +62848,7 @@ index 0000000..2f8793f
 +#
 +# All code in this directory and various hooks inserted throughout the kernel
 +# are copyright Brad Spengler - Open Source Security, Inc., and released 
-+# under the GPL v2 or higher
++# under the GPL v2
 +
 +KBUILD_CFLAGS += -Werror
 +
@@ -73987,19 +74214,6 @@ index 7925bf0..d5143d2 100644
  #define free(a) kfree(a)
  
  #define large_malloc(a) vmalloc(a)
-diff --git a/include/linux/devfreq.h b/include/linux/devfreq.h
-index 98ce812..9afa76d 100644
---- a/include/linux/devfreq.h
-+++ b/include/linux/devfreq.h
-@@ -100,7 +100,7 @@ struct devfreq_governor {
- 	int (*init)(struct devfreq *this);
- 	void (*exit)(struct devfreq *this);
- 	const bool no_central_polling;
--};
-+} __do_const;
- 
- /**
-  * struct devfreq - Device devfreq structure
 diff --git a/include/linux/device.h b/include/linux/device.h
 index 3136ede..9a589c5 100644
 --- a/include/linux/device.h
@@ -76948,19 +77162,6 @@ index 857f502..350a113 100644
  
  /* Function to register/unregister hook points. */
  int nf_register_hook(struct nf_hook_ops *reg);
-diff --git a/include/linux/netfilter/ipset/ip_set.h b/include/linux/netfilter/ipset/ip_set.h
-index 3540c6e..83adb6c 100644
---- a/include/linux/netfilter/ipset/ip_set.h
-+++ b/include/linux/netfilter/ipset/ip_set.h
-@@ -274,7 +274,7 @@ struct ip_set_type_variant {
- 	/* Return true if "b" set is the same as "a"
- 	 * according to the create set parameters */
- 	bool (*same_set)(const struct ip_set *a, const struct ip_set *b);
--};
-+} __do_const;
- 
- /* The core set type structure */
- struct ip_set_type {
 diff --git a/include/linux/netfilter/nfnetlink.h b/include/linux/netfilter/nfnetlink.h
 index 74d3386..e800dbf 100644
 --- a/include/linux/netfilter/nfnetlink.h
@@ -77625,7 +77826,7 @@ index 2148b12..519b820 100644
  
  static inline void anon_vma_merge(struct vm_area_struct *vma,
 diff --git a/include/linux/sched.h b/include/linux/sched.h
-index 312d047..dbf4637 100644
+index 312d047..a4bff08 100644
 --- a/include/linux/sched.h
 +++ b/include/linux/sched.h
 @@ -101,6 +101,7 @@ struct bio_list;
@@ -77826,7 +78027,7 @@ index 312d047..dbf4637 100644
  #ifdef CONFIG_FUNCTION_GRAPH_TRACER
  	/* Index of current stored address in ret_stack */
  	int curr_ret_stack;
-@@ -1582,6 +1652,52 @@ struct task_struct {
+@@ -1582,6 +1652,53 @@ struct task_struct {
  #endif
  };
  
@@ -77842,6 +78043,7 @@ index 312d047..dbf4637 100644
 +#endif
 +
 +extern int pax_check_flags(unsigned long *);
++#define PAX_PARSE_FLAGS_FALLBACK	(~0UL)
 +
 +/* if tsk != current then task_lock must be held on it */
 +#if defined(CONFIG_PAX_NOEXEC) || defined(CONFIG_PAX_ASLR)
@@ -77879,7 +78081,7 @@ index 312d047..dbf4637 100644
  /* Future-safe accessor for struct task_struct's cpus_allowed. */
  #define tsk_cpus_allowed(tsk) (&(tsk)->cpus_allowed)
  
-@@ -2097,7 +2213,9 @@ void yield(void);
+@@ -2097,7 +2214,9 @@ void yield(void);
  extern struct exec_domain	default_exec_domain;
  
  union thread_union {
@@ -77889,7 +78091,7 @@ index 312d047..dbf4637 100644
  	unsigned long stack[THREAD_SIZE/sizeof(long)];
  };
  
-@@ -2130,6 +2248,7 @@ extern struct pid_namespace init_pid_ns;
+@@ -2130,6 +2249,7 @@ extern struct pid_namespace init_pid_ns;
   */
  
  extern struct task_struct *find_task_by_vpid(pid_t nr);
@@ -77897,7 +78099,7 @@ index 312d047..dbf4637 100644
  extern struct task_struct *find_task_by_pid_ns(pid_t nr,
  		struct pid_namespace *ns);
  
-@@ -2251,6 +2370,12 @@ static inline void mmdrop(struct mm_struct * mm)
+@@ -2251,6 +2371,12 @@ static inline void mmdrop(struct mm_struct * mm)
  extern void mmput(struct mm_struct *);
  /* Grab a reference to a task's mm, if it is not already going away */
  extern struct mm_struct *get_task_mm(struct task_struct *task);
@@ -77910,7 +78112,7 @@ index 312d047..dbf4637 100644
  /* Remove the current tasks stale references to the old mm_struct */
  extern void mm_release(struct task_struct *, struct mm_struct *);
  /* Allocate a new mm structure and copy contents from tsk->mm */
-@@ -2267,9 +2392,8 @@ extern void __cleanup_sighand(struct sighand_struct *);
+@@ -2267,9 +2393,8 @@ extern void __cleanup_sighand(struct sighand_struct *);
  extern void exit_itimers(struct signal_struct *);
  extern void flush_itimer_signals(void);
  
@@ -77921,7 +78123,7 @@ index 312d047..dbf4637 100644
  extern int allow_signal(int);
  extern int disallow_signal(int);
  
-@@ -2432,9 +2556,9 @@ static inline unsigned long *end_of_stack(struct task_struct *p)
+@@ -2432,9 +2557,9 @@ static inline unsigned long *end_of_stack(struct task_struct *p)
  
  #endif
  
@@ -78195,7 +78397,7 @@ index 92808b8..c28cac4 100644
  
  /* shm_mode upper byte flags */
 diff --git a/include/linux/skbuff.h b/include/linux/skbuff.h
-index 85180bf..cc75886 100644
+index 85180bf..78919aa 100644
 --- a/include/linux/skbuff.h
 +++ b/include/linux/skbuff.h
 @@ -538,7 +538,7 @@ extern void consume_skb(struct sk_buff *skb);
@@ -78234,6 +78436,15 @@ index 85180bf..cc75886 100644
  }
  
  /**
+@@ -1506,7 +1506,7 @@ static inline u32 skb_network_header_len(const struct sk_buff *skb)
+ 	return skb->transport_header - skb->network_header;
+ }
+ 
+-static inline int skb_network_offset(const struct sk_buff *skb)
++static inline int __intentional_overflow(0) skb_network_offset(const struct sk_buff *skb)
+ {
+ 	return skb_network_header(skb) - skb->data;
+ }
 @@ -1561,7 +1561,7 @@ static inline int pskb_network_may_pull(struct sk_buff *skb, unsigned int len)
   * NET_IP_ALIGN(2) + ethernet_header(14) + IP_header(20/40) + ports(8)
   */
@@ -78678,23 +78889,19 @@ index 27b3b0b..e093dd9 100644
  extern void register_syscore_ops(struct syscore_ops *ops);
  extern void unregister_syscore_ops(struct syscore_ops *ops);
 diff --git a/include/linux/sysctl.h b/include/linux/sysctl.h
-index 703cfa33..dff53c0 100644
+index 703cfa33..04ef3d7 100644
 --- a/include/linux/sysctl.h
 +++ b/include/linux/sysctl.h
-@@ -155,7 +155,11 @@ enum
+@@ -155,8 +155,6 @@ enum
  	KERN_PANIC_ON_NMI=76, /* int: whether we will panic on an unrecovered */
  };
  
 -
-+#ifdef CONFIG_PAX_SOFTMODE
-+enum {
-+	PAX_SOFTMODE=1		/* PaX: disable/enable soft mode */
-+};
-+#endif
- 
+-
  /* CTL_VM names: */
  enum
-@@ -961,13 +965,13 @@ extern void sysctl_head_finish(struct ctl_table_header *prev);
+ {
+@@ -961,13 +959,13 @@ extern void sysctl_head_finish(struct ctl_table_header *prev);
  extern int sysctl_perm(struct ctl_table_root *root,
  		struct ctl_table *table, int op);
  
@@ -78710,7 +78917,7 @@ index 703cfa33..dff53c0 100644
  extern int proc_dointvec(struct ctl_table *, int,
  			 void __user *, size_t *, loff_t *);
  extern int proc_dointvec_minmax(struct ctl_table *, int,
-@@ -1045,7 +1049,9 @@ struct ctl_table
+@@ -1045,7 +1043,9 @@ struct ctl_table
  	struct ctl_table_poll *poll;
  	void *extra1;
  	void *extra2;
@@ -79069,6 +79276,19 @@ index 6f8fbcf..8259001 100644
 +	MODULE_ARCH_VERMAGIC						\
 +	MODULE_PAX_REFCOUNT MODULE_CONSTIFY_PLUGIN MODULE_STACKLEAK_PLUGIN \
 +	MODULE_GRSEC
+ 
+diff --git a/include/linux/videodev2.h b/include/linux/videodev2.h
+index 45a7698..76e6993 100644
+--- a/include/linux/videodev2.h
++++ b/include/linux/videodev2.h
+@@ -1062,7 +1062,7 @@ struct v4l2_ext_control {
+ 	union {
+ 		__s32 value;
+ 		__s64 value64;
+-		char *string;
++		char __user *string;
+ 	};
+ } __attribute__ ((packed));
  
 diff --git a/include/linux/vmalloc.h b/include/linux/vmalloc.h
 index 4bde182..943f335 100644
@@ -94162,6 +94382,37 @@ index 963f285..3e3874d 100644
  			struct vlan_net *vn;
  
  			vn = net_generic(net, vlan_net_id);
+diff --git a/net/9p/client.c b/net/9p/client.c
+index 854ca7a..fc1bfc8 100644
+--- a/net/9p/client.c
++++ b/net/9p/client.c
+@@ -582,7 +582,7 @@ static int p9_check_zc_errors(struct p9_client *c, struct p9_req_t *req,
+ 				       len - inline_len);
+ 			} else {
+ 				err = copy_from_user(ename + inline_len,
+-						     uidata, len - inline_len);
++						     (char __force_user *)uidata, len - inline_len);
+ 				if (err) {
+ 					err = -EFAULT;
+ 					goto out_free;
+@@ -1528,7 +1528,7 @@ p9_client_read(struct p9_fid *fid, char *data, char __user *udata, u64 offset,
+ 			kernel_buf = 1;
+ 			indata = data;
+ 		} else
+-			indata = (char *)udata;
++			indata = (__force_kernel char *)udata;
+ 		/*
+ 		 * response header len is 11
+ 		 * PDU Header(7) + IO Size (4)
+@@ -1603,7 +1603,7 @@ p9_client_write(struct p9_fid *fid, char *data, const char __user *udata,
+ 			kernel_buf = 1;
+ 			odata = data;
+ 		} else
+-			odata = (char *)udata;
++			odata = (char __force_kernel *)udata;
+ 		req = p9_client_zc_rpc(clnt, P9_TWRITE, NULL, odata, 0, rsize,
+ 				       P9_ZC_HDR_SZ, kernel_buf, "dqd",
+ 				       fid->fid, offset, rsize);
 diff --git a/net/9p/mod.c b/net/9p/mod.c
 index 2664d12..b2803fe 100644
 --- a/net/9p/mod.c
@@ -96332,10 +96583,25 @@ index 99ec116..c5628fe 100644
  	return res;
  }
 diff --git a/net/ipv4/ipmr.c b/net/ipv4/ipmr.c
-index b5e64e4..4a9a5c4 100644
+index b5e64e4..69801fa 100644
 --- a/net/ipv4/ipmr.c
 +++ b/net/ipv4/ipmr.c
-@@ -1320,6 +1320,10 @@ int ip_mroute_setsockopt(struct sock *sk, int optname, char __user *optval, unsi
+@@ -155,9 +155,12 @@ static struct mr_table *ipmr_get_table(struct net *net, u32 id)
+ static int ipmr_fib_lookup(struct net *net, struct flowi4 *flp4,
+ 			   struct mr_table **mrt)
+ {
++	int err;
+ 	struct ipmr_result res;
+-	struct fib_lookup_arg arg = { .result = &res, };
+-	int err;
++	struct fib_lookup_arg arg = {
++		.result = &res,
++		.flags = FIB_LOOKUP_NOREF,
++	};
+ 
+ 	err = fib_rules_lookup(net->ipv4.mr_rules_ops,
+ 			       flowi4_to_flowi(flp4), 0, &arg);
+@@ -1320,6 +1323,10 @@ int ip_mroute_setsockopt(struct sock *sk, int optname, char __user *optval, unsi
  		if (get_user(v, (u32 __user *)optval))
  			return -EFAULT;
  
@@ -97325,6 +97591,25 @@ index d3fde7e..f526e49 100644
  }
  
  int ip6_fragment(struct sk_buff *skb, int (*output)(struct sk_buff *))
+diff --git a/net/ipv6/ip6mr.c b/net/ipv6/ip6mr.c
+index f5af259..f96c96f 100644
+--- a/net/ipv6/ip6mr.c
++++ b/net/ipv6/ip6mr.c
+@@ -139,9 +139,12 @@ static struct mr6_table *ip6mr_get_table(struct net *net, u32 id)
+ static int ip6mr_fib_lookup(struct net *net, struct flowi6 *flp6,
+ 			    struct mr6_table **mrt)
+ {
++	int err;
+ 	struct ip6mr_result res;
+-	struct fib_lookup_arg arg = { .result = &res, };
+-	int err;
++	struct fib_lookup_arg arg = {
++		.result = &res,
++		.flags = FIB_LOOKUP_NOREF,
++	};
+ 
+ 	err = fib_rules_lookup(net->ipv6.mr6_rules_ops,
+ 			       flowi6_to_flowi(flp6), 0, &arg);
 diff --git a/net/ipv6/ipv6_sockglue.c b/net/ipv6/ipv6_sockglue.c
 index b204df8..8f274f4 100644
 --- a/net/ipv6/ipv6_sockglue.c
@@ -99819,7 +100104,7 @@ index 8da4481..d02565e 100644
  			+ (rtt >> sctp_rto_alpha);
  	} else {
 diff --git a/net/socket.c b/net/socket.c
-index d4faade..2492841 100644
+index d4faade..1c51abc 100644
 --- a/net/socket.c
 +++ b/net/socket.c
 @@ -88,6 +88,7 @@
@@ -99989,20 +100274,11 @@ index d4faade..2492841 100644
   *	the protocol.
   */
  
-+asmlinkage long sys_sendto(int, void *, size_t, unsigned, struct sockaddr *, int);
++asmlinkage long sys_sendto(int, void __user *, size_t, unsigned, struct sockaddr __user *, int);
 +
  SYSCALL_DEFINE6(sendto, int, fd, void __user *, buff, size_t, len,
  		unsigned, flags, struct sockaddr __user *, addr,
  		int, addr_len)
-@@ -1737,7 +1803,7 @@ SYSCALL_DEFINE6(recvfrom, int, fd, void __user *, ubuf, size_t, size,
- 	struct socket *sock;
- 	struct iovec iov;
- 	struct msghdr msg;
--	struct sockaddr_storage address;
-+	struct sockaddr_storage address = { };
- 	int err, err2;
- 	int fput_needed;
- 
 @@ -1966,7 +2032,7 @@ static int ___sys_sendmsg(struct socket *sock, struct msghdr __user *msg,
  		 * checking falls down on this.
  		 */
@@ -100012,15 +100288,6 @@ index d4faade..2492841 100644
  				   ctl_len))
  			goto out_freectl;
  		msg_sys->msg_control = ctl_buf;
-@@ -2117,7 +2183,7 @@ static int ___sys_recvmsg(struct socket *sock, struct msghdr __user *msg,
- 	int err, iov_size, total_len, len;
- 
- 	/* kernel mode address */
--	struct sockaddr_storage addr;
-+	struct sockaddr_storage addr = { };
- 
- 	/* user mode address pointers */
- 	struct sockaddr __user *uaddr;
 @@ -2148,7 +2214,8 @@ static int ___sys_recvmsg(struct socket *sock, struct msghdr __user *msg,
  	/* Save the user-mode address (verify_iovec will change the
  	 * kernel msghdr to use the kernel address space)
@@ -100031,15 +100298,18 @@ index d4faade..2492841 100644
  	uaddr_len = COMPAT_NAMELEN(msg);
  	if (MSG_CMSG_COMPAT & flags)
  		err = verify_compat_iovec(msg_sys, iov,
-@@ -2792,7 +2859,7 @@ static int ethtool_ioctl(struct net *net, struct compat_ifreq __user *ifr32)
+@@ -2792,9 +2859,9 @@ static int ethtool_ioctl(struct net *net, struct compat_ifreq __user *ifr32)
  	}
  
  	ifr = compat_alloc_user_space(buf_size);
 -	rxnfc = (void *)ifr + ALIGN(sizeof(struct ifreq), 8);
 +	rxnfc = (void __user *)ifr + ALIGN(sizeof(struct ifreq), 8);
  
- 	if (copy_in_user(&ifr->ifr_name, &ifr32->ifr_name, IFNAMSIZ))
+-	if (copy_in_user(&ifr->ifr_name, &ifr32->ifr_name, IFNAMSIZ))
++	if (copy_in_user(ifr->ifr_name, ifr32->ifr_name, IFNAMSIZ))
  		return -EFAULT;
+ 
+ 	if (put_user(convert_in ? rxnfc : compat_ptr(data),
 @@ -2816,12 +2883,12 @@ static int ethtool_ioctl(struct net *net, struct compat_ifreq __user *ifr32)
  			offsetof(struct ethtool_rxnfc, fs.ring_cookie));
  
@@ -100074,7 +100344,7 @@ index d4faade..2492841 100644
  		    copy_in_user(&compat_rxnfc->rule_cnt, &rxnfc->rule_cnt,
  				 sizeof(rxnfc->rule_cnt)))
  			return -EFAULT;
-@@ -2908,7 +2975,7 @@ static int bond_ioctl(struct net *net, unsigned int cmd,
+@@ -2908,14 +2975,14 @@ static int bond_ioctl(struct net *net, unsigned int cmd,
  		old_fs = get_fs();
  		set_fs(KERNEL_DS);
  		err = dev_ioctl(net, cmd,
@@ -100083,6 +100353,14 @@ index d4faade..2492841 100644
  		set_fs(old_fs);
  
  		return err;
+ 	case SIOCBONDSLAVEINFOQUERY:
+ 	case SIOCBONDINFOQUERY:
+ 		uifr = compat_alloc_user_space(sizeof(*uifr));
+-		if (copy_in_user(&uifr->ifr_name, &ifr32->ifr_name, IFNAMSIZ))
++		if (copy_in_user(uifr->ifr_name, ifr32->ifr_name, IFNAMSIZ))
+ 			return -EFAULT;
+ 
+ 		if (get_user(data, &ifr32->ifr_ifru.ifru_data))
 @@ -3017,7 +3084,7 @@ static int compat_sioc_ifmap(struct net *net, unsigned int cmd,
  
  	old_fs = get_fs();
@@ -100122,7 +100400,7 @@ index d4faade..2492841 100644
  	set_fs(KERNEL_DS);
  	if (level == SOL_SOCKET)
 diff --git a/net/sunrpc/clnt.c b/net/sunrpc/clnt.c
-index b2250da..db374b7 100644
+index b2250da..2680674 100644
 --- a/net/sunrpc/clnt.c
 +++ b/net/sunrpc/clnt.c
 @@ -163,10 +163,8 @@ static struct rpc_clnt * rpc_new_client(const struct rpc_create_args *args, stru
@@ -100160,6 +100438,22 @@ index b2250da..db374b7 100644
  	clnt->cl_stats->rpccnt++;
  	task->tk_action = call_reserve;
  }
+@@ -1002,9 +1001,13 @@ call_refreshresult(struct rpc_task *task)
+ 	task->tk_action = call_refresh;
+ 	switch (status) {
+ 	case 0:
+-		if (rpcauth_uptodatecred(task))
++		if (rpcauth_uptodatecred(task)) {
+ 			task->tk_action = call_allocate;
+-		return;
++			return;
++		}
++		/* Use rate-limiting and a max number of retries if refresh
++		 * had status 0 but failed to update the cred.
++		 */
+ 	case -ETIMEDOUT:
+ 		rpc_delay(task, 3*HZ);
+ 	case -EAGAIN:
 diff --git a/net/sunrpc/rpc_pipe.c b/net/sunrpc/rpc_pipe.c
 index bfddd68..567429b 100644
 --- a/net/sunrpc/rpc_pipe.c
@@ -101813,10 +102107,10 @@ index 38f6617..e70b72b 100755
  
  exuberant()
 diff --git a/security/Kconfig b/security/Kconfig
-index 51bd5a0..ce4aad0 100644
+index 51bd5a0..62953d6 100644
 --- a/security/Kconfig
 +++ b/security/Kconfig
-@@ -4,6 +4,954 @@
+@@ -4,6 +4,953 @@
  
  menu "Security options"
  
@@ -102126,7 +102420,6 @@ index 51bd5a0..ce4aad0 100644
 +	select CIFS_XATTR if CIFS
 +	select EXT2_FS_XATTR if EXT2_FS
 +	select EXT3_FS_XATTR if EXT3_FS
-+	select EXT4_FS_XATTR if EXT4_FS
 +	select JFFS2_FS_XATTR if JFFS2_FS
 +	select REISERFS_FS_XATTR if REISERFS_FS
 +	select SQUASHFS_XATTR if SQUASHFS
@@ -102771,7 +103064,7 @@ index 51bd5a0..ce4aad0 100644
  config KEYS
  	bool "Enable access key retention support"
  	help
-@@ -169,7 +1117,7 @@ config INTEL_TXT
+@@ -169,7 +1116,7 @@ config INTEL_TXT
  config LSM_MMAP_MIN_ADDR
  	int "Low address space for LSM to protect from user allocation"
  	depends on SECURITY && SECURITY_SELINUX
@@ -104195,7 +104488,7 @@ index dca1c22..4fa4591 100644
  		lock = &avc_cache.slots_lock[hvalue];
  
 diff --git a/security/selinux/hooks.c b/security/selinux/hooks.c
-index 5898f34..f44199b 100644
+index 5898f34..04f8b47 100644
 --- a/security/selinux/hooks.c
 +++ b/security/selinux/hooks.c
 @@ -95,8 +95,6 @@
@@ -104207,7 +104500,41 @@ index 5898f34..f44199b 100644
  /* SECMARK reference count */
  static atomic_t selinux_secmark_refcount = ATOMIC_INIT(0);
  
-@@ -2001,6 +1999,13 @@ static int selinux_bprm_set_creds(struct linux_binprm *bprm)
+@@ -217,6 +215,14 @@ static int inode_alloc_security(struct inode *inode)
+ 	return 0;
+ }
+ 
++static void inode_free_rcu(struct rcu_head *head)
++{
++	struct inode_security_struct *isec;
++
++	isec = container_of(head, struct inode_security_struct, rcu);
++	kmem_cache_free(sel_inode_cache, isec);
++}
++
+ static void inode_free_security(struct inode *inode)
+ {
+ 	struct inode_security_struct *isec = inode->i_security;
+@@ -227,8 +233,16 @@ static void inode_free_security(struct inode *inode)
+ 		list_del_init(&isec->list);
+ 	spin_unlock(&sbsec->isec_lock);
+ 
+-	inode->i_security = NULL;
+-	kmem_cache_free(sel_inode_cache, isec);
++	/*
++	 * The inode may still be referenced in a path walk and
++	 * a call to selinux_inode_permission() can be made
++	 * after inode_free_security() is called. Ideally, the VFS
++	 * wouldn't do this, but fixing that is a much harder
++	 * job. For now, simply free the i_security via RCU, and
++	 * leave the current inode->i_security pointer intact.
++	 * The inode will be freed after the RCU grace period too.
++	 */
++	call_rcu(&isec->rcu, inode_free_rcu);
+ }
+ 
+ static int file_alloc_security(struct file *file)
+@@ -2001,6 +2015,13 @@ static int selinux_bprm_set_creds(struct linux_binprm *bprm)
  		new_tsec->sid = old_tsec->exec_sid;
  		/* Reset exec SID on execve. */
  		new_tsec->exec_sid = 0;
@@ -104221,7 +104548,7 @@ index 5898f34..f44199b 100644
  	} else {
  		/* Check for a default transition on this program. */
  		rc = security_transition_sid(old_tsec->sid, isec->sid,
-@@ -2013,7 +2018,8 @@ static int selinux_bprm_set_creds(struct linux_binprm *bprm)
+@@ -2013,7 +2034,8 @@ static int selinux_bprm_set_creds(struct linux_binprm *bprm)
  	COMMON_AUDIT_DATA_INIT(&ad, PATH);
  	ad.u.path = bprm->file->f_path;
  
@@ -104231,7 +104558,7 @@ index 5898f34..f44199b 100644
  		new_tsec->sid = old_tsec->sid;
  
  	if (new_tsec->sid == old_tsec->sid) {
-@@ -4181,8 +4187,10 @@ static int selinux_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
+@@ -4181,8 +4203,10 @@ static int selinux_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
  		}
  		err = avc_has_perm(sk_sid, peer_sid, SECCLASS_PEER,
  				   PEER__RECV, &ad);
@@ -104243,7 +104570,7 @@ index 5898f34..f44199b 100644
  	}
  
  	if (secmark_active) {
-@@ -5372,11 +5380,11 @@ static int selinux_setprocattr(struct task_struct *p,
+@@ -5372,11 +5396,11 @@ static int selinux_setprocattr(struct task_struct *p,
  		/* Check for ptracing, and update the task SID if ok.
  		   Otherwise, leave SID unchanged and fail. */
  		ptsid = 0;
@@ -104257,7 +104584,7 @@ index 5898f34..f44199b 100644
  
  		if (tracer) {
  			error = avc_has_perm(ptsid, sid, SECCLASS_PROCESS,
-@@ -5508,7 +5516,7 @@ static int selinux_key_getsecurity(struct key *key, char **_buffer)
+@@ -5508,7 +5532,7 @@ static int selinux_key_getsecurity(struct key *key, char **_buffer)
  
  #endif
  
@@ -104266,7 +104593,7 @@ index 5898f34..f44199b 100644
  	.name =				"selinux",
  
  	.ptrace_access_check =		selinux_ptrace_access_check,
-@@ -5854,6 +5862,9 @@ static void selinux_nf_ip_exit(void)
+@@ -5854,6 +5878,9 @@ static void selinux_nf_ip_exit(void)
  #ifdef CONFIG_SECURITY_SELINUX_DISABLE
  static int selinux_disabled;
  
@@ -104276,7 +104603,7 @@ index 5898f34..f44199b 100644
  int selinux_disable(void)
  {
  	if (ss_initialized) {
-@@ -5871,7 +5882,9 @@ int selinux_disable(void)
+@@ -5871,7 +5898,9 @@ int selinux_disable(void)
  	selinux_disabled = 1;
  	selinux_enabled = 0;
  
@@ -104287,6 +104614,22 @@ index 5898f34..f44199b 100644
  
  	/* Try to destroy the avc node cache */
  	avc_disable();
+diff --git a/security/selinux/include/objsec.h b/security/selinux/include/objsec.h
+index 26c7eee..7b1830b 100644
+--- a/security/selinux/include/objsec.h
++++ b/security/selinux/include/objsec.h
+@@ -38,7 +38,10 @@ struct task_security_struct {
+ 
+ struct inode_security_struct {
+ 	struct inode *inode;	/* back pointer to inode object */
+-	struct list_head list;	/* list of inode_security_struct */
++	union {
++		struct list_head list;	/* list of inode_security_struct */
++		struct rcu_head rcu;	/* for freeing the inode_security_struct */
++	};
+ 	u32 task_sid;		/* SID of creating task */
+ 	u32 sid;		/* SID of this object */
+ 	u16 sclass;		/* security class of this object */
 diff --git a/security/selinux/include/xfrm.h b/security/selinux/include/xfrm.h
 index b43813c..74be837 100644
 --- a/security/selinux/include/xfrm.h
@@ -104901,7 +105244,7 @@ index 0000000..50f2f2f
 +size_overflow_hash.h
 diff --git a/tools/gcc/Makefile b/tools/gcc/Makefile
 new file mode 100644
-index 0000000..144dbee
+index 0000000..270a5bc
 --- /dev/null
 +++ b/tools/gcc/Makefile
 @@ -0,0 +1,45 @@
@@ -104916,7 +105259,7 @@ index 0000000..144dbee
 +HOST_EXTRACFLAGS += -I$(GCCPLUGINS_DIR)/include -std=gnu99 -ggdb
 +else
 +HOSTLIBS := hostcxxlibs
-+HOST_EXTRACXXFLAGS += -I$(GCCPLUGINS_DIR)/include -std=gnu++98 -ggdb -Wno-unused-parameter
++HOST_EXTRACXXFLAGS += -I$(GCCPLUGINS_DIR)/include -std=gnu++98 -fno-rtti -ggdb -Wno-unused-parameter
 +endif
 +
 +$(HOSTLIBS)-$(CONFIG_PAX_CONSTIFY_PLUGIN) := constify_plugin.so
@@ -104952,12 +105295,12 @@ index 0000000..144dbee
 +targets += size_overflow_hash.h
 diff --git a/tools/gcc/checker_plugin.c b/tools/gcc/checker_plugin.c
 new file mode 100644
-index 0000000..22f03c0
+index 0000000..5452feea
 --- /dev/null
 +++ b/tools/gcc/checker_plugin.c
-@@ -0,0 +1,172 @@
+@@ -0,0 +1,150 @@
 +/*
-+ * Copyright 2011 by the PaX Team <pageexec@freemail.hu>
++ * Copyright 2011-2014 by the PaX Team <pageexec@freemail.hu>
 + * Licensed under the GPL v2
 + *
 + * Note: the choice of the license means that the compilation process is
@@ -104973,27 +105316,8 @@ index 0000000..22f03c0
 + * BUGS:
 + * - none known
 + */
-+#include "gcc-plugin.h"
-+#include "config.h"
-+#include "system.h"
-+#include "coretypes.h"
-+#include "tree.h"
-+#include "tree-pass.h"
-+#include "flags.h"
-+#include "intl.h"
-+#include "toplev.h"
-+#include "plugin.h"
-+//#include "expr.h" where are you...
-+#include "diagnostic.h"
-+#include "plugin-version.h"
-+#include "tm.h"
-+#include "function.h"
-+#include "basic-block.h"
-+#include "gimple.h"
-+#include "rtl.h"
-+#include "emit-rtl.h"
-+#include "tree-flow.h"
-+#include "target.h"
++
++#include "gcc-common.h"
 +
 +extern void c_register_addr_space (const char *str, addr_space_t as);
 +extern enum machine_mode default_addr_space_pointer_mode (addr_space_t);
@@ -105002,13 +105326,10 @@ index 0000000..22f03c0
 +extern bool default_addr_space_legitimate_address_p(enum machine_mode mode, rtx mem, bool strict, addr_space_t as);
 +extern rtx default_addr_space_legitimize_address(rtx x, rtx oldx, enum machine_mode mode, addr_space_t as);
 +
-+extern void print_gimple_stmt(FILE *, gimple, int, int);
-+extern rtx emit_move_insn(rtx x, rtx y);
-+
 +int plugin_is_GPL_compatible;
 +
 +static struct plugin_info checker_plugin_info = {
-+	.version	= "201111150100",
++	.version	= "201304082245",
 +	.help		= NULL,
 +};
 +
@@ -105130,12 +105451,12 @@ index 0000000..22f03c0
 +}
 diff --git a/tools/gcc/colorize_plugin.c b/tools/gcc/colorize_plugin.c
 new file mode 100644
-index 0000000..414fe5e
+index 0000000..06dcfda
 --- /dev/null
 +++ b/tools/gcc/colorize_plugin.c
-@@ -0,0 +1,151 @@
+@@ -0,0 +1,169 @@
 +/*
-+ * Copyright 2012-2013 by PaX Team <pageexec@freemail.hu>
++ * Copyright 2012-2014 by PaX Team <pageexec@freemail.hu>
 + * Licensed under the GPL v2
 + *
 + * Note: the choice of the license means that the compilation process is
@@ -105147,24 +105468,12 @@ index 0000000..414fe5e
 + *
 + */
 +
-+#include "gcc-plugin.h"
-+#include "config.h"
-+#include "system.h"
-+#include "coretypes.h"
-+#include "tree.h"
-+#include "tree-pass.h"
-+#include "flags.h"
-+#include "intl.h"
-+#include "toplev.h"
-+#include "plugin.h"
-+#include "diagnostic.h"
-+#include "plugin-version.h"
-+#include "tm.h"
++#include "gcc-common.h"
 +
 +int plugin_is_GPL_compatible;
 +
 +static struct plugin_info colorize_plugin_info = {
-+	.version	= "201302112000",
++	.version	= "201401260140",
 +	.help		= NULL,
 +};
 +
@@ -105239,26 +105548,56 @@ index 0000000..414fe5e
 +	return 0;
 +}
 +
-+struct simple_ipa_opt_pass pass_ipa_colorize_rearm = {
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data colorize_rearm_pass_data = {
++#else
++struct simple_ipa_opt_pass colorize_rearm_pass = {
 +	.pass = {
++#endif
 +		.type			= SIMPLE_IPA_PASS,
 +		.name			= "colorize_rearm",
 +#if BUILDING_GCC_VERSION >= 4008
 +		.optinfo_flags		= OPTGROUP_NONE,
 +#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= false,
++		.has_execute		= true,
++#else
 +		.gate			= NULL,
 +		.execute		= execute_colorize_rearm,
 +		.sub			= NULL,
 +		.next			= NULL,
 +		.static_pass_number	= 0,
++#endif
 +		.tv_id			= TV_NONE,
 +		.properties_required	= 0,
 +		.properties_provided	= 0,
 +		.properties_destroyed	= 0,
 +		.todo_flags_start	= 0,
 +		.todo_flags_finish	= 0
++#if BUILDING_GCC_VERSION < 4009
 +	}
++#endif
 +};
++
++#if BUILDING_GCC_VERSION >= 4009
++namespace {
++class colorize_rearm_pass : public simple_ipa_opt_pass {
++public:
++	colorize_rearm_pass() : simple_ipa_opt_pass(colorize_rearm_pass_data, g) {}
++	unsigned int execute() { return execute_colorize_rearm(); }
++};
++}
++#endif
++
++static struct opt_pass *make_colorize_rearm_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new colorize_rearm_pass();
++#else
++	return &colorize_rearm_pass.pass;
++#endif
++}
 +
 +static void colorize_start_unit(void *gcc_data, void *user_data)
 +{
@@ -105268,12 +105607,12 @@ index 0000000..414fe5e
 +int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version *version)
 +{
 +	const char * const plugin_name = plugin_info->base_name;
-+	struct register_pass_info colorize_rearm_pass_info = {
-+		.pass				= &pass_ipa_colorize_rearm.pass,
-+		.reference_pass_name		= "*free_lang_data",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op 			= PASS_POS_INSERT_AFTER
-+	};
++	struct register_pass_info colorize_rearm_pass_info;
++
++	colorize_rearm_pass_info.pass				= make_colorize_rearm_pass();
++	colorize_rearm_pass_info.reference_pass_name		= "*free_lang_data";
++	colorize_rearm_pass_info.ref_pass_instance_number	= 1;
++	colorize_rearm_pass_info.pos_op 			= PASS_POS_INSERT_AFTER;
 +
 +	if (!plugin_default_version_check(version, &gcc_version)) {
 +		error(G_("incompatible gcc/plugin versions"));
@@ -105287,13 +105626,13 @@ index 0000000..414fe5e
 +}
 diff --git a/tools/gcc/constify_plugin.c b/tools/gcc/constify_plugin.c
 new file mode 100644
-index 0000000..c17312d
+index 0000000..4f67ac1
 --- /dev/null
 +++ b/tools/gcc/constify_plugin.c
-@@ -0,0 +1,560 @@
+@@ -0,0 +1,552 @@
 +/*
 + * Copyright 2011 by Emese Revfy <re.emese@gmail.com>
-+ * Copyright 2011-2013 by PaX Team <pageexec@freemail.hu>
++ * Copyright 2011-2014 by PaX Team <pageexec@freemail.hu>
 + * Licensed under the GPL v2, or (at your option) v3
 + *
 + * This gcc plugin constifies all structures which contain only function pointers or are explicitly marked for constification.
@@ -105306,38 +105645,15 @@ index 0000000..c17312d
 + * $ gcc -fplugin=constify_plugin.so test.c -O2
 + */
 +
-+#include "gcc-plugin.h"
-+#include "config.h"
-+#include "system.h"
-+#include "coretypes.h"
-+#include "tree.h"
-+#include "tree-pass.h"
-+#include "flags.h"
-+#include "intl.h"
-+#include "toplev.h"
-+#include "plugin.h"
-+#include "diagnostic.h"
-+#include "plugin-version.h"
-+#include "tm.h"
-+#include "function.h"
-+#include "basic-block.h"
-+#include "gimple.h"
-+#include "rtl.h"
-+#include "emit-rtl.h"
-+#include "tree-flow.h"
-+#include "target.h"
-+#include "langhooks.h"
++#include "gcc-common.h"
 +
-+// should come from c-tree.h if only it were installed for gcc 4.5...
-+#define C_TYPE_FIELDS_READONLY(TYPE) TREE_LANG_FLAG_1(TYPE)
-+
-+// unused type flag in all versions 4.5-4.8
++// unused C type flag in all versions 4.5-4.9
 +#define TYPE_CONSTIFY_VISITED(TYPE) TYPE_LANG_FLAG_4(TYPE)
 +
 +int plugin_is_GPL_compatible;
 +
 +static struct plugin_info const_plugin_info = {
-+	.version	= "201305231310",
++	.version	= "201401270210",
 +	.help		= "no-constify\tturn off constification\n",
 +};
 +
@@ -105412,7 +105728,7 @@ index 0000000..c17312d
 +	gcc_assert(TREE_CODE(node) == RECORD_TYPE || TREE_CODE(node) == UNION_TYPE);
 +
 +	if (lookup_attribute("no_const", TYPE_ATTRIBUTES(node))) {
-+		gcc_assert(!TYPE_READONLY(node));
++//		gcc_assert(!TYPE_READONLY(node));
 +		return false;
 +	}
 +
@@ -105441,15 +105757,17 @@ index 0000000..c17312d
 +
 +		// special case handling of simple ptr-to-same-array-type members
 +		if (TREE_CODE(TREE_TYPE(field)) == POINTER_TYPE) {
-+			const_tree ptrtype = TREE_TYPE(TREE_TYPE(field));
++			tree ptrtype = TREE_TYPE(TREE_TYPE(field));
 +
++			if (TREE_TYPE(TREE_TYPE(field)) == type)
++				continue;
 +			if (TREE_CODE(ptrtype) != RECORD_TYPE && TREE_CODE(ptrtype) != UNION_TYPE)
 +				continue;
-+			if (TREE_TYPE(TREE_TYPE(field)) == type)
++			if (!constified(ptrtype))
 +				continue;
 +			if (TYPE_MAIN_VARIANT(ptrtype) == TYPE_MAIN_VARIANT(type)) {
 +				TREE_TYPE(field) = copy_node(TREE_TYPE(field));
-+				TREE_TYPE(TREE_TYPE(field)) = type;
++				TREE_TYPE(TREE_TYPE(field)) = build_qualified_type(type, TYPE_QUALS(ptrtype) & ~TYPE_QUAL_CONST);
 +			}
 +			continue;
 +		}
@@ -105463,8 +105781,10 @@ index 0000000..c17312d
 +	}
 +	TYPE_READONLY(type) = 0;
 +	C_TYPE_FIELDS_READONLY(type) = 0;
-+	if (lookup_attribute("do_const", TYPE_ATTRIBUTES(type)))
++	if (lookup_attribute("do_const", TYPE_ATTRIBUTES(type))) {
++		TYPE_ATTRIBUTES(type) = copy_list(TYPE_ATTRIBUTES(type));
 +		TYPE_ATTRIBUTES(type) = remove_attribute("do_const", TYPE_ATTRIBUTES(type));
++	}
 +}
 +
 +static void deconstify_tree(tree node)
@@ -105502,22 +105822,21 @@ index 0000000..c17312d
 +
 +	*no_add_attrs = true;
 +	if (TREE_CODE(*node) == FUNCTION_DECL) {
-+		error("%qE attribute does not apply to functions", name);
++		error("%qE attribute does not apply to functions (%qF)", name, *node);
 +		return NULL_TREE;
 +	}
 +
 +	if (TREE_CODE(*node) == PARM_DECL) {
-+		error("%qE attribute does not apply to function parameters", name);
++		error("%qE attribute does not apply to function parameters (%qD)", name, *node);
 +		return NULL_TREE;
 +	}
 +
 +	if (TREE_CODE(*node) == VAR_DECL) {
-+		error("%qE attribute does not apply to variables", name);
++		error("%qE attribute does not apply to variables (%qD)", name, *node);
 +		return NULL_TREE;
 +	}
 +
 +	if (TYPE_P(*node)) {
-+		*no_add_attrs = false;
 +		type = *node;
 +	} else {
 +		gcc_assert(TREE_CODE(*node) == TYPE_DECL);
@@ -105525,18 +105844,20 @@ index 0000000..c17312d
 +	}
 +
 +	if (TREE_CODE(type) != RECORD_TYPE && TREE_CODE(type) != UNION_TYPE) {
-+		error("%qE attribute applies to struct and union types only", name);
++		error("%qE attribute used on %qT applies to struct and union types only", name, type);
 +		return NULL_TREE;
 +	}
 +
 +	if (lookup_attribute(IDENTIFIER_POINTER(name), TYPE_ATTRIBUTES(type))) {
-+		error("%qE attribute is already applied to the type", name);
++		error("%qE attribute is already applied to the type %qT", name, type);
 +		return NULL_TREE;
 +	}
 +
 +	if (TYPE_P(*node)) {
 +		if (lookup_attribute("do_const", TYPE_ATTRIBUTES(type)))
-+			error("%qE attribute is incompatible with 'do_const'", name);
++			error("%qE attribute used on type %qT is incompatible with 'do_const'", name, type);
++		else
++			*no_add_attrs = false;
 +		return NULL_TREE;
 +	}
 +
@@ -105547,7 +105868,7 @@ index 0000000..c17312d
 +		return NULL_TREE;
 +	}
 +
-+	error("%qE attribute used on type that is not constified", name);
++	error("%qE attribute used on type %qT that is not constified", name, type);
 +	return NULL_TREE;
 +}
 +
@@ -105556,6 +105877,7 @@ index 0000000..c17312d
 +	TYPE_READONLY(type) = 1;
 +	C_TYPE_FIELDS_READONLY(type) = 1;
 +	TYPE_CONSTIFY_VISITED(type) = 1;
++//	TYPE_ATTRIBUTES(type) = copy_list(TYPE_ATTRIBUTES(type));
 +//	TYPE_ATTRIBUTES(type) = tree_cons(get_identifier("do_const"), NULL_TREE, TYPE_ATTRIBUTES(type));
 +}
 +
@@ -105563,22 +105885,22 @@ index 0000000..c17312d
 +{
 +	*no_add_attrs = true;
 +	if (!TYPE_P(*node)) {
-+		error("%qE attribute applies to types only", name);
++		error("%qE attribute applies to types only (%qD)", name, *node);
 +		return NULL_TREE;
 +	}
 +
 +	if (TREE_CODE(*node) != RECORD_TYPE && TREE_CODE(*node) != UNION_TYPE) {
-+		error("%qE attribute applies to struct and union types only", name);
++		error("%qE attribute used on %qT applies to struct and union types only", name, *node);
 +		return NULL_TREE;
 +	}
 +
 +	if (lookup_attribute(IDENTIFIER_POINTER(name), TYPE_ATTRIBUTES(*node))) {
-+		error("%qE attribute is already applied to the type", name);
++		error("%qE attribute used on %qT is already applied to the type", name, *node);
 +		return NULL_TREE;
 +	}
 +
 +	if (lookup_attribute("no_const", TYPE_ATTRIBUTES(*node))) {
-+		error("%qE attribute is incompatible with 'no_const'", name);
++		error("%qE attribute used on %qT is incompatible with 'no_const'", name, *node);
 +		return NULL_TREE;
 +	}
 +
@@ -105636,30 +105958,29 @@ index 0000000..c17312d
 +
 +	constifiable(type, &cinfo);
 +
-+	if (TYPE_READONLY(type) && C_TYPE_FIELDS_READONLY(type)) {
-+		if (!lookup_attribute("do_const", TYPE_ATTRIBUTES(type)))
-+			return;
-+		if (cinfo.has_writable_field)
-+			return;
-+		error("'do_const' attribute used on type that is%sconstified", cinfo.has_fptr_field ? " " : " not ");
-+		return;
-+	}
-+
 +	if (lookup_attribute("no_const", TYPE_ATTRIBUTES(type))) {
 +		if ((cinfo.has_fptr_field && !cinfo.has_writable_field) || cinfo.has_do_const_field) {
 +			deconstify_type(type);
 +			TYPE_CONSTIFY_VISITED(type) = 1;
 +		} else
-+			error("'no_const' attribute used on type that is not constified");
++			error("'no_const' attribute used on type %qT that is not constified", type);
 +		return;
 +	}
 +
 +	if (lookup_attribute("do_const", TYPE_ATTRIBUTES(type))) {
++		if (!cinfo.has_writable_field) {
++			error("'do_const' attribute used on type %qT that is%sconstified", type, cinfo.has_fptr_field ? " " : " not ");
++			return;
++		}
 +		constify_type(type);
 +		return;
 +	}
 +
 +	if (cinfo.has_fptr_field && !cinfo.has_writable_field) {
++		if (lookup_attribute("do_const", TYPE_ATTRIBUTES(type))) {
++			error("'do_const' attribute used on type %qT that is constified", type);
++			return;
++		}
 +		constify_type(type);
 +		return;
 +	}
@@ -105668,17 +105989,12 @@ index 0000000..c17312d
 +	TYPE_CONSTIFY_VISITED(type) = 1;
 +}
 +
-+static void check_global_variables(void)
++static void check_global_variables(void *event_data, void *data)
 +{
 +	struct varpool_node *node;
 +
-+#if BUILDING_GCC_VERSION <= 4007
-+	for (node = varpool_nodes; node; node = node->next) {
-+		tree var = node->decl;
-+#else
 +	FOR_EACH_VARIABLE(node) {
-+		tree var = node->symbol.decl;
-+#endif
++		tree var = NODE_DECL(node);
 +		tree type = TREE_TYPE(var);
 +
 +		if (TREE_CODE(type) != RECORD_TYPE && TREE_CODE(type) != UNION_TYPE)
@@ -105708,18 +106024,9 @@ index 0000000..c17312d
 +	unsigned int ret = 0;
 +	tree var;
 +
-+#if BUILDING_GCC_VERSION == 4005
-+	tree vars;
-+#else
 +	unsigned int i;
-+#endif
 +
-+#if BUILDING_GCC_VERSION == 4005
-+	for (vars = cfun->local_decls; vars; vars = TREE_CHAIN(vars)) {
-+		var = TREE_VALUE(vars);
-+#else
 +	FOR_EACH_LOCAL_DECL(cfun, i, var) {
-+#endif
 +		tree type = TREE_TYPE(var);
 +
 +		gcc_assert(DECL_P(var));
@@ -105741,33 +106048,56 @@ index 0000000..c17312d
 +	return ret;
 +}
 +
-+static unsigned int check_variables(void)
-+{
-+	check_global_variables();
-+	return check_local_variables();
-+}
-+
-+	unsigned int ret = 0;
-+static struct gimple_opt_pass pass_local_variable = {
-+	{
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data check_local_variables_pass_data = {
++#else
++static struct gimple_opt_pass check_local_variables_pass = {
++	.pass = {
++#endif
 +		.type			= GIMPLE_PASS,
-+		.name			= "check_variables",
++		.name			= "check_local_variables",
 +#if BUILDING_GCC_VERSION >= 4008
 +		.optinfo_flags		= OPTGROUP_NONE,
 +#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= false,
++		.has_execute		= true,
++#else
 +		.gate			= NULL,
-+		.execute		= check_variables,
++		.execute		= check_local_variables,
 +		.sub			= NULL,
 +		.next			= NULL,
 +		.static_pass_number	= 0,
++#endif
 +		.tv_id			= TV_NONE,
 +		.properties_required	= 0,
 +		.properties_provided	= 0,
 +		.properties_destroyed	= 0,
 +		.todo_flags_start	= 0,
 +		.todo_flags_finish	= 0
++#if BUILDING_GCC_VERSION < 4009
 +	}
++#endif
 +};
++
++#if BUILDING_GCC_VERSION >= 4009
++namespace {
++class check_local_variables_pass : public gimple_opt_pass {
++public:
++	check_local_variables_pass() : gimple_opt_pass(check_local_variables_pass_data, g) {}
++	unsigned int execute() { return check_local_variables(); }
++};
++}
++#endif
++
++static struct opt_pass *make_check_local_variables_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new check_local_variables_pass();
++#else
++	return &check_local_variables_pass.pass;
++#endif
++}
 +
 +static struct {
 +	const char *name;
@@ -105816,12 +106146,12 @@ index 0000000..c17312d
 +	int i;
 +	bool constify = true;
 +
-+	struct register_pass_info local_variable_pass_info = {
-+		.pass				= &pass_local_variable.pass,
-+		.reference_pass_name		= "ssa",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op				= PASS_POS_INSERT_BEFORE
-+	};
++	struct register_pass_info check_local_variables_pass_info;
++
++	check_local_variables_pass_info.pass				= make_check_local_variables_pass();
++	check_local_variables_pass_info.reference_pass_name		= "ssa";
++	check_local_variables_pass_info.ref_pass_instance_number	= 1;
++	check_local_variables_pass_info.pos_op				= PASS_POS_INSERT_BEFORE;
 +
 +	if (!plugin_default_version_check(version, &gcc_version)) {
 +		error(G_("incompatible gcc/plugin versions"));
@@ -105843,14 +106173,288 @@ index 0000000..c17312d
 +
 +	register_callback(plugin_name, PLUGIN_INFO, NULL, &const_plugin_info);
 +	if (constify) {
++		register_callback(plugin_name, PLUGIN_ALL_IPA_PASSES_START, check_global_variables, NULL);
 +		register_callback(plugin_name, PLUGIN_FINISH_TYPE, finish_type, NULL);
-+		register_callback(plugin_name, PLUGIN_PASS_MANAGER_SETUP, NULL, &local_variable_pass_info);
++		register_callback(plugin_name, PLUGIN_PASS_MANAGER_SETUP, NULL, &check_local_variables_pass_info);
 +		register_callback(plugin_name, PLUGIN_START_UNIT, constify_start_unit, NULL);
 +	}
 +	register_callback(plugin_name, PLUGIN_ATTRIBUTES, register_attributes, NULL);
 +
 +	return 0;
 +}
+diff --git a/tools/gcc/gcc-common.h b/tools/gcc/gcc-common.h
+new file mode 100644
+index 0000000..986f39b
+--- /dev/null
++++ b/tools/gcc/gcc-common.h
+@@ -0,0 +1,267 @@
++#ifndef GCC_COMMON_H_INCLUDED
++#define GCC_COMMON_H_INCLUDED
++
++#include "plugin.h"
++#include "bversion.h"
++#include "plugin-version.h"
++#include "config.h"
++#include "system.h"
++#include "coretypes.h"
++#include "tm.h"
++#include "line-map.h"
++#include "input.h"
++#include "tree.h"
++
++#include "tree-inline.h"
++#include "version.h"
++#include "rtl.h"
++#include "tm_p.h"
++#include "flags.h"
++//#include "insn-attr.h"
++//#include "insn-config.h"
++//#include "insn-flags.h"
++#include "hard-reg-set.h"
++//#include "recog.h"
++#include "output.h"
++#include "except.h"
++#include "function.h"
++#include "toplev.h"
++//#include "expr.h"
++#include "basic-block.h"
++#include "intl.h"
++#include "ggc.h"
++//#include "regs.h"
++#include "timevar.h"
++
++#include "params.h"
++#include "pointer-set.h"
++#include "emit-rtl.h"
++//#include "reload.h"
++//#include "ira.h"
++//#include "dwarf2asm.h"
++#include "debug.h"
++#include "target.h"
++#include "langhooks.h"
++#include "cfgloop.h"
++//#include "hosthooks.h"
++#include "cgraph.h"
++#include "opts.h"
++//#include "coverage.h"
++//#include "value-prof.h"
++
++#if BUILDING_GCC_VERSION >= 4007
++#include "tree-pretty-print.h"
++#include "gimple-pretty-print.h"
++#include "c-tree.h"
++//#include "alloc-pool.h"
++#endif
++
++#if BUILDING_GCC_VERSION <= 4008
++#include "tree-flow.h"
++#endif
++
++#include "diagnostic.h"
++//#include "tree-diagnostic.h"
++#include "tree-dump.h"
++#include "tree-pass.h"
++//#include "df.h"
++#include "predict.h"
++//#include "lto-streamer.h"
++#include "ipa-utils.h"
++
++#if BUILDING_GCC_VERSION >= 4009
++#include "varasm.h"
++#include "stor-layout.h"
++#include "internal-fn.h"
++#include "gimple-expr.h"
++//#include "diagnostic-color.h"
++#include "context.h"
++#include "tree-ssa-alias.h"
++#include "stringpool.h"
++#include "tree-ssanames.h"
++#include "print-tree.h"
++#include "tree-eh.h"
++#endif
++
++#include "gimple.h"
++
++#if BUILDING_GCC_VERSION >= 4009
++#include "tree-ssa-operands.h"
++#include "tree-phinodes.h"
++#include "gimple-iterator.h"
++#include "gimple-ssa.h"
++#include "ssa-iterators.h"
++#endif
++
++//#include "expr.h" where are you...
++extern rtx emit_move_insn(rtx x, rtx y);
++
++#define __unused __attribute__((__unused__))
++
++#define DECL_NAME_POINTER(node) IDENTIFIER_POINTER(DECL_NAME(node))
++#define DECL_NAME_LENGTH(node) IDENTIFIER_LENGTH(DECL_NAME(node))
++
++#if BUILDING_GCC_VERSION == 4005
++#define FOR_EACH_LOCAL_DECL(FUN, I, D) for (tree vars = (FUN)->local_decls; vars && (D = TREE_VALUE(vars)); vars = TREE_CHAIN(vars), I)
++#define DECL_CHAIN(NODE) (TREE_CHAIN(DECL_MINIMAL_CHECK(NODE)))
++#define FOR_EACH_VEC_ELT(T, V, I, P) for (I = 0; VEC_iterate(T, (V), (I), (P)); ++(I))
++
++static inline bool gimple_call_builtin_p(gimple stmt, enum built_in_function code)
++{
++	tree fndecl;
++
++	if (!is_gimple_call(stmt))
++		return false;
++	fndecl = gimple_call_fndecl(stmt);
++	if (!fndecl || DECL_BUILT_IN_CLASS(fndecl) != BUILT_IN_NORMAL)
++		return false;
++//	print_node(stderr, "pax", fndecl, 4);
++	return DECL_FUNCTION_CODE(fndecl) == code;
++}
++
++static inline bool is_simple_builtin(tree decl)
++{
++	if (decl && DECL_BUILT_IN_CLASS(decl) != BUILT_IN_NORMAL)
++		return false;
++
++	switch (DECL_FUNCTION_CODE(decl)) {
++	/* Builtins that expand to constants. */
++	case BUILT_IN_CONSTANT_P:
++	case BUILT_IN_EXPECT:
++	case BUILT_IN_OBJECT_SIZE:
++	case BUILT_IN_UNREACHABLE:
++	/* Simple register moves or loads from stack. */
++	case BUILT_IN_RETURN_ADDRESS:
++	case BUILT_IN_EXTRACT_RETURN_ADDR:
++	case BUILT_IN_FROB_RETURN_ADDR:
++	case BUILT_IN_RETURN:
++	case BUILT_IN_AGGREGATE_INCOMING_ADDRESS:
++	case BUILT_IN_FRAME_ADDRESS:
++	case BUILT_IN_VA_END:
++	case BUILT_IN_STACK_SAVE:
++	case BUILT_IN_STACK_RESTORE:
++	/* Exception state returns or moves registers around. */
++	case BUILT_IN_EH_FILTER:
++	case BUILT_IN_EH_POINTER:
++	case BUILT_IN_EH_COPY_VALUES:
++	return true;
++
++	default:
++	return false;
++	}
++}
++#endif
++
++#if BUILDING_GCC_VERSION <= 4006
++#define ANY_RETURN_P(rtx) (GET_CODE(rtx) == RETURN)
++#define C_DECL_REGISTER(EXP) DECL_LANG_FLAG_4(EXP)
++
++// should come from c-tree.h if only it were installed for gcc 4.5...
++#define C_TYPE_FIELDS_READONLY(TYPE) TREE_LANG_FLAG_1(TYPE)
++
++#define get_random_seed(noinit) ({						\
++	unsigned HOST_WIDE_INT seed;						\
++	sscanf(get_random_seed(noinit), "%" HOST_WIDE_INT_PRINT "x", &seed);	\
++	seed * seed; })
++
++static inline bool gimple_clobber_p(gimple s)
++{
++	return false;
++}
++
++static inline tree builtin_decl_implicit(enum built_in_function fncode)
++{
++	return implicit_built_in_decls[fncode];
++}
++
++static inline struct cgraph_node *cgraph_get_create_node(tree decl)
++{
++	struct cgraph_node *node = cgraph_get_node(decl);
++
++	return node ? node : cgraph_node(decl);
++}
++
++static inline bool cgraph_function_with_gimple_body_p(struct cgraph_node *node)
++{
++	return node->analyzed && !node->thunk.thunk_p && !node->alias;
++}
++
++static inline struct cgraph_node *cgraph_first_function_with_gimple_body(void)
++{
++	struct cgraph_node *node;
++
++	for (node = cgraph_nodes; node; node = node->next)
++		if (cgraph_function_with_gimple_body_p(node))
++			return node;
++	return NULL;
++}
++
++static inline struct cgraph_node *cgraph_next_function_with_gimple_body(struct cgraph_node *node)
++{
++	for (node = node->next; node; node = node->next)
++		if (cgraph_function_with_gimple_body_p(node))
++			return node;
++	return NULL;
++}
++
++#define FOR_EACH_FUNCTION_WITH_GIMPLE_BODY(node) \
++	for ((node) = cgraph_first_function_with_gimple_body(); (node); \
++		(node) = cgraph_next_function_with_gimple_body(node))
++#endif
++
++#if BUILDING_GCC_VERSION == 4006
++extern void debug_gimple_stmt(gimple);
++extern void debug_gimple_seq(gimple_seq);
++extern void print_gimple_seq(FILE *, gimple_seq, int, int);
++extern void print_gimple_stmt(FILE *, gimple, int, int);
++extern void print_gimple_expr(FILE *, gimple, int, int);
++extern void dump_gimple_stmt(pretty_printer *, gimple, int, int);
++#endif
++
++#if BUILDING_GCC_VERSION <= 4007
++#define FOR_EACH_VARIABLE(node) for (node = varpool_nodes; node; node = node->next)
++
++static inline bool gimple_store_p(gimple gs)
++{
++	tree lhs = gimple_get_lhs(gs);
++	return lhs && !is_gimple_reg(lhs);
++}
++#endif
++
++#if BUILDING_GCC_VERSION >= 4007
++#define cgraph_create_edge(caller, callee, call_stmt, count, freq, nest) \
++	cgraph_create_edge((caller), (callee), (call_stmt), (count), (freq))
++#endif
++
++#if BUILDING_GCC_VERSION <= 4008
++#define ENTRY_BLOCK_PTR_FOR_FN(FN) ENTRY_BLOCK_PTR_FOR_FUNCTION(FN)
++#define EXIT_BLOCK_PTR_FOR_FN(FN) EXIT_BLOCK_PTR_FOR_FUNCTION(FN)
++
++static inline const char *get_tree_code_name(enum tree_code code)
++{
++	gcc_assert(code < MAX_TREE_CODES);
++	return tree_code_name[code];
++}
++
++#define ipa_remove_stmt_references(cnode, stmt)
++#endif
++
++#if BUILDING_GCC_VERSION == 4008
++#define NODE_DECL(node) node->symbol.decl
++#else
++#define NODE_DECL(node) node->decl
++#endif
++
++#if BUILDING_GCC_VERSION >= 4008
++#define add_referenced_var(var)
++#define mark_sym_for_renaming(var)
++#define varpool_mark_needed_node(node)
++#define TODO_dump_func 0
++#define TODO_dump_cgraph 0
++#endif
++
++#if BUILDING_GCC_VERSION >= 4009
++#define TODO_ggc_collect 0
++#endif
++
++#endif
 diff --git a/tools/gcc/generate_size_overflow_hash.sh b/tools/gcc/generate_size_overflow_hash.sh
 new file mode 100644
 index 0000000..e518932
@@ -105953,12 +106557,12 @@ index 0000000..e518932
 +exit 0
 diff --git a/tools/gcc/kallocstat_plugin.c b/tools/gcc/kallocstat_plugin.c
 new file mode 100644
-index 0000000..568b360
+index 0000000..b559327
 --- /dev/null
 +++ b/tools/gcc/kallocstat_plugin.c
-@@ -0,0 +1,170 @@
+@@ -0,0 +1,182 @@
 +/*
-+ * Copyright 2011-2013 by the PaX Team <pageexec@freemail.hu>
++ * Copyright 2011-2014 by the PaX Team <pageexec@freemail.hu>
 + * Licensed under the GPL v2
 + *
 + * Note: the choice of the license means that the compilation process is
@@ -105973,29 +106577,15 @@ index 0000000..568b360
 + * BUGS:
 + * - none known
 + */
-+#include "gcc-plugin.h"
-+#include "config.h"
-+#include "system.h"
-+#include "coretypes.h"
-+#include "tree.h"
-+#include "tree-pass.h"
-+#include "flags.h"
-+#include "intl.h"
-+#include "toplev.h"
-+#include "plugin.h"
-+//#include "expr.h" where are you...
-+#include "diagnostic.h"
-+#include "plugin-version.h"
-+#include "tm.h"
-+#include "function.h"
-+#include "basic-block.h"
-+#include "gimple.h"
-+#include "rtl.h"
-+#include "emit-rtl.h"
 +
-+extern void print_gimple_stmt(FILE *, gimple, int, int);
++#include "gcc-common.h"
 +
 +int plugin_is_GPL_compatible;
++
++static struct plugin_info kallocstat_plugin_info = {
++	.version	= "201401260140",
++	.help		= NULL
++};
 +
 +static const char * const kalloc_functions[] = {
 +	"__kmalloc",
@@ -106007,33 +106597,6 @@ index 0000000..568b360
 +	"kmalloc_slab",
 +	"kzalloc",
 +	"kzalloc_node",
-+};
-+
-+static struct plugin_info kallocstat_plugin_info = {
-+	.version	= "201302112000",
-+};
-+
-+static unsigned int execute_kallocstat(void);
-+
-+static struct gimple_opt_pass kallocstat_pass = {
-+	.pass = {
-+		.type			= GIMPLE_PASS,
-+		.name			= "kallocstat",
-+#if BUILDING_GCC_VERSION >= 4008
-+		.optinfo_flags		= OPTGROUP_NONE,
-+#endif
-+		.gate			= NULL,
-+		.execute		= execute_kallocstat,
-+		.sub			= NULL,
-+		.next			= NULL,
-+		.static_pass_number	= 0,
-+		.tv_id			= TV_NONE,
-+		.properties_required	= 0,
-+		.properties_provided	= 0,
-+		.properties_destroyed	= 0,
-+		.todo_flags_start	= 0,
-+		.todo_flags_finish	= 0
-+	}
 +};
 +
 +static bool is_kalloc(const char *fnname)
@@ -106051,52 +106614,54 @@ index 0000000..568b360
 +	basic_block bb;
 +
 +	// 1. loop through BBs and GIMPLE statements
-+	FOR_EACH_BB(bb) {
++	FOR_EACH_BB_FN(bb, cfun) {
 +		gimple_stmt_iterator gsi;
 +		for (gsi = gsi_start_bb(bb); !gsi_end_p(gsi); gsi_next(&gsi)) {
 +			// gimple match: 
 +			tree fndecl, size;
-+			gimple call_stmt;
++			gimple stmt;
 +			const char *fnname;
 +
 +			// is it a call
-+			call_stmt = gsi_stmt(gsi);
-+			if (!is_gimple_call(call_stmt))
++			stmt = gsi_stmt(gsi);
++			if (!is_gimple_call(stmt))
 +				continue;
-+			fndecl = gimple_call_fndecl(call_stmt);
++			fndecl = gimple_call_fndecl(stmt);
 +			if (fndecl == NULL_TREE)
 +				continue;
 +			if (TREE_CODE(fndecl) != FUNCTION_DECL)
 +				continue;
 +
 +			// is it a call to k*alloc
-+			fnname = IDENTIFIER_POINTER(DECL_NAME(fndecl));
++			fnname = DECL_NAME_POINTER(fndecl);
 +			if (!is_kalloc(fnname))
 +				continue;
 +
-+			// is the size arg the result of a simple const assignment
-+			size = gimple_call_arg(call_stmt, 0);
++			// is the size arg const or the result of a simple const assignment
++			size = gimple_call_arg(stmt, 0);
 +			while (true) {
-+				gimple def_stmt;
 +				expanded_location xloc;
 +				size_t size_val;
 +
++				if (TREE_CONSTANT(size)) {
++					xloc = expand_location(gimple_location(stmt));
++					if (!xloc.file)
++						xloc = expand_location(DECL_SOURCE_LOCATION(current_function_decl));
++					size_val = TREE_INT_CST_LOW(size);
++					fprintf(stderr, "kallocsize: %8zu %8zx %s %s:%u\n", size_val, size_val, fnname, xloc.file, xloc.line);
++					break;
++				}
++
 +				if (TREE_CODE(size) != SSA_NAME)
 +					break;
-+				def_stmt = SSA_NAME_DEF_STMT(size);
-+				if (!def_stmt || !is_gimple_assign(def_stmt))
++				stmt = SSA_NAME_DEF_STMT(size);
++//debug_gimple_stmt(stmt);
++//debug_tree(size);
++				if (!stmt || !is_gimple_assign(stmt))
 +					break;
-+				if (gimple_num_ops(def_stmt) != 2)
++				if (gimple_num_ops(stmt) != 2)
 +					break;
-+				size = gimple_assign_rhs1(def_stmt);
-+				if (!TREE_CONSTANT(size))
-+					continue;
-+				xloc = expand_location(gimple_location(def_stmt));
-+				if (!xloc.file)
-+					xloc = expand_location(DECL_SOURCE_LOCATION(current_function_decl));
-+				size_val = TREE_INT_CST_LOW(size);
-+				fprintf(stderr, "kallocsize: %8zu %8zx %s %s:%u\n", size_val, size_val, fnname, xloc.file, xloc.line);
-+				break;
++				size = gimple_assign_rhs1(stmt);
 +			}
 +//print_gimple_stmt(stderr, call_stmt, 0, TDF_LINENO);
 +//debug_tree(gimple_call_fn(call_stmt));
@@ -106107,15 +106672,66 @@ index 0000000..568b360
 +	return 0;
 +}
 +
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data kallocstat_pass_data = {
++#else
++static struct gimple_opt_pass kallocstat_pass = {
++	.pass = {
++#endif
++		.type			= GIMPLE_PASS,
++		.name			= "kallocstat",
++#if BUILDING_GCC_VERSION >= 4008
++		.optinfo_flags		= OPTGROUP_NONE,
++#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= false,
++		.has_execute		= true,
++#else
++		.gate			= NULL,
++		.execute		= execute_kallocstat,
++		.sub			= NULL,
++		.next			= NULL,
++		.static_pass_number	= 0,
++#endif
++		.tv_id			= TV_NONE,
++		.properties_required	= 0,
++		.properties_provided	= 0,
++		.properties_destroyed	= 0,
++		.todo_flags_start	= 0,
++		.todo_flags_finish	= 0
++#if BUILDING_GCC_VERSION < 4009
++	}
++#endif
++};
++
++#if BUILDING_GCC_VERSION >= 4009
++namespace {
++class kallocstat_pass : public gimple_opt_pass {
++public:
++	kallocstat_pass() : gimple_opt_pass(kallocstat_pass_data, g) {}
++	unsigned int execute() { return execute_kallocstat(); }
++};
++}
++#endif
++
++static struct opt_pass *make_kallocstat_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new kallocstat_pass();
++#else
++	return &kallocstat_pass.pass;
++#endif
++}
++
 +int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version *version)
 +{
 +	const char * const plugin_name = plugin_info->base_name;
-+	struct register_pass_info kallocstat_pass_info = {
-+		.pass				= &kallocstat_pass.pass,
-+		.reference_pass_name		= "ssa",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op 			= PASS_POS_INSERT_AFTER
-+	};
++	struct register_pass_info kallocstat_pass_info;
++
++	kallocstat_pass_info.pass			= make_kallocstat_pass();
++	kallocstat_pass_info.reference_pass_name	= "ssa";
++	kallocstat_pass_info.ref_pass_instance_number	= 1;
++	kallocstat_pass_info.pos_op 			= PASS_POS_INSERT_AFTER;
 +
 +	if (!plugin_default_version_check(version, &gcc_version)) {
 +		error(G_("incompatible gcc/plugin versions"));
@@ -106129,12 +106745,12 @@ index 0000000..568b360
 +}
 diff --git a/tools/gcc/kernexec_plugin.c b/tools/gcc/kernexec_plugin.c
 new file mode 100644
-index 0000000..a25306b
+index 0000000..dd73713
 --- /dev/null
 +++ b/tools/gcc/kernexec_plugin.c
-@@ -0,0 +1,474 @@
+@@ -0,0 +1,519 @@
 +/*
-+ * Copyright 2011-2013 by the PaX Team <pageexec@freemail.hu>
++ * Copyright 2011-2014 by the PaX Team <pageexec@freemail.hu>
 + * Licensed under the GPL v2
 + *
 + * Note: the choice of the license means that the compilation process is
@@ -106149,133 +106765,18 @@ index 0000000..a25306b
 + * BUGS:
 + * - none known
 + */
-+#include "gcc-plugin.h"
-+#include "config.h"
-+#include "system.h"
-+#include "coretypes.h"
-+#include "tree.h"
-+#include "tree-pass.h"
-+#include "flags.h"
-+#include "intl.h"
-+#include "toplev.h"
-+#include "plugin.h"
-+//#include "expr.h" where are you...
-+#include "diagnostic.h"
-+#include "plugin-version.h"
-+#include "tm.h"
-+#include "function.h"
-+#include "basic-block.h"
-+#include "gimple.h"
-+#include "rtl.h"
-+#include "emit-rtl.h"
-+#include "tree-flow.h"
 +
-+extern void print_gimple_stmt(FILE *, gimple, int, int);
-+extern rtx emit_move_insn(rtx x, rtx y);
-+
-+#if BUILDING_GCC_VERSION <= 4006
-+#define ANY_RETURN_P(rtx) (GET_CODE(rtx) == RETURN)
-+#endif
-+
-+#if BUILDING_GCC_VERSION >= 4008
-+#define TODO_dump_func 0
-+#endif
++#include "gcc-common.h"
 +
 +int plugin_is_GPL_compatible;
 +
 +static struct plugin_info kernexec_plugin_info = {
-+	.version	= "201308230150",
++	.version	= "201401260140",
 +	.help		= "method=[bts|or]\tinstrumentation method\n"
 +};
 +
-+static unsigned int execute_kernexec_reload(void);
-+static unsigned int execute_kernexec_fptr(void);
-+static unsigned int execute_kernexec_retaddr(void);
-+static bool kernexec_cmodel_check(void);
-+
 +static void (*kernexec_instrument_fptr)(gimple_stmt_iterator *);
 +static void (*kernexec_instrument_retaddr)(rtx);
-+
-+static struct gimple_opt_pass kernexec_reload_pass = {
-+	.pass = {
-+		.type			= GIMPLE_PASS,
-+		.name			= "kernexec_reload",
-+#if BUILDING_GCC_VERSION >= 4008
-+		.optinfo_flags		= OPTGROUP_NONE,
-+#endif
-+		.gate			= kernexec_cmodel_check,
-+		.execute		= execute_kernexec_reload,
-+		.sub			= NULL,
-+		.next			= NULL,
-+		.static_pass_number	= 0,
-+		.tv_id			= TV_NONE,
-+		.properties_required	= 0,
-+		.properties_provided	= 0,
-+		.properties_destroyed	= 0,
-+		.todo_flags_start	= 0,
-+		.todo_flags_finish	= TODO_verify_ssa | TODO_verify_stmts | TODO_dump_func | TODO_remove_unused_locals | TODO_update_ssa_no_phi
-+	}
-+};
-+
-+static struct gimple_opt_pass kernexec_fptr_pass = {
-+	.pass = {
-+		.type			= GIMPLE_PASS,
-+		.name			= "kernexec_fptr",
-+#if BUILDING_GCC_VERSION >= 4008
-+		.optinfo_flags		= OPTGROUP_NONE,
-+#endif
-+		.gate			= kernexec_cmodel_check,
-+		.execute		= execute_kernexec_fptr,
-+		.sub			= NULL,
-+		.next			= NULL,
-+		.static_pass_number	= 0,
-+		.tv_id			= TV_NONE,
-+		.properties_required	= 0,
-+		.properties_provided	= 0,
-+		.properties_destroyed	= 0,
-+		.todo_flags_start	= 0,
-+		.todo_flags_finish	= TODO_verify_ssa | TODO_verify_stmts | TODO_dump_func | TODO_remove_unused_locals | TODO_update_ssa_no_phi
-+	}
-+};
-+
-+static struct rtl_opt_pass kernexec_retaddr_pass = {
-+	.pass = {
-+		.type			= RTL_PASS,
-+		.name			= "kernexec_retaddr",
-+#if BUILDING_GCC_VERSION >= 4008
-+		.optinfo_flags		= OPTGROUP_NONE,
-+#endif
-+		.gate			= kernexec_cmodel_check,
-+		.execute		= execute_kernexec_retaddr,
-+		.sub			= NULL,
-+		.next			= NULL,
-+		.static_pass_number	= 0,
-+		.tv_id			= TV_NONE,
-+		.properties_required	= 0,
-+		.properties_provided	= 0,
-+		.properties_destroyed	= 0,
-+		.todo_flags_start	= 0,
-+		.todo_flags_finish	= TODO_dump_func | TODO_ggc_collect
-+	}
-+};
-+
-+static bool kernexec_cmodel_check(void)
-+{
-+	tree section;
-+
-+	if (ix86_cmodel != CM_KERNEL)
-+		return false;
-+
-+	section = lookup_attribute("section", DECL_ATTRIBUTES(current_function_decl));
-+	if (!section || !TREE_VALUE(section))
-+		return true;
-+
-+	section = TREE_VALUE(TREE_VALUE(section));
-+	if (strncmp(TREE_STRING_POINTER(section), ".vsyscall_", 10))
-+		return true;
-+
-+	return false;
-+}
 +
 +/*
 + * add special KERNEXEC instrumentation: reload %r12 after it has been clobbered
@@ -106299,7 +106800,7 @@ index 0000000..a25306b
 +	basic_block bb;
 +
 +	// 1. loop through BBs and GIMPLE statements
-+	FOR_EACH_BB(bb) {
++	FOR_EACH_BB_FN(bb, cfun) {
 +		gimple_stmt_iterator gsi;
 +
 +		for (gsi = gsi_start_bb(bb); !gsi_end_p(gsi); gsi_next(&gsi)) {
@@ -106342,9 +106843,7 @@ index 0000000..a25306b
 +
 +	// create temporary unsigned long variable used for bitops and cast fptr to it
 +	intptr = create_tmp_var(long_unsigned_type_node, "kernexec_bts");
-+#if BUILDING_GCC_VERSION <= 4007
 +	add_referenced_var(intptr);
-+#endif
 +	intptr = make_ssa_name(intptr, NULL);
 +	assign_intptr = gimple_build_assign(intptr, fold_convert(long_unsigned_type_node, old_fptr));
 +	SSA_NAME_DEF_STMT(intptr) = assign_intptr;
@@ -106363,9 +106862,7 @@ index 0000000..a25306b
 +
 +	// cast temporary unsigned long back to a temporary fptr variable
 +	new_fptr = create_tmp_var(TREE_TYPE(old_fptr), "kernexec_fptr");
-+#if BUILDING_GCC_VERSION <= 4007
 +	add_referenced_var(new_fptr);
-+#endif
 +	new_fptr = make_ssa_name(new_fptr, NULL);
 +	assign_new_fptr = gimple_build_assign(new_fptr, fold_convert(TREE_TYPE(old_fptr), intptr));
 +	SSA_NAME_DEF_STMT(new_fptr) = assign_new_fptr;
@@ -106394,9 +106891,7 @@ index 0000000..a25306b
 +
 +	// create temporary fptr variable
 +	new_fptr = create_tmp_var(TREE_TYPE(old_fptr), "kernexec_or");
-+#if BUILDING_GCC_VERSION <= 4007
 +	add_referenced_var(new_fptr);
-+#endif
 +	new_fptr = make_ssa_name(new_fptr, NULL);
 +
 +	// build asm volatile("orq %%r12, %0\n\t" : "=r"(new_fptr) : "0"(old_fptr));
@@ -106430,7 +106925,7 @@ index 0000000..a25306b
 +	basic_block bb;
 +
 +	// 1. loop through BBs and GIMPLE statements
-+	FOR_EACH_BB(bb) {
++	FOR_EACH_BB_FN(bb, cfun) {
 +		gimple_stmt_iterator gsi;
 +
 +		for (gsi = gsi_start_bb(bb); !gsi_end_p(gsi); gsi_next(&gsi)) {
@@ -106543,30 +107038,196 @@ index 0000000..a25306b
 +	return 0;
 +}
 +
++static bool kernexec_cmodel_check(void)
++{
++	tree section;
++
++	if (ix86_cmodel != CM_KERNEL)
++		return false;
++
++	section = lookup_attribute("section", DECL_ATTRIBUTES(current_function_decl));
++	if (!section || !TREE_VALUE(section))
++		return true;
++
++	section = TREE_VALUE(TREE_VALUE(section));
++	if (strncmp(TREE_STRING_POINTER(section), ".vsyscall_", 10))
++		return true;
++
++	return false;
++}
++
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data kernexec_reload_pass_data = {
++#else
++static struct gimple_opt_pass kernexec_reload_pass = {
++	.pass = {
++#endif
++		.type			= GIMPLE_PASS,
++		.name			= "kernexec_reload",
++#if BUILDING_GCC_VERSION >= 4008
++		.optinfo_flags		= OPTGROUP_NONE,
++#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= true,
++		.has_execute		= true,
++#else
++		.gate			= kernexec_cmodel_check,
++		.execute		= execute_kernexec_reload,
++		.sub			= NULL,
++		.next			= NULL,
++		.static_pass_number	= 0,
++#endif
++		.tv_id			= TV_NONE,
++		.properties_required	= 0,
++		.properties_provided	= 0,
++		.properties_destroyed	= 0,
++		.todo_flags_start	= 0,
++		.todo_flags_finish	= TODO_verify_ssa | TODO_verify_stmts | TODO_dump_func | TODO_remove_unused_locals | TODO_update_ssa_no_phi
++#if BUILDING_GCC_VERSION < 4009
++	}
++#endif
++};
++
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data kernexec_fptr_pass_data = {
++#else
++static struct gimple_opt_pass kernexec_fptr_pass = {
++	.pass = {
++#endif
++		.type			= GIMPLE_PASS,
++		.name			= "kernexec_fptr",
++#if BUILDING_GCC_VERSION >= 4008
++		.optinfo_flags		= OPTGROUP_NONE,
++#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= true,
++		.has_execute		= true,
++#else
++		.gate			= kernexec_cmodel_check,
++		.execute		= execute_kernexec_fptr,
++		.sub			= NULL,
++		.next			= NULL,
++		.static_pass_number	= 0,
++#endif
++		.tv_id			= TV_NONE,
++		.properties_required	= 0,
++		.properties_provided	= 0,
++		.properties_destroyed	= 0,
++		.todo_flags_start	= 0,
++		.todo_flags_finish	= TODO_verify_ssa | TODO_verify_stmts | TODO_dump_func | TODO_remove_unused_locals | TODO_update_ssa_no_phi
++#if BUILDING_GCC_VERSION < 4009
++	}
++#endif
++};
++
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data kernexec_retaddr_pass_data = {
++#else
++static struct rtl_opt_pass kernexec_retaddr_pass = {
++	.pass = {
++#endif
++		.type			= RTL_PASS,
++		.name			= "kernexec_retaddr",
++#if BUILDING_GCC_VERSION >= 4008
++		.optinfo_flags		= OPTGROUP_NONE,
++#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= true,
++		.has_execute		= true,
++#else
++		.gate			= kernexec_cmodel_check,
++		.execute		= execute_kernexec_retaddr,
++		.sub			= NULL,
++		.next			= NULL,
++		.static_pass_number	= 0,
++#endif
++		.tv_id			= TV_NONE,
++		.properties_required	= 0,
++		.properties_provided	= 0,
++		.properties_destroyed	= 0,
++		.todo_flags_start	= 0,
++		.todo_flags_finish	= TODO_dump_func | TODO_ggc_collect
++#if BUILDING_GCC_VERSION < 4009
++	}
++#endif
++};
++
++#if BUILDING_GCC_VERSION >= 4009
++namespace {
++class kernexec_reload_pass : public gimple_opt_pass {
++public:
++	kernexec_reload_pass() : gimple_opt_pass(kernexec_reload_pass_data, g) {}
++	bool gate() { return kernexec_cmodel_check(); }
++	unsigned int execute() { return execute_kernexec_reload(); }
++};
++
++class kernexec_fptr_pass : public gimple_opt_pass {
++public:
++	kernexec_fptr_pass() : gimple_opt_pass(kernexec_fptr_pass_data, g) {}
++	bool gate() { return kernexec_cmodel_check(); }
++	unsigned int execute() { return execute_kernexec_fptr(); }
++};
++
++class kernexec_retaddr_pass : public rtl_opt_pass {
++public:
++	kernexec_retaddr_pass() : rtl_opt_pass(kernexec_retaddr_pass_data, g) {}
++	bool gate() { return kernexec_cmodel_check(); }
++	unsigned int execute() { return execute_kernexec_retaddr(); }
++};
++}
++#endif
++
++static struct opt_pass *make_kernexec_reload_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new kernexec_reload_pass();
++#else
++	return &kernexec_reload_pass.pass;
++#endif
++}
++
++static struct opt_pass *make_kernexec_fptr_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new kernexec_fptr_pass();
++#else
++	return &kernexec_fptr_pass.pass;
++#endif
++}
++
++static struct opt_pass *make_kernexec_retaddr_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new kernexec_retaddr_pass();
++#else
++	return &kernexec_retaddr_pass.pass;
++#endif
++}
++
 +int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version *version)
 +{
 +	const char * const plugin_name = plugin_info->base_name;
 +	const int argc = plugin_info->argc;
 +	const struct plugin_argument * const argv = plugin_info->argv;
 +	int i;
-+	struct register_pass_info kernexec_reload_pass_info = {
-+		.pass				= &kernexec_reload_pass.pass,
-+		.reference_pass_name		= "ssa",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op 			= PASS_POS_INSERT_AFTER
-+	};
-+	struct register_pass_info kernexec_fptr_pass_info = {
-+		.pass				= &kernexec_fptr_pass.pass,
-+		.reference_pass_name		= "ssa",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op 			= PASS_POS_INSERT_AFTER
-+	};
-+	struct register_pass_info kernexec_retaddr_pass_info = {
-+		.pass				= &kernexec_retaddr_pass.pass,
-+		.reference_pass_name		= "pro_and_epilogue",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op 			= PASS_POS_INSERT_AFTER
-+	};
++	struct register_pass_info kernexec_reload_pass_info;
++	struct register_pass_info kernexec_fptr_pass_info;
++	struct register_pass_info kernexec_retaddr_pass_info;
++
++	kernexec_reload_pass_info.pass				= make_kernexec_reload_pass();
++	kernexec_reload_pass_info.reference_pass_name		= "ssa";
++	kernexec_reload_pass_info.ref_pass_instance_number	= 1;
++	kernexec_reload_pass_info.pos_op 			= PASS_POS_INSERT_AFTER;
++
++	kernexec_fptr_pass_info.pass				= make_kernexec_fptr_pass();
++	kernexec_fptr_pass_info.reference_pass_name		= "ssa";
++	kernexec_fptr_pass_info.ref_pass_instance_number	= 1;
++	kernexec_fptr_pass_info.pos_op 				= PASS_POS_INSERT_AFTER;
++
++	kernexec_retaddr_pass_info.pass				= make_kernexec_retaddr_pass();
++	kernexec_retaddr_pass_info.reference_pass_name		= "pro_and_epilogue";
++	kernexec_retaddr_pass_info.ref_pass_instance_number	= 1;
++	kernexec_retaddr_pass_info.pos_op 			= PASS_POS_INSERT_AFTER;
 +
 +	if (!plugin_default_version_check(version, &gcc_version)) {
 +		error(G_("incompatible gcc/plugin versions"));
@@ -106609,12 +107270,12 @@ index 0000000..a25306b
 +}
 diff --git a/tools/gcc/latent_entropy_plugin.c b/tools/gcc/latent_entropy_plugin.c
 new file mode 100644
-index 0000000..679b9ef
+index 0000000..f04b680
 --- /dev/null
 +++ b/tools/gcc/latent_entropy_plugin.c
-@@ -0,0 +1,335 @@
+@@ -0,0 +1,325 @@
 +/*
-+ * Copyright 2012-2013 by the PaX Team <pageexec@freemail.hu>
++ * Copyright 2012-2014 by the PaX Team <pageexec@freemail.hu>
 + * Licensed under the GPL v2
 + *
 + * Note: the choice of the license means that the compilation process is
@@ -106633,63 +107294,16 @@ index 0000000..679b9ef
 + * BUGS:
 + * - LTO needs -flto-partition=none for now
 + */
-+#include "gcc-plugin.h"
-+#include "config.h"
-+#include "system.h"
-+#include "coretypes.h"
-+#include "tree.h"
-+#include "tree-pass.h"
-+#include "flags.h"
-+#include "intl.h"
-+#include "toplev.h"
-+#include "plugin.h"
-+//#include "expr.h" where are you...
-+#include "diagnostic.h"
-+#include "plugin-version.h"
-+#include "tm.h"
-+#include "function.h"
-+#include "basic-block.h"
-+#include "gimple.h"
-+#include "rtl.h"
-+#include "emit-rtl.h"
-+#include "tree-flow.h"
-+#include "langhooks.h"
 +
-+#if BUILDING_GCC_VERSION >= 4008
-+#define TODO_dump_func 0
-+#endif
++#include "gcc-common.h"
 +
 +int plugin_is_GPL_compatible;
 +
 +static tree latent_entropy_decl;
 +
 +static struct plugin_info latent_entropy_plugin_info = {
-+	.version	= "201308230230",
++	.version	= "201401260140",
 +	.help		= NULL
-+};
-+
-+static unsigned int execute_latent_entropy(void);
-+static bool gate_latent_entropy(void);
-+
-+static struct gimple_opt_pass latent_entropy_pass = {
-+	.pass = {
-+		.type			= GIMPLE_PASS,
-+		.name			= "latent_entropy",
-+#if BUILDING_GCC_VERSION >= 4008
-+		.optinfo_flags		= OPTGROUP_NONE,
-+#endif
-+		.gate			= gate_latent_entropy,
-+		.execute		= execute_latent_entropy,
-+		.sub			= NULL,
-+		.next			= NULL,
-+		.static_pass_number	= 0,
-+		.tv_id			= TV_NONE,
-+		.properties_required	= PROP_gimple_leh | PROP_cfg,
-+		.properties_provided	= 0,
-+		.properties_destroyed	= 0,
-+		.todo_flags_start	= 0, //TODO_verify_ssa | TODO_verify_flow | TODO_verify_stmts,
-+		.todo_flags_finish	= TODO_verify_ssa | TODO_verify_stmts | TODO_dump_func | TODO_update_ssa
-+	}
 +};
 +
 +static unsigned HOST_WIDE_INT seed;
@@ -106802,17 +107416,13 @@ index 0000000..679b9ef
 +
 +	// 1. create temporary copy of latent_entropy
 +	temp = create_tmp_var(unsigned_intDI_type_node, "temp_latent_entropy");
-+#if BUILDING_GCC_VERSION <= 4007
 +	add_referenced_var(temp);
-+#endif
 +
 +	// 2. read...
 +	temp = make_ssa_name(temp, NULL);
 +	assign = gimple_build_assign(temp, latent_entropy_decl);
 +	SSA_NAME_DEF_STMT(temp) = assign;
-+#if BUILDING_GCC_VERSION <= 4007
 +	add_referenced_var(latent_entropy_decl);
-+#endif
 +	gsi = gsi_after_labels(bb);
 +	gsi_insert_after(&gsi, assign, GSI_NEW_STMT);
 +	update_stmt(assign);
@@ -106841,13 +107451,9 @@ index 0000000..679b9ef
 +	if (!latent_entropy_decl) {
 +		struct varpool_node *node;
 +
-+#if BUILDING_GCC_VERSION <= 4007
-+		for (node = varpool_nodes; node; node = node->next) {
-+			tree var = node->decl;
-+#else
 +		FOR_EACH_VARIABLE(node) {
-+			tree var = node->symbol.decl;
-+#endif
++			tree var = NODE_DECL(node);
++
 +			if (strcmp(IDENTIFIER_POINTER(DECL_NAME(var)), "latent_entropy"))
 +				continue;
 +			latent_entropy_decl = var;
@@ -106864,15 +107470,13 @@ index 0000000..679b9ef
 +
 +	// 1. create local entropy variable
 +	local_entropy = create_tmp_var(unsigned_intDI_type_node, "local_entropy");
-+#if BUILDING_GCC_VERSION <= 4007
 +	add_referenced_var(local_entropy);
 +	mark_sym_for_renaming(local_entropy);
-+#endif
 +
 +	// 2. initialize local entropy variable
-+	bb = split_block_after_labels(ENTRY_BLOCK_PTR)->dest;
++	bb = split_block_after_labels(ENTRY_BLOCK_PTR_FOR_FN(cfun))->dest;
 +	if (dom_info_available_p(CDI_DOMINATORS))
-+		set_immediate_dominator(CDI_DOMINATORS, bb, ENTRY_BLOCK_PTR);
++		set_immediate_dominator(CDI_DOMINATORS, bb, ENTRY_BLOCK_PTR_FOR_FN(cfun));
 +	gsi = gsi_start_bb(bb);
 +
 +	assign = gimple_build_assign(local_entropy, build_int_cstu(unsigned_intDI_type_node, get_random_const()));
@@ -106883,15 +107487,15 @@ index 0000000..679b9ef
 +	bb = bb->next_bb;
 +
 +	// 3. instrument each BB with an operation on the local entropy variable
-+	while (bb != EXIT_BLOCK_PTR) {
++	while (bb != EXIT_BLOCK_PTR_FOR_FN(cfun)) {
 +		perturb_local_entropy(bb, local_entropy);
 +//debug_bb(bb);
 +		bb = bb->next_bb;
 +	};
 +
 +	// 4. mix local entropy into the global entropy variable
-+	perturb_latent_entropy(EXIT_BLOCK_PTR->prev_bb, local_entropy);
-+//debug_bb(EXIT_BLOCK_PTR->prev_bb);
++	perturb_latent_entropy(EXIT_BLOCK_PTR_FOR_FN(cfun)->prev_bb, local_entropy);
++//debug_bb(EXIT_BLOCK_PTR_FOR_FN(cfun)->prev_bb);
 +	return 0;
 +}
 +
@@ -106899,12 +107503,7 @@ index 0000000..679b9ef
 +{
 +	tree latent_entropy_type;
 +
-+#if BUILDING_GCC_VERSION >= 4007
 +	seed = get_random_seed(false);
-+#else
-+	sscanf(get_random_seed(false), "%" HOST_WIDE_INT_PRINT "x", &seed);
-+	seed *= seed;
-+#endif
 +
 +	if (in_lto_p)
 +		return;
@@ -106926,15 +107525,67 @@ index 0000000..679b9ef
 +//	varpool_mark_needed_node(latent_entropy_decl);
 +}
 +
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data latent_entropy_pass_data = {
++#else
++static struct gimple_opt_pass latent_entropy_pass = {
++	.pass = {
++#endif
++		.type			= GIMPLE_PASS,
++		.name			= "latent_entropy",
++#if BUILDING_GCC_VERSION >= 4008
++		.optinfo_flags		= OPTGROUP_NONE,
++#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= true,
++		.has_execute		= true,
++#else
++		.gate			= gate_latent_entropy,
++		.execute		= execute_latent_entropy,
++		.sub			= NULL,
++		.next			= NULL,
++		.static_pass_number	= 0,
++#endif
++		.tv_id			= TV_NONE,
++		.properties_required	= PROP_gimple_leh | PROP_cfg,
++		.properties_provided	= 0,
++		.properties_destroyed	= 0,
++		.todo_flags_start	= 0, //TODO_verify_ssa | TODO_verify_flow | TODO_verify_stmts,
++		.todo_flags_finish	= TODO_verify_ssa | TODO_verify_stmts | TODO_dump_func | TODO_update_ssa
++#if BUILDING_GCC_VERSION < 4009
++	}
++#endif
++};
++
++#if BUILDING_GCC_VERSION >= 4009
++namespace {
++class latent_entropy_pass : public gimple_opt_pass {
++public:
++	latent_entropy_pass() : gimple_opt_pass(latent_entropy_pass_data, g) {}
++	bool gate() { return gate_latent_entropy(); }
++	unsigned int execute() { return execute_latent_entropy(); }
++};
++}
++#endif
++
++static struct opt_pass *make_latent_entropy_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new latent_entropy_pass();
++#else
++	return &latent_entropy_pass.pass;
++#endif
++}
++
 +int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version *version)
 +{
 +	const char * const plugin_name = plugin_info->base_name;
-+	struct register_pass_info latent_entropy_pass_info = {
-+		.pass				= &latent_entropy_pass.pass,
-+		.reference_pass_name		= "optimized",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op 			= PASS_POS_INSERT_BEFORE
-+	};
++	struct register_pass_info latent_entropy_pass_info;
++
++	latent_entropy_pass_info.pass				= make_latent_entropy_pass();
++	latent_entropy_pass_info.reference_pass_name		= "optimized";
++	latent_entropy_pass_info.ref_pass_instance_number	= 1;
++	latent_entropy_pass_info.pos_op 			= PASS_POS_INSERT_BEFORE;
 +
 +	if (!plugin_default_version_check(version, &gcc_version)) {
 +		error(G_("incompatible gcc/plugin versions"));
@@ -106950,10 +107601,10 @@ index 0000000..679b9ef
 +}
 diff --git a/tools/gcc/size_overflow_hash.data b/tools/gcc/size_overflow_hash.data
 new file mode 100644
-index 0000000..2d131cc
+index 0000000..7b67f2b
 --- /dev/null
 +++ b/tools/gcc/size_overflow_hash.data
-@@ -0,0 +1,5998 @@
+@@ -0,0 +1,6001 @@
 +intel_fake_agp_alloc_by_type_1 intel_fake_agp_alloc_by_type 1 1 NULL
 +ocfs2_get_refcount_tree_3 ocfs2_get_refcount_tree 0 3 NULL
 +storvsc_connect_to_vsp_22 storvsc_connect_to_vsp 2 22 NULL
@@ -107612,6 +108263,7 @@ index 0000000..2d131cc
 +ext3_try_to_allocate_7590 ext3_try_to_allocate 3-5-0 7590 NULL
 +create_dir_7614 create_dir 0 7614 NULL nohasharray
 +groups_alloc_7614 groups_alloc 1 7614 &create_dir_7614
++cpumask_first_7648 cpumask_first 0 7648 NULL
 +set_connectable_7649 set_connectable 4 7649 NULL
 +skb_copy_expand_7685 skb_copy_expand 3-2 7685 NULL nohasharray
 +acpi_ex_allocate_name_string_7685 acpi_ex_allocate_name_string 1-2 7685 &skb_copy_expand_7685
@@ -109798,6 +110450,7 @@ index 0000000..2d131cc
 +lbs_failcount_read_31063 lbs_failcount_read 3 31063 NULL
 +find_next_bit_le_31064 find_next_bit_le 0-2-3 31064 NULL
 +sys_mincore_31079 sys_mincore 2-1 31079 NULL
++scb_status_31084 scb_status 0 31084 NULL
 +sctp_setsockopt_context_31091 sctp_setsockopt_context 3 31091 NULL
 +find_mergeable_31093 find_mergeable 2 31093 NULL
 +compat_sys_get_mempolicy_31109 compat_sys_get_mempolicy 3 31109 NULL
@@ -111385,6 +112038,7 @@ index 0000000..2d131cc
 +hash_setkey_48310 hash_setkey 3 48310 NULL
 +bcm_download_config_file_48313 bcm_download_config_file 0 48313 NULL
 +skb_add_data_48363 skb_add_data 3 48363 NULL
++eexp_start_irq_48364 eexp_start_irq 2 48364 NULL
 +iscsi_complete_pdu_48372 iscsi_complete_pdu 4 48372 NULL
 +lbs_debugfs_write_48413 lbs_debugfs_write 3 48413 NULL
 +snd_power_wait_48422 snd_power_wait 0 48422 NULL
@@ -112954,12 +113608,12 @@ index 0000000..2d131cc
 +selnl_msglen_65499 selnl_msglen 0 65499 NULL
 diff --git a/tools/gcc/size_overflow_plugin.c b/tools/gcc/size_overflow_plugin.c
 new file mode 100644
-index 0000000..5515dcb
+index 0000000..94aa56d
 --- /dev/null
 +++ b/tools/gcc/size_overflow_plugin.c
-@@ -0,0 +1,3927 @@
+@@ -0,0 +1,4040 @@
 +/*
-+ * Copyright 2011, 2012, 2013 by Emese Revfy <re.emese@gmail.com>
++ * Copyright 2011-2014 by Emese Revfy <re.emese@gmail.com>
 + * Licensed under the GPL v2, or (at your option) v3
 + *
 + * Homepage:
@@ -112977,32 +113631,15 @@ index 0000000..5515dcb
 + * $ gcc -fplugin=size_overflow_plugin.so test.c  -O2
 + */
 +
-+#include "gcc-plugin.h"
-+#include "config.h"
-+#include "system.h"
-+#include "coretypes.h"
-+#include "tree.h"
-+#include "tree-pass.h"
-+#include "intl.h"
-+#include "plugin-version.h"
-+#include "tm.h"
-+#include "toplev.h"
-+#include "function.h"
-+#include "tree-flow.h"
-+#include "plugin.h"
-+#include "gimple.h"
-+#include "diagnostic.h"
-+#include "cfgloop.h"
++#include "gcc-common.h"
 +
-+#if BUILDING_GCC_VERSION >= 4008
-+#define TODO_dump_func 0
-+#define TODO_dump_cgraph 0
-+#endif
++int plugin_is_GPL_compatible;
 +
-+#define __unused __attribute__((__unused__))
-+#define ASM_NAME(node) IDENTIFIER_POINTER(DECL_ASSEMBLER_NAME(node))
-+#define NAME(node) IDENTIFIER_POINTER(DECL_NAME(node))
-+#define NAME_LEN(node) IDENTIFIER_LENGTH(DECL_NAME(node))
++static struct plugin_info size_overflow_plugin_info = {
++	.version	= "20140128",
++	.help		= "no-size-overflow\tturn off size overflow checking\n",
++};
++
 +#define BEFORE_STMT true
 +#define AFTER_STMT false
 +#define CREATE_NEW_VAR NULL_TREE
@@ -113018,13 +113655,9 @@ index 0000000..5515dcb
 +#define MIN_CHECK true
 +#define MAX_CHECK false
 +
-+#define TURN_OFF_ASM_STR "# size_overflow MARK_TURN_OFF\n\t"
-+#define YES_ASM_STR "# size_overflow MARK_YES\n\t"
-+#define OK_ASM_STR "# size_overflow\n\t"
-+
-+#if BUILDING_GCC_VERSION == 4005
-+#define DECL_CHAIN(NODE) (TREE_CHAIN(DECL_MINIMAL_CHECK(NODE)))
-+#endif
++#define TURN_OFF_ASM_STR "# size_overflow MARK_TURN_OFF "
++#define YES_ASM_STR "# size_overflow MARK_YES "
++#define OK_ASM_STR "# size_overflow "
 +
 +struct size_overflow_hash {
 +	const struct size_overflow_hash * const next;
@@ -113044,7 +113677,7 @@ index 0000000..5515dcb
 +	struct visited *next;
 +	const_tree fndecl;
 +	unsigned int num;
-+	const_gimple first_stmt;
++	const_tree rhs;
 +};
 +
 +struct next_cgraph_node {
@@ -113070,9 +113703,6 @@ index 0000000..5515dcb
 +	gimple intentional_mark_from_gimple;
 +};
 +
-+int plugin_is_GPL_compatible;
-+void debug_gimple_stmt(gimple gs);
-+
 +static tree report_size_overflow_decl;
 +static const_tree const_char_ptr_type_node;
 +
@@ -113085,11 +113715,6 @@ index 0000000..5515dcb
 +static void check_size_overflow(struct cgraph_node *caller_node, gimple stmt, tree size_overflow_type, tree cast_rhs, tree rhs, bool before);
 +static tree get_size_overflow_type(gimple stmt, const_tree node);
 +static tree dup_assign(struct pointer_set_t *visited, gimple oldstmt, const_tree node, tree rhs1, tree rhs2, tree __unused rhs3);
-+
-+static struct plugin_info size_overflow_plugin_info = {
-+	.version	= "20131214beta",
-+	.help		= "no-size-overflow\tturn off size overflow checking\n",
-+};
 +
 +static tree handle_size_overflow_attribute(tree *node, tree __unused name, tree args, int __unused flags, bool *no_add_attrs)
 +{
@@ -113295,7 +113920,7 @@ index 0000000..5515dcb
 +struct function_hash {
 +	size_t tree_codes_len;
 +	unsigned char tree_codes[CODES_LIMIT];
-+	tree fndecl;
++	const_tree fndecl;
 +	unsigned int hash;
 +};
 +
@@ -113387,7 +114012,7 @@ index 0000000..5515dcb
 +		set_node_codes(TREE_VALUE(arg), fn_hash_data);
 +}
 +
-+static const struct size_overflow_hash *get_function_hash(tree fndecl)
++static const struct size_overflow_hash *get_function_hash(const_tree fndecl)
 +{
 +	const struct size_overflow_hash *entry;
 +	struct function_hash fn_hash_data;
@@ -113403,7 +114028,7 @@ index 0000000..5515dcb
 +	set_function_codes(&fn_hash_data);
 +	gcc_assert(fn_hash_data.tree_codes_len != 0);
 +
-+	func_name = ASM_NAME(fn_hash_data.fndecl);
++	func_name = DECL_NAME_POINTER(fn_hash_data.fndecl);
 +	set_hash(func_name, &fn_hash_data);
 +
 +	entry = size_overflow_hash[fn_hash_data.hash];
@@ -113416,7 +114041,7 @@ index 0000000..5515dcb
 +	return NULL;
 +}
 +
-+static void print_missing_msg(tree func, unsigned int argnum)
++static void print_missing_msg(const_tree func, unsigned int argnum)
 +{
 +	location_t loc;
 +	const char *curfunc;
@@ -113426,7 +114051,7 @@ index 0000000..5515dcb
 +	fn_hash_data.tree_codes_len = 0;
 +
 +	loc = DECL_SOURCE_LOCATION(fn_hash_data.fndecl);
-+	curfunc = ASM_NAME(fn_hash_data.fndecl);
++	curfunc = DECL_NAME_POINTER(fn_hash_data.fndecl);
 +
 +	set_function_codes(&fn_hash_data);
 +	set_hash(curfunc, &fn_hash_data);
@@ -113443,7 +114068,7 @@ index 0000000..5515dcb
 +		arg = SSA_NAME_VAR(arg);
 +
 +	for (var = DECL_ARGUMENTS(func); var; var = TREE_CHAIN(var), argnum++) {
-+		if (!operand_equal_p(arg, var, 0) && strcmp(NAME(var), NAME(arg)))
++		if (!operand_equal_p(arg, var, 0) && strcmp(DECL_NAME_POINTER(var), DECL_NAME_POINTER(arg)))
 +			continue;
 +		if (!skip_types(var))
 +			return argnum;
@@ -113456,9 +114081,7 @@ index 0000000..5515dcb
 +{
 +	tree new_var = create_tmp_var(type, "cicus");
 +
-+#if BUILDING_GCC_VERSION <= 4007
 +	add_referenced_var(new_var);
-+#endif
 +	return new_var;
 +}
 +
@@ -113677,7 +114300,7 @@ index 0000000..5515dcb
 +
 +	if (rhs2 != NULL_TREE)
 +		gimple_assign_set_rhs2(stmt, rhs2);
-+#if BUILDING_GCC_VERSION >= 4007
++#if BUILDING_GCC_VERSION >= 4006
 +	if (rhs3 != NULL_TREE)
 +		gimple_assign_set_rhs3(stmt, rhs3);
 +#endif
@@ -113700,9 +114323,9 @@ index 0000000..5515dcb
 +	gcc_assert(SSA_NAME_IS_DEFAULT_DEF(arg));
 +
 +	if (bb->index == 0) {
-+		first_bb = split_block_after_labels(ENTRY_BLOCK_PTR)->dest;
++		first_bb = split_block_after_labels(ENTRY_BLOCK_PTR_FOR_FN(cfun))->dest;
 +		gcc_assert(dom_info_available_p(CDI_DOMINATORS));
-+		set_immediate_dominator(CDI_DOMINATORS, first_bb, ENTRY_BLOCK_PTR);
++		set_immediate_dominator(CDI_DOMINATORS, first_bb, ENTRY_BLOCK_PTR_FOR_FN(cfun));
 +		bb = first_bb;
 +	}
 +
@@ -113816,9 +114439,9 @@ index 0000000..5515dcb
 +}
 +
 +#if BUILDING_GCC_VERSION <= 4007
-+static tree create_new_phi_node(VEC(tree, gc) *args, tree ssa_name_var, gimple oldstmt)
++static tree create_new_phi_node(VEC(tree, heap) **args, tree ssa_name_var, gimple oldstmt)
 +#else
-+static tree create_new_phi_node(vec<tree, va_gc> *args, tree ssa_name_var, gimple oldstmt)
++static tree create_new_phi_node(vec<tree, va_heap, vl_embed> *&args, tree ssa_name_var, gimple oldstmt)
 +#endif
 +{
 +	gimple new_phi;
@@ -113827,7 +114450,7 @@ index 0000000..5515dcb
 +	location_t loc = gimple_location(oldstmt);
 +
 +#if BUILDING_GCC_VERSION <= 4007
-+	gcc_assert(!VEC_empty(tree, args));
++	gcc_assert(!VEC_empty(tree, *args));
 +#else
 +	gcc_assert(!args->is_empty());
 +#endif
@@ -113836,21 +114459,17 @@ index 0000000..5515dcb
 +	result = gimple_phi_result(new_phi);
 +	ssa_name_var = SSA_NAME_VAR(result);
 +
-+
-+#if BUILDING_GCC_VERSION == 4005
-+	for (i = 0; i < VEC_length(tree, args); i++) {
-+		arg = VEC_index(tree, args, i);
-+#elif BUILDING_GCC_VERSION <= 4007
-+	FOR_EACH_VEC_ELT(tree, args, i, arg) {
++#if BUILDING_GCC_VERSION <= 4007
++	FOR_EACH_VEC_ELT(tree, *args, i, arg) {
 +#else
-+	FOR_EACH_VEC_ELT(*args, i, arg) {
++	FOR_EACH_VEC_SAFE_ELT(args, i, arg) {
 +#endif
 +		arg = create_new_phi_arg(ssa_name_var, arg, oldstmt, i);
 +		add_phi_arg(new_phi, arg, gimple_phi_arg_edge(oldstmt, i), loc);
 +	}
 +
 +#if BUILDING_GCC_VERSION <= 4007
-+	VEC_free(tree, gc, args);
++	VEC_free(tree, heap, *args);
 +#else
 +	vec_free(args);
 +#endif
@@ -113862,19 +114481,14 @@ index 0000000..5515dcb
 +{
 +	tree ssa_name_var = NULL_TREE;
 +#if BUILDING_GCC_VERSION <= 4007
-+	VEC(tree, gc) *args;
++	VEC(tree, heap) *args = NULL;
 +#else
-+	vec<tree, va_gc> *args;
++	vec<tree, va_heap, vl_embed> *args = NULL;
 +#endif
 +	gimple oldstmt = get_def_stmt(orig_result);
 +	unsigned int i, len = gimple_phi_num_args(oldstmt);
 +
 +	pointer_set_insert(visited, oldstmt);
-+#if BUILDING_GCC_VERSION <= 4007
-+	args = VEC_alloc(tree, gc, len);
-+#else
-+	vec_alloc(args, len);
-+#endif
 +	for (i = 0; i < len; i++) {
 +		tree arg, new_arg;
 +
@@ -113891,13 +114505,17 @@ index 0000000..5515dcb
 +		}
 +
 +#if BUILDING_GCC_VERSION <= 4007
-+		VEC_safe_push(tree, gc, args, new_arg);
++		VEC_safe_push(tree, heap, args, new_arg);
 +#else
 +		vec_safe_push(args, new_arg);
 +#endif
 +	}
 +
++#if BUILDING_GCC_VERSION <= 4007
++	return create_new_phi_node(&args, ssa_name_var, oldstmt);
++#else
 +	return create_new_phi_node(args, ssa_name_var, oldstmt);
++#endif
 +}
 +
 +static tree change_assign_rhs(gimple stmt, const_tree orig_rhs, tree new_rhs)
@@ -114165,20 +114783,6 @@ index 0000000..5515dcb
 +	return build1(ADDR_EXPR, ptr_type_node, string);
 +}
 +
-+#if BUILDING_GCC_VERSION <= 4006
-+struct cgraph_node *cgraph_get_create_node(tree decl);
-+
-+struct cgraph_node *cgraph_get_create_node(tree decl)
-+{
-+	struct cgraph_node *node;
-+
-+	node = cgraph_get_node(decl);
-+	if (node)
-+		return node;
-+	return cgraph_node(decl);
-+}
-+#endif
-+
 +static void insert_cond_result(struct cgraph_node *caller_node, basic_block bb_true, const_gimple stmt, const_tree arg, bool min)
 +{
 +	gimple func_stmt;
@@ -114207,12 +114811,12 @@ index 0000000..5515dcb
 +	loc_file = build_string(strlen(xloc.file) + 1, xloc.file);
 +	loc_file = create_string_param(loc_file);
 +
-+	current_func = build_string(NAME_LEN(current_function_decl) + 1, NAME(current_function_decl));
++	current_func = build_string(DECL_NAME_LENGTH(current_function_decl) + 1, DECL_NAME_POINTER(current_function_decl));
 +	current_func = create_string_param(current_func);
 +
 +	gcc_assert(DECL_NAME(SSA_NAME_VAR(arg)) != NULL);
 +	call_count++;
-+	len = asprintf(&ssa_name_buf, "%s_%u %s, count: %u\n", NAME(SSA_NAME_VAR(arg)), SSA_NAME_VERSION(arg), min ? "min" : "max", call_count);
++	len = asprintf(&ssa_name_buf, "%s_%u %s, count: %u\n", DECL_NAME_POINTER(SSA_NAME_VAR(arg)), SSA_NAME_VERSION(arg), min ? "min" : "max", call_count);
 +	gcc_assert(len > 0);
 +	ssa_name = build_string(len + 1, ssa_name_buf);
 +	free(ssa_name_buf);
@@ -114225,11 +114829,7 @@ index 0000000..5515dcb
 +	callee_node = cgraph_get_create_node(report_size_overflow_decl);
 +	frequency = compute_call_stmt_bb_frequency(current_function_decl, bb_true);
 +
-+#if BUILDING_GCC_VERSION <= 4006
 +	edge = cgraph_create_edge(caller_node, callee_node, func_stmt, bb_true->count, frequency, bb_true->loop_depth);
-+#else
-+	edge = cgraph_create_edge(caller_node, callee_node, func_stmt, bb_true->count, frequency);
-+#endif
 +	gcc_assert(edge != NULL);
 +}
 +
@@ -114526,7 +115126,7 @@ index 0000000..5515dcb
 +	return dup_assign(visited, def_stmt, lhs, new_rhs1, new_rhs2, NULL_TREE);
 +}
 +
-+#if BUILDING_GCC_VERSION >= 4007
++#if BUILDING_GCC_VERSION >= 4006
 +static tree get_new_rhs(struct pointer_set_t *visited, struct cgraph_node *caller_node, tree size_overflow_type, tree rhs)
 +{
 +	if (is_gimple_constant(rhs))
@@ -114648,7 +115248,7 @@ index 0000000..5515dcb
 +			return handle_unary_ops(visited, caller_node, def_stmt);
 +		case 3:
 +			return handle_binary_ops(visited, caller_node, lhs);
-+#if BUILDING_GCC_VERSION >= 4007
++#if BUILDING_GCC_VERSION >= 4006
 +		case 4:
 +			return handle_ternary_ops(visited, caller_node, lhs);
 +#endif
@@ -114691,7 +115291,7 @@ index 0000000..5515dcb
 +		case 2:
 +			set_rhs = &gimple_assign_set_rhs2;
 +			break;
-+#if BUILDING_GCC_VERSION > 4005
++#if BUILDING_GCC_VERSION >= 4006
 +		case 3:
 +			set_rhs = &gimple_assign_set_rhs3;
 +			break;
@@ -114710,7 +115310,7 @@ index 0000000..5515dcb
 +	update_stmt(stmt);
 +}
 +
-+static unsigned int get_correct_arg_count(unsigned int argnum, tree fndecl)
++static unsigned int get_correct_arg_count(unsigned int argnum, const_tree fndecl)
 +{
 +	const struct size_overflow_hash *hash;
 +	unsigned int new_argnum;
@@ -114737,7 +115337,7 @@ index 0000000..5515dcb
 +	gcc_assert(origarg != NULL_TREE);
 +
 +	for (arg = DECL_ARGUMENTS(fndecl), new_argnum = 1; arg; arg = TREE_CHAIN(arg), new_argnum++)
-+		if (operand_equal_p(origarg, arg, 0) || !strcmp(NAME(origarg), NAME(arg)))
++		if (operand_equal_p(origarg, arg, 0) || !strcmp(DECL_NAME_POINTER(origarg), DECL_NAME_POINTER(arg)))
 +			return new_argnum;
 +
 +	return CANNOT_FIND_ARG;
@@ -114750,20 +115350,12 @@ index 0000000..5515dcb
 +	struct next_cgraph_node *cur_node;
 +
 +	if (fndecl == RET_CHECK)
-+#if BUILDING_GCC_VERSION <= 4007
-+		new_callee_fndecl = node->decl;
-+#else
-+		new_callee_fndecl = node->symbol.decl;
-+#endif
++		new_callee_fndecl = NODE_DECL(node);
 +	else
 +		new_callee_fndecl = fndecl;
 +
 +	for (cur_node = head; cur_node; cur_node = cur_node->next) {
-+#if BUILDING_GCC_VERSION <= 4007
-+		if (!operand_equal_p(cur_node->current_function->decl, node->decl, 0))
-+#else
-+		if (!operand_equal_p(cur_node->current_function->symbol.decl, node->symbol.decl, 0))
-+#endif
++		if (!operand_equal_p(NODE_DECL(cur_node->current_function), NODE_DECL(node), 0))
 +			continue;
 +		if (!operand_equal_p(cur_node->callee_fndecl, new_callee_fndecl, 0))
 +			continue;
@@ -114789,11 +115381,7 @@ index 0000000..5515dcb
 +	new_node->next = NULL;
 +	new_node->num = num;
 +	if (fndecl == RET_CHECK)
-+#if BUILDING_GCC_VERSION <= 4007
-+		new_node->callee_fndecl = node->decl;
-+#else
-+		new_node->callee_fndecl = node->symbol.decl;
-+#endif
++		new_node->callee_fndecl = NODE_DECL(node);
 +	else
 +		new_node->callee_fndecl = fndecl;
 +
@@ -114830,7 +115418,7 @@ index 0000000..5515dcb
 +	return false;
 +}
 +
-+static bool is_in_hash_table(tree fndecl, unsigned int num)
++static bool is_in_hash_table(const_tree fndecl, unsigned int num)
 +{
 +	const struct size_overflow_hash *hash;
 +
@@ -114870,7 +115458,7 @@ index 0000000..5515dcb
 +/* Check if the function has a size_overflow attribute or it is in the size_overflow hash table.
 + * If the function is missing everywhere then print the missing message into stderr.
 + */
-+static bool is_missing_function(tree orig_fndecl, unsigned int num)
++static bool is_missing_function(const_tree orig_fndecl, unsigned int num)
 +{
 +	switch (DECL_FUNCTION_CODE(orig_fndecl)) {
 +#if BUILDING_GCC_VERSION >= 4008
@@ -114886,9 +115474,9 @@ index 0000000..5515dcb
 +	}
 +
 +	// skip test.c
-+	if (strcmp(NAME(current_function_decl), "coolmalloc")) {
++	if (strcmp(DECL_NAME_POINTER(current_function_decl), "coolmalloc")) {
 +		if (lookup_attribute("size_overflow", DECL_ATTRIBUTES(orig_fndecl)))
-+			warning(0, "unnecessary size_overflow attribute on: %s\n", NAME(orig_fndecl));
++			warning(0, "unnecessary size_overflow attribute on: %s\n", DECL_NAME_POINTER(orig_fndecl));
 +	}
 +
 +	if (is_in_hash_table(orig_fndecl, num))
@@ -114913,7 +115501,7 @@ index 0000000..5515dcb
 +static struct next_cgraph_node *check_missing_overflow_attribute_and_create_next_node(struct next_cgraph_node *cnodes, struct missing_functions *missing_fn_head)
 +{
 +	unsigned int num;
-+	tree orig_fndecl;
++	const_tree orig_fndecl;
 +	struct cgraph_node *next_node = NULL;
 +
 +	orig_fndecl = DECL_ORIGIN(missing_fn_head->fndecl);
@@ -114940,10 +115528,7 @@ index 0000000..5515dcb
 +	tree node;
 +	struct missing_functions *cur, *missing_fn_head = NULL;
 +
-+#if BUILDING_GCC_VERSION == 4005
-+	for (i = 0; i < VEC_length(tree, cur_node->last_nodes); i++) {
-+		node = VEC_index(tree, cur_node->last_nodes, i);
-+#elif BUILDING_GCC_VERSION <= 4007
++#if BUILDING_GCC_VERSION <= 4007
 +	FOR_EACH_VEC_ELT(tree, cur_node->last_nodes, i, node) {
 +#else
 +	FOR_EACH_VEC_ELT(*cur_node->last_nodes, i, node) {
@@ -115177,7 +115762,7 @@ index 0000000..5515dcb
 +	str = get_asm_string(stmt);
 +	if (!str)
 +		return false;
-+	return !strcmp(str, TURN_OFF_ASM_STR);
++	return !strncmp(str, TURN_OFF_ASM_STR, sizeof(TURN_OFF_ASM_STR) - 1);
 +}
 +
 +static bool is_size_overflow_intentional_asm_yes(const_gimple stmt)
@@ -115187,7 +115772,7 @@ index 0000000..5515dcb
 +	str = get_asm_string(stmt);
 +	if (!str)
 +		return false;
-+	return !strcmp(str, YES_ASM_STR);
++	return !strncmp(str, YES_ASM_STR, sizeof(YES_ASM_STR) - 1);
 +}
 +
 +static bool is_size_overflow_asm(const_gimple stmt)
@@ -115197,7 +115782,7 @@ index 0000000..5515dcb
 +	str = get_asm_string(stmt);
 +	if (!str)
 +		return false;
-+	return !strncmp(str, "# size_overflow", 15);
++	return !strncmp(str, OK_ASM_STR, sizeof(OK_ASM_STR) - 1);
 +}
 +
 +static void print_missing_intentional(enum mark callee_attr, enum mark caller_attr, const_tree decl, unsigned int argnum)
@@ -115211,7 +115796,7 @@ index 0000000..5515dcb
 +		return;
 +
 +	loc = DECL_SOURCE_LOCATION(decl);
-+	inform(loc, "The intentional_overflow attribute is missing from +%s+%u+", NAME(decl), argnum);
++	inform(loc, "The intentional_overflow attribute is missing from +%s+%u+", DECL_NAME_POINTER(decl), argnum);
 +}
 +
 +/* Get the type of the intentional_overflow attribute of a node
@@ -115265,10 +115850,7 @@ index 0000000..5515dcb
 +	tree last_node;
 +	enum mark mark = MARK_NO;
 +
-+#if BUILDING_GCC_VERSION == 4005
-+	for (i = 0; i < VEC_length(tree, cur_node->last_nodes); i++) {
-+		last_node = VEC_index(tree, cur_node->last_nodes, i);
-+#elif BUILDING_GCC_VERSION <= 4007
++#if BUILDING_GCC_VERSION <= 4007
 +	FOR_EACH_VEC_ELT(tree, cur_node->last_nodes, i, last_node) {
 +#else
 +	FOR_EACH_VEC_ELT(*cur_node->last_nodes, i, last_node) {
@@ -115396,10 +115978,7 @@ index 0000000..5515dcb
 +	if (code != PARM_DECL && code != FUNCTION_DECL && code != COMPONENT_REF)
 +		return;
 +
-+#if BUILDING_GCC_VERSION == 4005
-+	for (i = 0; i < VEC_length(tree, cur_node->last_nodes); i++) {
-+		element = VEC_index(tree, cur_node->last_nodes, i);
-+#elif BUILDING_GCC_VERSION <= 4007
++#if BUILDING_GCC_VERSION <= 4007
 +	FOR_EACH_VEC_ELT(tree, cur_node->last_nodes, i, element) {
 +#else
 +	FOR_EACH_VEC_ELT(*cur_node->last_nodes, i, element) {
@@ -115656,7 +116235,8 @@ index 0000000..5515dcb
 +static struct interesting_node *handle_stmt_by_cgraph_nodes_call(struct interesting_node *head, gimple stmt, struct next_cgraph_node *next_node)
 +{
 +	unsigned int argnum;
-+	tree fndecl, arg;
++	tree arg;
++	const_tree fndecl;
 +	struct next_cgraph_node *cur_node;
 +
 +	fndecl = gimple_call_fndecl(stmt);
@@ -115804,6 +116384,7 @@ index 0000000..5515dcb
 +
 +	if (gimple_asm_noutputs(stmt) == 0) {
 +		gsi = gsi_for_stmt(stmt);
++		ipa_remove_stmt_references(cgraph_get_create_node(current_function_decl), stmt);
 +		gsi_remove(&gsi, true);
 +		return;
 +	}
@@ -115868,7 +116449,7 @@ index 0000000..5515dcb
 +	basic_block bb;
 +	struct interesting_node *head = NULL;
 +
-+	FOR_ALL_BB(bb) {
++	FOR_ALL_BB_FN(bb, cfun) {
 +		gimple_stmt_iterator gsi;
 +
 +		for (gsi = gsi_start_bb(bb); !gsi_end_p(gsi); gsi_next(&gsi)) {
@@ -115930,7 +116511,7 @@ index 0000000..5515dcb
 +	new_visited = (struct visited *)xmalloc(sizeof(*new_visited));
 +	new_visited->fndecl = cur_node->fndecl;
 +	new_visited->num = cur_node->num;
-+	new_visited->first_stmt = cur_node->first_stmt;
++	new_visited->rhs = cur_node->node;
 +	new_visited->next = NULL;
 +
 +	if (!head)
@@ -115955,7 +116536,7 @@ index 0000000..5515dcb
 +			continue;
 +		if (cur_node->num != cur->num)
 +			continue;
-+		if (cur_node->first_stmt == cur->first_stmt)
++		if (cur_node->node == cur->rhs)
 +			return true;
 +	}
 +	return false;
@@ -115976,7 +116557,7 @@ index 0000000..5515dcb
 +{
 +	basic_block bb;
 +
-+	FOR_ALL_BB(bb) {
++	FOR_ALL_BB_FN(bb, cfun) {
 +		gimple_stmt_iterator si;
 +
 +		for (si = gsi_start_bb(bb); !gsi_end_p(si); gsi_next(&si))
@@ -115994,11 +116575,7 @@ index 0000000..5515dcb
 +	struct interesting_node *head, *cur_node;
 +	struct next_cgraph_node *cur_cnodes, *cnodes_head = NULL;
 +
-+#if BUILDING_GCC_VERSION <= 4007
-+	set_current_function_decl(node->decl);
-+#else
-+	set_current_function_decl(node->symbol.decl);
-+#endif
++	set_current_function_decl(NODE_DECL(node));
 +	call_count = 0;
 +
 +	head = collect_interesting_stmts(next_node);
@@ -116036,7 +116613,7 @@ index 0000000..5515dcb
 +{
 +	basic_block bb;
 +
-+	FOR_ALL_BB(bb) {
++	FOR_ALL_BB_FN(bb, cfun) {
 +		gimple_stmt_iterator si;
 +
 +		for (si = gsi_start_bb(bb); !gsi_end_p(si); gsi_next(&si))
@@ -116046,38 +116623,6 @@ index 0000000..5515dcb
 +	}
 +}
 +
-+#if BUILDING_GCC_VERSION <= 4006
-+static bool cgraph_function_with_gimple_body_p(struct cgraph_node *node)
-+{
-+	return node->analyzed && !node->thunk.thunk_p && !node->alias;
-+}
-+
-+static struct cgraph_node *cgraph_first_function_with_gimple_body(void)
-+{
-+	struct cgraph_node *node;
-+
-+	for (node = cgraph_nodes; node; node = node->next) {
-+		if (cgraph_function_with_gimple_body_p(node))
-+			return node;
-+	}
-+	return NULL;
-+}
-+
-+static inline struct cgraph_node *cgraph_next_function_with_gimple_body(struct cgraph_node *node)
-+{
-+	for (node = node->next; node; node = node->next) {
-+		if (cgraph_function_with_gimple_body_p(node))
-+			return node;
-+	}
-+	return NULL;
-+}
-+
-+#define FOR_EACH_FUNCTION_WITH_GIMPLE_BODY(node) \
-+	for ((node) = cgraph_first_function_with_gimple_body (); (node); \
-+		(node) = cgraph_next_function_with_gimple_body (node))
-+
-+#endif
-+
 +// Main entry point of the ipa pass: erases the plf flag of all stmts and iterates over all the functions
 +static unsigned int search_function(void)
 +{
@@ -116085,11 +116630,7 @@ index 0000000..5515dcb
 +	struct visited *visited = NULL;
 +
 +	FOR_EACH_FUNCTION_WITH_GIMPLE_BODY(node) {
-+#if BUILDING_GCC_VERSION <= 4007
-+		set_current_function_decl(node->decl);
-+#else
-+		set_current_function_decl(node->symbol.decl);
-+#endif
++		set_current_function_decl(NODE_DECL(node));
 +		set_plf_false();
 +		unset_current_function_decl();
 +	}
@@ -116107,24 +116648,34 @@ index 0000000..5515dcb
 +	return 0;
 +}
 +
-+static struct ipa_opt_pass_d pass_ipa = {
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data ipa_pass_data = {
++#else
++static struct ipa_opt_pass_d ipa_pass = {
 +	.pass = {
++#endif
 +		.type			= SIMPLE_IPA_PASS,
 +		.name			= "size_overflow",
 +#if BUILDING_GCC_VERSION >= 4008
 +		.optinfo_flags		= OPTGROUP_NONE,
 +#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= false,
++		.has_execute		= true,
++#else
 +		.gate			= NULL,
 +		.execute		= search_function,
 +		.sub			= NULL,
 +		.next			= NULL,
 +		.static_pass_number	= 0,
++#endif
 +		.tv_id			= TV_NONE,
 +		.properties_required	= 0,
 +		.properties_provided	= 0,
 +		.properties_destroyed	= 0,
 +		.todo_flags_start	= 0,
 +		.todo_flags_finish	= TODO_verify_ssa | TODO_verify_stmts | TODO_remove_unused_locals | TODO_ggc_collect | TODO_verify_flow | TODO_dump_cgraph | TODO_dump_func | TODO_update_ssa_no_phi,
++#if BUILDING_GCC_VERSION < 4009
 +	},
 +	.generate_summary		= NULL,
 +	.write_summary			= NULL,
@@ -116137,7 +116688,27 @@ index 0000000..5515dcb
 +	.function_transform_todo_flags_start		= 0,
 +	.function_transform		= NULL,
 +	.variable_transform		= NULL,
++#endif
 +};
++
++#if BUILDING_GCC_VERSION >= 4009
++namespace {
++class ipa_pass : public ipa_opt_pass_d {
++public:
++	ipa_pass() : ipa_opt_pass_d(ipa_pass_data, g, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL) {}
++	unsigned int execute() { return search_function(); }
++};
++}
++#endif
++
++static struct opt_pass *make_ipa_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new ipa_pass();
++#else
++	return &ipa_pass.pass;
++#endif
++}
 +
 +// data for the size_overflow asm stmt
 +struct asm_data {
@@ -116295,9 +116866,8 @@ index 0000000..5515dcb
 +
 +	switch (cur_fndecl_attr) {
 +	case MARK_NO:
-+		return MARK_NO;
 +	case MARK_TURN_OFF:
-+		return MARK_TURN_OFF;
++		return cur_fndecl_attr;
 +	default:
 +		print_missing_intentional(decl_attr, cur_fndecl_attr, fndecl, argnum);
 +		return MARK_YES;
@@ -116437,6 +117007,23 @@ index 0000000..5515dcb
 +	update_stmt(stmt);
 +}
 +
++static char *create_asm_comment(unsigned int argnum, const_gimple stmt , const char *mark_str)
++{
++	const char *fn_name;
++	char *asm_comment;
++	unsigned int len;
++
++	if (argnum == 0)
++		fn_name = DECL_NAME_POINTER(current_function_decl);
++	else
++		fn_name = DECL_NAME_POINTER(gimple_call_fndecl(stmt));
++
++	len = asprintf(&asm_comment, "%s %s %u", mark_str, fn_name, argnum);
++	gcc_assert(len > 0);
++
++	return asm_comment;
++}
++
 +static const char *convert_mark_to_str(enum mark mark)
 +{
 +	switch (mark) {
@@ -116465,8 +117052,6 @@ index 0000000..5515dcb
 +		return;
 +	}
 +
-+	gcc_assert(!is_size_overflow_intentional_asm_turn_off(asm_data->def_stmt));
-+
 +	asm_data->input = create_new_var(TREE_TYPE(asm_data->output));
 +	asm_data->input = make_ssa_name(asm_data->input, asm_data->def_stmt);
 +
@@ -116480,16 +117065,20 @@ index 0000000..5515dcb
 +		break;
 +	case GIMPLE_NOP: {
 +		enum mark mark;
-+		const char *str;
++		const char *mark_str;
++		char *asm_comment;
 +
 +		mark = check_intentional_attribute_gimple(asm_data->output, stmt, argnum);
-+		str = convert_mark_to_str(mark);
 +
 +		asm_data->input = asm_data->output;
 +		asm_data->output = NULL;
 +		asm_data->def_stmt = stmt;
 +
-+		create_asm_stmt(str, build_string(2, "rm"), NULL, asm_data);
++		mark_str = convert_mark_to_str(mark);
++		asm_comment = create_asm_comment(argnum, stmt, mark_str);
++
++		create_asm_stmt(asm_comment, build_string(2, "rm"), NULL, asm_data);
++		free(asm_comment);
 +		asm_data->input = NULL_TREE;
 +		break;
 +	}
@@ -116512,7 +117101,8 @@ index 0000000..5515dcb
 +static void create_size_overflow_asm(gimple stmt, tree output_node, unsigned int argnum)
 +{
 +	struct asm_data asm_data;
-+	const char *str;
++	const char *mark_str;
++	char *asm_comment;
 +	enum mark mark;
 +
 +	if (is_gimple_constant(output_node))
@@ -116520,18 +117110,156 @@ index 0000000..5515dcb
 +
 +	asm_data.output = output_node;
 +	mark = check_intentional_attribute_gimple(asm_data.output, stmt, argnum);
-+	if (mark == MARK_TURN_OFF)
-+		return;
-+
-+	search_missing_size_overflow_attribute_gimple(stmt, argnum);
++	if (mark != MARK_TURN_OFF)
++		search_missing_size_overflow_attribute_gimple(stmt, argnum);
 +
 +	asm_data.def_stmt = get_def_stmt(asm_data.output);
++	if (is_size_overflow_intentional_asm_turn_off(asm_data.def_stmt))
++		return;
++
 +	create_asm_input(stmt, argnum, &asm_data);
 +	if (asm_data.input == NULL_TREE)
 +		return;
 +
-+	str = convert_mark_to_str(mark);
-+	create_asm_stmt(str, build_string(1, "0"), build_string(3, "=rm"), &asm_data);
++	mark_str = convert_mark_to_str(mark);
++	asm_comment = create_asm_comment(argnum, stmt, mark_str);
++	create_asm_stmt(asm_comment, build_string(1, "0"), build_string(3, "=rm"), &asm_data);
++	free(asm_comment);
++}
++
++// Insert an asm stmt with "MARK_TURN_OFF", "MARK_YES" or "MARK_NOT_INTENTIONAL".
++static bool create_mark_asm(gimple stmt, enum mark mark)
++{
++	struct asm_data asm_data;
++	const char *asm_str;
++
++	switch (mark) {
++	case MARK_TURN_OFF:
++		asm_str = TURN_OFF_ASM_STR;
++		break;
++	case MARK_NOT_INTENTIONAL:
++	case MARK_YES:
++		asm_str = YES_ASM_STR;
++		break;
++	default:
++		gcc_unreachable();
++	}
++
++	asm_data.def_stmt = stmt;
++	asm_data.output = gimple_call_lhs(stmt);
++
++	if (asm_data.output == NULL_TREE) {
++		asm_data.input = gimple_call_arg(stmt, 0);
++		if (is_gimple_constant(asm_data.input))
++			return false;
++		asm_data.output = NULL;
++		create_asm_stmt(asm_str, build_string(2, "rm"), NULL, &asm_data);
++		return true;
++	}
++
++	create_asm_input(stmt, 0, &asm_data);
++	gcc_assert(asm_data.input != NULL_TREE);
++
++	create_asm_stmt(asm_str, build_string(1, "0"), build_string(3, "=rm"), &asm_data);
++	return true;
++}
++
++static bool is_from_cast(const_tree node)
++{
++	gimple def_stmt = get_def_stmt(node);
++
++	if (!def_stmt)
++		return false;
++
++	if (gimple_assign_cast_p(def_stmt))
++		return true;
++
++	return false;
++}
++
++// Skip duplication when there is a minus expr and the type of rhs1 or rhs2 is a pointer_type.
++static bool skip_ptr_minus(gimple stmt)
++{
++	const_tree rhs1, rhs2, ptr1_rhs, ptr2_rhs;
++
++	if (gimple_assign_rhs_code(stmt) != MINUS_EXPR)
++		return false;
++
++	rhs1 = gimple_assign_rhs1(stmt);
++	if (!is_from_cast(rhs1))
++		return false;
++
++	rhs2 = gimple_assign_rhs2(stmt);
++	if (!is_from_cast(rhs2))
++		return false;
++
++	ptr1_rhs = gimple_assign_rhs1(get_def_stmt(rhs1));
++	ptr2_rhs = gimple_assign_rhs1(get_def_stmt(rhs2));
++
++	if (TREE_CODE(TREE_TYPE(ptr1_rhs)) != POINTER_TYPE && TREE_CODE(TREE_TYPE(ptr2_rhs)) != POINTER_TYPE)
++		return false;
++
++	create_mark_asm(stmt, MARK_YES);
++	return true;
++}
++
++static void walk_use_def_ptr(struct pointer_set_t *visited, const_tree lhs)
++{
++	gimple def_stmt;
++
++	def_stmt = get_def_stmt(lhs);
++	if (!def_stmt)
++		return;
++
++	if (pointer_set_insert(visited, def_stmt))
++		return;
++
++	switch (gimple_code(def_stmt)) {
++	case GIMPLE_NOP:
++	case GIMPLE_ASM:
++	case GIMPLE_CALL:
++		break;
++	case GIMPLE_PHI: {
++		unsigned int i, n = gimple_phi_num_args(def_stmt);
++
++		pointer_set_insert(visited, def_stmt);
++
++		for (i = 0; i < n; i++) {
++			tree arg = gimple_phi_arg_def(def_stmt, i);
++
++			walk_use_def_ptr(visited, arg);
++		}
++	}
++	case GIMPLE_ASSIGN:
++		switch (gimple_num_ops(def_stmt)) {
++		case 2:
++			walk_use_def_ptr(visited, gimple_assign_rhs1(def_stmt));
++			return;
++		case 3:
++			if (skip_ptr_minus(def_stmt))
++				return;
++
++			walk_use_def_ptr(visited, gimple_assign_rhs1(def_stmt));
++			walk_use_def_ptr(visited, gimple_assign_rhs2(def_stmt));
++			return;
++		default:
++			return;
++		}
++	default:
++		debug_gimple_stmt((gimple)def_stmt);
++		error("%s: unknown gimple code", __func__);
++		gcc_unreachable();
++	}
++}
++
++// Look for a ptr - ptr expression (e.g., cpuset_common_file_read() s - page)
++static void insert_mark_not_intentional_asm_at_ptr(const_tree arg)
++{
++	struct pointer_set_t *visited;
++
++	visited = pointer_set_create();
++	walk_use_def_ptr(visited, arg);
++	pointer_set_destroy(visited);
 +}
 +
 +// Determine the return value and insert the asm stmt to mark the return stmt.
@@ -116556,6 +117284,10 @@ index 0000000..5515dcb
 +
 +	arg = gimple_call_arg(stmt, argnum - 1);
 +	gcc_assert(arg != NULL_TREE);
++
++	// skip all ptr - ptr expressions
++	insert_mark_not_intentional_asm_at_ptr(arg);
++
 +	create_size_overflow_asm(stmt, arg, argnum);
 +}
 +
@@ -116615,35 +117347,17 @@ index 0000000..5515dcb
 +
 +/*
 + * Look up the intentional_overflow attribute that turns off ipa based duplication
-+ * on the callee function, if found insert an asm stmt with "MARK_TURN_OFF".
++ * on the callee function.
 + */
-+static bool create_mark_turn_off_asm(gimple stmt)
++static bool is_mark_turn_off_attribute(gimple stmt)
 +{
 +	enum mark mark;
-+	struct asm_data asm_data;
 +	const_tree fndecl = gimple_call_fndecl(stmt);
 +
 +	mark = get_intentional_attr_type(DECL_ORIGIN(fndecl));
-+	if (mark != MARK_TURN_OFF)
-+		return false;
-+
-+	asm_data.def_stmt = stmt;
-+	asm_data.output = gimple_call_lhs(stmt);
-+
-+	if (asm_data.output == NULL_TREE) {
-+		asm_data.input = gimple_call_arg(stmt, 0);
-+		if (is_gimple_constant(asm_data.input))
-+			return false;
-+		asm_data.output = NULL;
-+		create_asm_stmt(TURN_OFF_ASM_STR, build_string(2, "rm"), NULL, &asm_data);
++	if (mark == MARK_TURN_OFF)
 +		return true;
-+	}
-+
-+	create_asm_input(stmt, 0, &asm_data);
-+	gcc_assert(asm_data.input != NULL_TREE);
-+
-+	create_asm_stmt(TURN_OFF_ASM_STR, build_string(1, "0"), build_string(3, "=rm"), &asm_data);
-+	return true;
++	return false;
 +}
 +
 +// If the argument(s) of the callee function is/are in the hash table or are marked by an attribute then mark the call stmt with an asm stmt
@@ -116660,8 +117374,10 @@ index 0000000..5515dcb
 +		return;
 +	fndecl = DECL_ORIGIN(fndecl);
 +
-+	if (create_mark_turn_off_asm(stmt))
++	if (is_mark_turn_off_attribute(stmt)) {
++		create_mark_asm(stmt, MARK_TURN_OFF);
 +		return;
++	}
 +
 +	search_interesting_args(fndecl, orig_argnums);
 +
@@ -116686,7 +117402,7 @@ index 0000000..5515dcb
 +{
 +	basic_block bb;
 +
-+	FOR_ALL_BB(bb) {
++	FOR_ALL_BB_FN(bb, cfun) {
 +		gimple_stmt_iterator gsi;
 +
 +		for (gsi = gsi_start_bb(bb); !gsi_end_p(gsi); gsi_next(&gsi)) {
@@ -116709,26 +117425,56 @@ index 0000000..5515dcb
 + * this pass inserts asm stmts to mark the interesting args
 + * that the ipa pass will detect and insert the size overflow checks for.
 + */
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data insert_size_overflow_asm_pass_data = {
++#else
 +static struct gimple_opt_pass insert_size_overflow_asm_pass = {
 +	.pass = {
++#endif
 +		.type			= GIMPLE_PASS,
 +		.name			= "insert_size_overflow_asm",
 +#if BUILDING_GCC_VERSION >= 4008
 +		.optinfo_flags		= OPTGROUP_NONE,
 +#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= false,
++		.has_execute		= true,
++#else
 +		.gate			= NULL,
 +		.execute		= search_interesting_functions,
 +		.sub			= NULL,
 +		.next			= NULL,
 +		.static_pass_number	= 0,
++#endif
 +		.tv_id			= TV_NONE,
 +		.properties_required	= PROP_cfg,
 +		.properties_provided	= 0,
 +		.properties_destroyed	= 0,
 +		.todo_flags_start	= 0,
 +		.todo_flags_finish	= TODO_dump_func | TODO_verify_ssa | TODO_verify_stmts | TODO_remove_unused_locals | TODO_update_ssa_no_phi | TODO_cleanup_cfg | TODO_ggc_collect | TODO_verify_flow
++#if BUILDING_GCC_VERSION < 4009
 +	}
++#endif
 +};
++
++#if BUILDING_GCC_VERSION >= 4009
++namespace {
++class insert_size_overflow_asm_pass : public gimple_opt_pass {
++public:
++	insert_size_overflow_asm_pass() : gimple_opt_pass(insert_size_overflow_asm_pass_data, g) {}
++	unsigned int execute() { return search_interesting_functions(); }
++};
++}
++#endif
++
++static struct opt_pass *make_insert_size_overflow_asm_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new insert_size_overflow_asm_pass();
++#else
++	return &insert_size_overflow_asm_pass.pass;
++#endif
++}
 +
 +// Create the noreturn report_size_overflow() function decl.
 +static void start_unit_callback(void __unused *gcc_data, void __unused *user_data)
@@ -116760,17 +117506,12 @@ index 0000000..5515dcb
 +	FOR_EACH_FUNCTION_WITH_GIMPLE_BODY(node) {
 +		basic_block bb;
 +
-+#if BUILDING_GCC_VERSION <= 4007
-+		push_cfun(DECL_STRUCT_FUNCTION(node->decl));
-+		current_function_decl = node->decl;
-+#else
-+		push_cfun(DECL_STRUCT_FUNCTION(node->symbol.decl));
-+		current_function_decl = node->symbol.decl;
-+#endif
++		push_cfun(DECL_STRUCT_FUNCTION(NODE_DECL(node)));
++		current_function_decl = NODE_DECL(node);
 +
-+		fprintf(stderr, "-----------------------------------------\n%s\n-----------------------------------------\n", NAME(current_function_decl));
++		fprintf(stderr, "-----------------------------------------\n%s\n-----------------------------------------\n", DECL_NAME_POINTER(current_function_decl));
 +
-+		FOR_ALL_BB(bb) {
++		FOR_ALL_BB_FN(bb, cfun) {
 +			gimple_stmt_iterator si;
 +
 +			fprintf(stderr, "<bb %u>:\n", bb->index);
@@ -116792,24 +117533,34 @@ index 0000000..5515dcb
 +	return 0;
 +}
 +
-+static struct ipa_opt_pass_d pass_dump = {
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data dump_pass_data = {
++#else
++static struct ipa_opt_pass_d dump_pass = {
 +	.pass = {
++#endif
 +		.type			= SIMPLE_IPA_PASS,
 +		.name			= "dump",
 +#if BUILDING_GCC_VERSION >= 4008
 +		.optinfo_flags		= OPTGROUP_NONE,
 +#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= false,
++		.has_execute		= true,
++#else
 +		.gate			= NULL,
 +		.execute		= dump_functions,
 +		.sub			= NULL,
 +		.next			= NULL,
 +		.static_pass_number	= 0,
++#endif
 +		.tv_id			= TV_NONE,
 +		.properties_required	= 0,
 +		.properties_provided	= 0,
 +		.properties_destroyed	= 0,
 +		.todo_flags_start	= 0,
 +		.todo_flags_finish	= 0,
++#if BUILDING_GCC_VERSION < 4009
 +	},
 +	.generate_summary		= NULL,
 +	.write_summary			= NULL,
@@ -116822,7 +117573,27 @@ index 0000000..5515dcb
 +	.function_transform_todo_flags_start		= 0,
 +	.function_transform		= NULL,
 +	.variable_transform		= NULL,
++#endif
 +};
++
++#if BUILDING_GCC_VERSION >= 4009
++namespace {
++class dump_pass : public ipa_opt_pass_d {
++public:
++	dump_pass() : ipa_opt_pass_d(dump_pass_data, g, NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL) {}
++	unsigned int execute() { return dump_functions(); }
++};
++}
++#endif
++
++static struct opt_pass *make_dump_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new dump_pass();
++#else
++	return &dump_pass.pass;
++#endif
++}
 +
 +int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version *version)
 +{
@@ -116831,34 +117602,30 @@ index 0000000..5515dcb
 +	const int argc = plugin_info->argc;
 +	const struct plugin_argument * const argv = plugin_info->argv;
 +	bool enable = true;
++	struct register_pass_info insert_size_overflow_asm_pass_info;
++	struct register_pass_info __unused dump_before_pass_info;
++	struct register_pass_info __unused dump_after_pass_info;
++	struct register_pass_info ipa_pass_info;
 +
-+	struct register_pass_info insert_size_overflow_asm_pass_info = {
-+		.pass				= &insert_size_overflow_asm_pass.pass,
-+		.reference_pass_name		= "ssa",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op				= PASS_POS_INSERT_AFTER
-+	};
++	insert_size_overflow_asm_pass_info.pass				= make_insert_size_overflow_asm_pass();
++	insert_size_overflow_asm_pass_info.reference_pass_name		= "ssa";
++	insert_size_overflow_asm_pass_info.ref_pass_instance_number	= 1;
++	insert_size_overflow_asm_pass_info.pos_op			= PASS_POS_INSERT_AFTER;
 +
-+	struct register_pass_info __unused dump_before_pass_info = {
-+		.pass				= &pass_dump.pass,
-+		.reference_pass_name		= "increase_alignment",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op				= PASS_POS_INSERT_BEFORE
-+	};
++	dump_before_pass_info.pass			= make_dump_pass();
++	dump_before_pass_info.reference_pass_name	= "increase_alignment";
++	dump_before_pass_info.ref_pass_instance_number	= 1;
++	dump_before_pass_info.pos_op			= PASS_POS_INSERT_BEFORE;
 +
-+	struct register_pass_info ipa_pass_info = {
-+		.pass				= &pass_ipa.pass,
-+		.reference_pass_name		= "increase_alignment",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op				= PASS_POS_INSERT_BEFORE
-+	};
++	ipa_pass_info.pass			= make_ipa_pass();
++	ipa_pass_info.reference_pass_name	= "increase_alignment";
++	ipa_pass_info.ref_pass_instance_number	= 1;
++	ipa_pass_info.pos_op			= PASS_POS_INSERT_BEFORE;
 +
-+	struct register_pass_info __unused dump_after_pass_info = {
-+		.pass				= &pass_dump.pass,
-+		.reference_pass_name		= "increase_alignment",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op				= PASS_POS_INSERT_BEFORE
-+	};
++	dump_after_pass_info.pass			= make_dump_pass();
++	dump_after_pass_info.reference_pass_name	= "increase_alignment";
++	dump_after_pass_info.ref_pass_instance_number	= 1;
++	dump_after_pass_info.pos_op			= PASS_POS_INSERT_BEFORE;
 +
 +	if (!plugin_default_version_check(version, &gcc_version)) {
 +		error(G_("incompatible gcc/plugin versions"));
@@ -116887,12 +117654,12 @@ index 0000000..5515dcb
 +}
 diff --git a/tools/gcc/stackleak_plugin.c b/tools/gcc/stackleak_plugin.c
 new file mode 100644
-index 0000000..ac2901e
+index 0000000..a4f816a
 --- /dev/null
 +++ b/tools/gcc/stackleak_plugin.c
-@@ -0,0 +1,327 @@
+@@ -0,0 +1,341 @@
 +/*
-+ * Copyright 2011-2013 by the PaX Team <pageexec@freemail.hu>
++ * Copyright 2011-2014 by the PaX Team <pageexec@freemail.hu>
 + * Licensed under the GPL v2
 + *
 + * Note: the choice of the license means that the compilation process is
@@ -116910,31 +117677,8 @@ index 0000000..ac2901e
 + * BUGS:
 + * - none known
 + */
-+#include "gcc-plugin.h"
-+#include "config.h"
-+#include "system.h"
-+#include "coretypes.h"
-+#include "tree.h"
-+#include "tree-pass.h"
-+#include "flags.h"
-+#include "intl.h"
-+#include "toplev.h"
-+#include "plugin.h"
-+//#include "expr.h" where are you...
-+#include "diagnostic.h"
-+#include "plugin-version.h"
-+#include "tm.h"
-+#include "function.h"
-+#include "basic-block.h"
-+#include "gimple.h"
-+#include "rtl.h"
-+#include "emit-rtl.h"
 +
-+#if BUILDING_GCC_VERSION >= 4008
-+#define TODO_dump_func 0
-+#endif
-+
-+extern void print_gimple_stmt(FILE *, gimple, int, int);
++#include "gcc-common.h"
 +
 +int plugin_is_GPL_compatible;
 +
@@ -116944,61 +117688,10 @@ index 0000000..ac2901e
 +static bool init_locals;
 +
 +static struct plugin_info stackleak_plugin_info = {
-+	.version	= "201302112000",
++	.version	= "201401260140",
 +	.help		= "track-lowest-sp=nn\ttrack sp in functions whose frame size is at least nn bytes\n"
 +//			  "initialize-locals\t\tforcibly initialize all stack frames\n"
 +};
-+
-+static bool gate_stackleak_track_stack(void);
-+static unsigned int execute_stackleak_tree_instrument(void);
-+static unsigned int execute_stackleak_final(void);
-+
-+static struct gimple_opt_pass stackleak_tree_instrument_pass = {
-+	.pass = {
-+		.type			= GIMPLE_PASS,
-+		.name			= "stackleak_tree_instrument",
-+#if BUILDING_GCC_VERSION >= 4008
-+		.optinfo_flags		= OPTGROUP_NONE,
-+#endif
-+		.gate			= gate_stackleak_track_stack,
-+		.execute		= execute_stackleak_tree_instrument,
-+		.sub			= NULL,
-+		.next			= NULL,
-+		.static_pass_number	= 0,
-+		.tv_id			= TV_NONE,
-+		.properties_required	= PROP_gimple_leh | PROP_cfg,
-+		.properties_provided	= 0,
-+		.properties_destroyed	= 0,
-+		.todo_flags_start	= 0, //TODO_verify_ssa | TODO_verify_flow | TODO_verify_stmts,
-+		.todo_flags_finish	= TODO_verify_ssa | TODO_verify_stmts | TODO_dump_func | TODO_update_ssa
-+	}
-+};
-+
-+static struct rtl_opt_pass stackleak_final_rtl_opt_pass = {
-+	.pass = {
-+		.type			= RTL_PASS,
-+		.name			= "stackleak_final",
-+#if BUILDING_GCC_VERSION >= 4008
-+		.optinfo_flags		= OPTGROUP_NONE,
-+#endif
-+		.gate			= gate_stackleak_track_stack,
-+		.execute		= execute_stackleak_final,
-+		.sub			= NULL,
-+		.next			= NULL,
-+		.static_pass_number	= 0,
-+		.tv_id			= TV_NONE,
-+		.properties_required	= 0,
-+		.properties_provided	= 0,
-+		.properties_destroyed	= 0,
-+		.todo_flags_start	= 0,
-+		.todo_flags_finish	= TODO_dump_func
-+	}
-+};
-+
-+static bool gate_stackleak_track_stack(void)
-+{
-+	return track_frame_size >= 0;
-+}
 +
 +static void stackleak_check_alloca(gimple_stmt_iterator *gsi)
 +{
@@ -117029,23 +117722,6 @@ index 0000000..ac2901e
 +	gsi_insert_after(gsi, track_stack, GSI_CONTINUE_LINKING);
 +}
 +
-+#if BUILDING_GCC_VERSION == 4005
-+static bool gimple_call_builtin_p(gimple stmt, enum built_in_function code)
-+{
-+	tree fndecl;
-+
-+	if (!is_gimple_call(stmt))
-+		return false;
-+	fndecl = gimple_call_fndecl(stmt);
-+	if (!fndecl)
-+		return false;
-+	if (DECL_BUILT_IN_CLASS(fndecl) != BUILT_IN_NORMAL)
-+		return false;
-+//	print_node(stderr, "pax", fndecl, 4);
-+	return DECL_FUNCTION_CODE(fndecl) == code;
-+}
-+#endif
-+
 +static bool is_alloca(gimple stmt)
 +{
 +	if (gimple_call_builtin_p(stmt, BUILT_IN_ALLOCA))
@@ -117064,10 +117740,10 @@ index 0000000..ac2901e
 +	basic_block bb, entry_bb;
 +	bool prologue_instrumented = false, is_leaf = true;
 +
-+	entry_bb = ENTRY_BLOCK_PTR_FOR_FUNCTION(cfun)->next_bb;
++	entry_bb = ENTRY_BLOCK_PTR_FOR_FN(cfun)->next_bb;
 +
 +	// 1. loop through BBs and GIMPLE statements
-+	FOR_EACH_BB(bb) {
++	FOR_EACH_BB_FN(bb, cfun) {
 +		gimple_stmt_iterator gsi;
 +
 +		for (gsi = gsi_start_bb(bb); !gsi_end_p(gsi); gsi_next(&gsi)) {
@@ -117105,9 +117781,9 @@ index 0000000..ac2901e
 +	if (!prologue_instrumented) {
 +		gimple_stmt_iterator gsi;
 +
-+		bb = split_block_after_labels(ENTRY_BLOCK_PTR)->dest;
++		bb = split_block_after_labels(ENTRY_BLOCK_PTR_FOR_FN(cfun))->dest;
 +		if (dom_info_available_p(CDI_DOMINATORS))
-+			set_immediate_dominator(CDI_DOMINATORS, bb, ENTRY_BLOCK_PTR);
++			set_immediate_dominator(CDI_DOMINATORS, bb, ENTRY_BLOCK_PTR_FOR_FN(cfun));
 +		gsi = gsi_start_bb(bb);
 +		stackleak_add_instrumentation(&gsi);
 +	}
@@ -117164,25 +117840,130 @@ index 0000000..ac2901e
 +	return 0;
 +}
 +
++static bool gate_stackleak_track_stack(void)
++{
++	return track_frame_size >= 0;
++}
++
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data stackleak_tree_instrument_pass_data = {
++#else
++static struct gimple_opt_pass stackleak_tree_instrument_pass = {
++	.pass = {
++#endif
++		.type			= GIMPLE_PASS,
++		.name			= "stackleak_tree_instrument",
++#if BUILDING_GCC_VERSION >= 4008
++		.optinfo_flags		= OPTGROUP_NONE,
++#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= true,
++		.has_execute		= true,
++#else
++		.gate			= gate_stackleak_track_stack,
++		.execute		= execute_stackleak_tree_instrument,
++		.sub			= NULL,
++		.next			= NULL,
++		.static_pass_number	= 0,
++#endif
++		.tv_id			= TV_NONE,
++		.properties_required	= PROP_gimple_leh | PROP_cfg,
++		.properties_provided	= 0,
++		.properties_destroyed	= 0,
++		.todo_flags_start	= 0, //TODO_verify_ssa | TODO_verify_flow | TODO_verify_stmts,
++		.todo_flags_finish	= TODO_verify_ssa | TODO_verify_stmts | TODO_dump_func | TODO_update_ssa
++#if BUILDING_GCC_VERSION < 4009
++	}
++#endif
++};
++
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data stackleak_final_rtl_opt_pass_data = {
++#else
++static struct rtl_opt_pass stackleak_final_rtl_opt_pass = {
++	.pass = {
++#endif
++		.type			= RTL_PASS,
++		.name			= "stackleak_final",
++#if BUILDING_GCC_VERSION >= 4008
++		.optinfo_flags		= OPTGROUP_NONE,
++#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= true,
++		.has_execute		= true,
++#else
++		.gate			= gate_stackleak_track_stack,
++		.execute		= execute_stackleak_final,
++		.sub			= NULL,
++		.next			= NULL,
++		.static_pass_number	= 0,
++#endif
++		.tv_id			= TV_NONE,
++		.properties_required	= 0,
++		.properties_provided	= 0,
++		.properties_destroyed	= 0,
++		.todo_flags_start	= 0,
++		.todo_flags_finish	= TODO_dump_func
++#if BUILDING_GCC_VERSION < 4009
++	}
++#endif
++};
++
++#if BUILDING_GCC_VERSION >= 4009
++namespace {
++class stackleak_tree_instrument_pass : public gimple_opt_pass {
++public:
++	stackleak_tree_instrument_pass() : gimple_opt_pass(stackleak_tree_instrument_pass_data, g) {}
++	bool gate() { return gate_stackleak_track_stack(); }
++	unsigned int execute() { return execute_stackleak_tree_instrument(); }
++};
++
++class stackleak_final_rtl_opt_pass : public rtl_opt_pass {
++public:
++	stackleak_final_rtl_opt_pass() : rtl_opt_pass(stackleak_final_rtl_opt_pass_data, g) {}
++	bool gate() { return gate_stackleak_track_stack(); }
++	unsigned int execute() { return execute_stackleak_final(); }
++};
++}
++#endif
++
++static struct opt_pass *make_stackleak_tree_instrument_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new stackleak_tree_instrument_pass();
++#else
++	return &stackleak_tree_instrument_pass.pass;
++#endif
++}
++
++static struct opt_pass *make_stackleak_final_rtl_opt_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new stackleak_final_rtl_opt_pass();
++#else
++	return &stackleak_final_rtl_opt_pass.pass;
++#endif
++}
++
 +int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version *version)
 +{
 +	const char * const plugin_name = plugin_info->base_name;
 +	const int argc = plugin_info->argc;
 +	const struct plugin_argument * const argv = plugin_info->argv;
 +	int i;
-+	struct register_pass_info stackleak_tree_instrument_pass_info = {
-+		.pass				= &stackleak_tree_instrument_pass.pass,
-+//		.reference_pass_name		= "tree_profile",
-+		.reference_pass_name		= "optimized",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op 			= PASS_POS_INSERT_BEFORE
-+	};
-+	struct register_pass_info stackleak_final_pass_info = {
-+		.pass				= &stackleak_final_rtl_opt_pass.pass,
-+		.reference_pass_name		= "final",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op 			= PASS_POS_INSERT_BEFORE
-+	};
++	struct register_pass_info stackleak_tree_instrument_pass_info;
++	struct register_pass_info stackleak_final_pass_info;
++
++	stackleak_tree_instrument_pass_info.pass			= make_stackleak_tree_instrument_pass();
++//	stackleak_tree_instrument_pass_info.reference_pass_name		= "tree_profile";
++	stackleak_tree_instrument_pass_info.reference_pass_name		= "optimized";
++	stackleak_tree_instrument_pass_info.ref_pass_instance_number	= 1;
++	stackleak_tree_instrument_pass_info.pos_op 			= PASS_POS_INSERT_BEFORE;
++
++	stackleak_final_pass_info.pass				= make_stackleak_final_rtl_opt_pass();
++	stackleak_final_pass_info.reference_pass_name		= "final";
++	stackleak_final_pass_info.ref_pass_instance_number	= 1;
++	stackleak_final_pass_info.pos_op 			= PASS_POS_INSERT_BEFORE;
 +
 +	if (!plugin_default_version_check(version, &gcc_version)) {
 +		error(G_("incompatible gcc/plugin versions"));
@@ -117220,12 +118001,12 @@ index 0000000..ac2901e
 +}
 diff --git a/tools/gcc/structleak_plugin.c b/tools/gcc/structleak_plugin.c
 new file mode 100644
-index 0000000..4fae911
+index 0000000..796569a
 --- /dev/null
 +++ b/tools/gcc/structleak_plugin.c
-@@ -0,0 +1,277 @@
+@@ -0,0 +1,273 @@
 +/*
-+ * Copyright 2013 by PaX Team <pageexec@freemail.hu>
++ * Copyright 2013-2014 by PaX Team <pageexec@freemail.hu>
 + * Licensed under the GPL v2
 + *
 + * Note: the choice of the license means that the compilation process is
@@ -117250,38 +118031,15 @@ index 0000000..4fae911
 + *       increase type coverage
 + */
 +
-+#include "gcc-plugin.h"
-+#include "config.h"
-+#include "system.h"
-+#include "coretypes.h"
-+#include "tree.h"
-+#include "tree-pass.h"
-+#include "intl.h"
-+#include "plugin-version.h"
-+#include "tm.h"
-+#include "toplev.h"
-+#include "function.h"
-+#include "tree-flow.h"
-+#include "plugin.h"
-+#include "gimple.h"
-+#include "diagnostic.h"
-+#include "cfgloop.h"
-+#include "langhooks.h"
++#include "gcc-common.h"
 +
-+#if BUILDING_GCC_VERSION >= 4008
-+#define TODO_dump_func 0
-+#endif
-+
-+#define NAME(node) IDENTIFIER_POINTER(DECL_NAME(node))
-+
-+// unused type flag in all versions 4.5-4.8
++// unused C type flag in all versions 4.5-4.9
 +#define TYPE_USERSPACE(TYPE) TYPE_LANG_FLAG_3(TYPE)
 +
 +int plugin_is_GPL_compatible;
-+void debug_gimple_stmt(gimple gs);
 +
 +static struct plugin_info structleak_plugin_info = {
-+	.version	= "201304082245",
++	.version	= "201401260140",
 +	.help		= "disable\tdo not activate plugin\n",
 +};
 +
@@ -117359,7 +118117,7 @@ index 0000000..4fae911
 +
 +	// this is the original entry bb before the forced split
 +	// TODO: check further BBs in case more splits occured before us
-+	bb = ENTRY_BLOCK_PTR->next_bb->next_bb;
++	bb = ENTRY_BLOCK_PTR_FOR_FN(cfun)->next_bb->next_bb;
 +
 +	// first check if the variable is already initialized, warn otherwise
 +	for (gsi = gsi_start_bb(bb); !gsi_end_p(gsi); gsi_next(&gsi)) {
@@ -117391,7 +118149,7 @@ index 0000000..4fae911
 +
 +	// build the initializer stmt
 +	init_stmt = gimple_build_assign(var, initializer);
-+	gsi = gsi_start_bb(ENTRY_BLOCK_PTR->next_bb);
++	gsi = gsi_start_bb(ENTRY_BLOCK_PTR_FOR_FN(cfun)->next_bb);
 +	gsi_insert_before(&gsi, init_stmt, GSI_NEW_STMT);
 +	update_stmt(init_stmt);
 +}
@@ -117401,25 +118159,15 @@ index 0000000..4fae911
 +	basic_block bb;
 +	unsigned int ret = 0;
 +	tree var;
-+
-+#if BUILDING_GCC_VERSION == 4005
-+	tree vars;
-+#else
 +	unsigned int i;
-+#endif
 +
 +	// split the first bb where we can put the forced initializers
-+	bb = split_block_after_labels(ENTRY_BLOCK_PTR)->dest;
++	bb = split_block_after_labels(ENTRY_BLOCK_PTR_FOR_FN(cfun))->dest;
 +	if (dom_info_available_p(CDI_DOMINATORS))
-+		set_immediate_dominator(CDI_DOMINATORS, bb, ENTRY_BLOCK_PTR);
++		set_immediate_dominator(CDI_DOMINATORS, bb, ENTRY_BLOCK_PTR_FOR_FN(cfun));
 +
 +	// enumarate all local variables and forcibly initialize our targets
-+#if BUILDING_GCC_VERSION == 4005
-+	for (vars = cfun->local_decls; vars; vars = TREE_CHAIN(vars)) {
-+		var = TREE_VALUE(vars);
-+#else
 +	FOR_EACH_LOCAL_DECL(cfun, i, var) {
-+#endif
 +		tree type = TREE_TYPE(var);
 +
 +		gcc_assert(DECL_P(var));
@@ -117438,26 +118186,56 @@ index 0000000..4fae911
 +	return ret;
 +}
 +
++#if BUILDING_GCC_VERSION >= 4009
++static const struct pass_data structleak_pass_data = {
++#else
 +static struct gimple_opt_pass structleak_pass = {
 +	.pass = {
++#endif
 +		.type			= GIMPLE_PASS,
 +		.name			= "structleak",
 +#if BUILDING_GCC_VERSION >= 4008
 +		.optinfo_flags		= OPTGROUP_NONE,
 +#endif
++#if BUILDING_GCC_VERSION >= 4009
++		.has_gate		= false,
++		.has_execute		= true,
++#else
 +		.gate			= NULL,
 +		.execute		= handle_function,
 +		.sub			= NULL,
 +		.next			= NULL,
 +		.static_pass_number	= 0,
++#endif
 +		.tv_id			= TV_NONE,
 +		.properties_required	= PROP_cfg,
 +		.properties_provided	= 0,
 +		.properties_destroyed	= 0,
 +		.todo_flags_start	= 0,
 +		.todo_flags_finish	= TODO_verify_ssa | TODO_verify_stmts | TODO_dump_func | TODO_remove_unused_locals | TODO_update_ssa | TODO_ggc_collect | TODO_verify_flow
++#if BUILDING_GCC_VERSION < 4009
 +	}
++#endif
 +};
++
++#if BUILDING_GCC_VERSION >= 4009
++namespace {
++class structleak_pass : public gimple_opt_pass {
++public:
++	structleak_pass() : gimple_opt_pass(structleak_pass_data, g) {}
++	unsigned int execute() { return handle_function(); }
++};
++}
++#endif
++
++static struct opt_pass *make_structleak_pass(void)
++{
++#if BUILDING_GCC_VERSION >= 4009
++	return new structleak_pass();
++#else
++	return &structleak_pass.pass;
++#endif
++}
 +
 +int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version *version)
 +{
@@ -117466,13 +118244,12 @@ index 0000000..4fae911
 +	const int argc = plugin_info->argc;
 +	const struct plugin_argument * const argv = plugin_info->argv;
 +	bool enable = true;
++	struct register_pass_info structleak_pass_info;
 +
-+	struct register_pass_info structleak_pass_info = {
-+		.pass				= &structleak_pass.pass,
-+		.reference_pass_name		= "ssa",
-+		.ref_pass_instance_number	= 1,
-+		.pos_op				= PASS_POS_INSERT_AFTER
-+	};
++	structleak_pass_info.pass			= make_structleak_pass();
++	structleak_pass_info.reference_pass_name	= "ssa";
++	structleak_pass_info.ref_pass_instance_number	= 1;
++	structleak_pass_info.pos_op			= PASS_POS_INSERT_AFTER;
 +
 +	if (!plugin_default_version_check(version, &gcc_version)) {
 +		error(G_("incompatible gcc/plugin versions"));
@@ -117531,7 +118308,7 @@ index 547628e..74de9f2 100644
 +
  #endif
 diff --git a/virt/kvm/kvm_main.c b/virt/kvm/kvm_main.c
-index d83aa5e..e097f17 100644
+index d83aa5e..76e9c92 100644
 --- a/virt/kvm/kvm_main.c
 +++ b/virt/kvm/kvm_main.c
 @@ -75,12 +75,17 @@ LIST_HEAD(vm_list);
@@ -117563,7 +118340,27 @@ index d83aa5e..e097f17 100644
  			(void __user *)(unsigned long)mem->userspace_addr,
  			mem->memory_size)))
  		goto out;
-@@ -1660,7 +1665,7 @@ static int kvm_vcpu_release(struct inode *inode, struct file *filp)
+@@ -1493,8 +1498,17 @@ EXPORT_SYMBOL_GPL(kvm_read_guest_cached);
+ 
+ int kvm_clear_guest_page(struct kvm *kvm, gfn_t gfn, int offset, int len)
+ {
+-	return kvm_write_guest_page(kvm, gfn, (const void *) empty_zero_page,
+-				    offset, len);
++	int r;
++	unsigned long addr;
++
++	addr = gfn_to_hva(kvm, gfn);
++	if (kvm_is_error_hva(addr))
++		return -EFAULT;
++	r = __clear_user((void __user *)addr + offset, len);
++	if (r)
++		return -EFAULT;
++	mark_page_dirty(kvm, gfn);
++	return 0;
+ }
+ EXPORT_SYMBOL_GPL(kvm_clear_guest_page);
+ 
+@@ -1660,7 +1674,7 @@ static int kvm_vcpu_release(struct inode *inode, struct file *filp)
  	return 0;
  }
  
@@ -117572,7 +118369,7 @@ index d83aa5e..e097f17 100644
  	.release        = kvm_vcpu_release,
  	.unlocked_ioctl = kvm_vcpu_ioctl,
  #ifdef CONFIG_COMPAT
-@@ -2183,7 +2188,7 @@ static int kvm_vm_mmap(struct file *file, struct vm_area_struct *vma)
+@@ -2183,7 +2197,7 @@ static int kvm_vm_mmap(struct file *file, struct vm_area_struct *vma)
  	return 0;
  }
  
@@ -117581,7 +118378,7 @@ index d83aa5e..e097f17 100644
  	.release        = kvm_vm_release,
  	.unlocked_ioctl = kvm_vm_ioctl,
  #ifdef CONFIG_COMPAT
-@@ -2281,7 +2286,7 @@ out:
+@@ -2281,7 +2295,7 @@ out:
  	return r;
  }
  
@@ -117590,7 +118387,7 @@ index d83aa5e..e097f17 100644
  	.unlocked_ioctl = kvm_dev_ioctl,
  	.compat_ioctl   = kvm_dev_ioctl,
  	.llseek		= noop_llseek,
-@@ -2307,7 +2312,7 @@ static void hardware_enable_nolock(void *junk)
+@@ -2307,7 +2321,7 @@ static void hardware_enable_nolock(void *junk)
  
  	if (r) {
  		cpumask_clear_cpu(cpu, cpus_hardware_enabled);
@@ -117599,7 +118396,7 @@ index d83aa5e..e097f17 100644
  		printk(KERN_INFO "kvm: enabling virtualization on "
  				 "CPU%d failed\n", cpu);
  	}
-@@ -2361,10 +2366,10 @@ static int hardware_enable_all(void)
+@@ -2361,10 +2375,10 @@ static int hardware_enable_all(void)
  
  	kvm_usage_count++;
  	if (kvm_usage_count == 1) {
@@ -117612,7 +118409,7 @@ index d83aa5e..e097f17 100644
  			hardware_disable_all_nolock();
  			r = -EBUSY;
  		}
-@@ -2715,7 +2720,7 @@ static void kvm_sched_out(struct preempt_notifier *pn,
+@@ -2715,7 +2729,7 @@ static void kvm_sched_out(struct preempt_notifier *pn,
  	kvm_arch_vcpu_put(vcpu);
  }
  
@@ -117621,7 +118418,7 @@ index d83aa5e..e097f17 100644
  		  struct module *module)
  {
  	int r;
-@@ -2778,7 +2783,7 @@ int kvm_init(void *opaque, unsigned vcpu_size, unsigned vcpu_align,
+@@ -2778,7 +2792,7 @@ int kvm_init(void *opaque, unsigned vcpu_size, unsigned vcpu_align,
  	if (!vcpu_align)
  		vcpu_align = __alignof__(struct kvm_vcpu);
  	kvm_vcpu_cache = kmem_cache_create("kvm_vcpu", vcpu_size, vcpu_align,
@@ -117630,7 +118427,7 @@ index d83aa5e..e097f17 100644
  	if (!kvm_vcpu_cache) {
  		r = -ENOMEM;
  		goto out_free_3;
-@@ -2788,9 +2793,11 @@ int kvm_init(void *opaque, unsigned vcpu_size, unsigned vcpu_align,
+@@ -2788,9 +2802,11 @@ int kvm_init(void *opaque, unsigned vcpu_size, unsigned vcpu_align,
  	if (r)
  		goto out_free;
  
@@ -117642,7 +118439,7 @@ index d83aa5e..e097f17 100644
  
  	r = misc_register(&kvm_dev);
  	if (r) {
-@@ -2800,9 +2807,6 @@ int kvm_init(void *opaque, unsigned vcpu_size, unsigned vcpu_align,
+@@ -2800,9 +2816,6 @@ int kvm_init(void *opaque, unsigned vcpu_size, unsigned vcpu_align,
  
  	register_syscore_ops(&kvm_syscore_ops);
  
