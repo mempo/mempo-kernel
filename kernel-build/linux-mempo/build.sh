@@ -92,6 +92,7 @@ pwd_here=$PWD
 	export KBUILD_BUILD_HOST=host
 	export ROOT_DEV=FLOPPY
 	export FAKETIME_TIME="$TIMESTAMP_RFC3339"
+	export XZ_OPT="--check=crc64"
 
 #	export TAR_OPTIONS="--mtime $TIMESTAMP_RFC3339 --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
 # ^--- tar options will be implemented as local wrapper script
