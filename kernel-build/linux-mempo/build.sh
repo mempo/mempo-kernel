@@ -1,9 +1,11 @@
 #!/bin/bash -e
 # do NOT run this directly, run build-run.sh
 
+. ../../support.sh
+
 linuxdir="$1"
 if [ -z "$linuxdir" ] ; then
-	echo "ERROR undefined linuxdir." ; exit 1
+	echo "ERROR undefined linuxdir." ; exit_error
 fi
 
 echo "Building linuxdir=$linuxdir"
@@ -26,9 +28,9 @@ pwd_here=$PWD
 
 
 	echo "Entering Linux sources in $linuxdir"
-	cd "$linuxdir" || { echo "ERROR can not enter $linuxdir"; exit 1; }
+	cd "$linuxdir" || { echo "ERROR can not enter $linuxdir"; exit_error; }
 
-	rm -rf ../buildlog ; mkdir -p ../buildlog || { echo "Can not create buildlog"; exit 1; }
+	rm -rf ../buildlog ; mkdir -p ../buildlog || { echo "Can not create buildlog"; exit_error; }
 
 	echo -n "Calculating checksum of the system: "
 	rm -f "../system_id.txt"
@@ -43,7 +45,7 @@ pwd_here=$PWD
 	echo "$sources_id" > "../sources_id.txt"
 
 	use_config_from=../configs/config-good.config
- 	cp $use_config_from .config || { echo "ERROR Could not copy the config=$use_config_from file here in PWD=$PWD, ABORTING" ; exit 1 ; }
+ 	cp $use_config_from .config || { echo "ERROR Could not copy the config=$use_config_from file here in PWD=$PWD, ABORTING" ; exit_error ; }
 	config_id=`sha256sum .config | cut -d" " -f1`
 	echo "Using .config with ID=$config_id"
 	echo $PWD
@@ -80,7 +82,7 @@ pwd_here=$PWD
 	overlay_dir="${pwd_here}/../../overlay-dir"
 	if [ ! -d $overlay_dir ] ; then
 		echo "ERROR: The overlay_dir=$overlay_dir is not existing directory!"
-		exit 1
+		exit_error
 	fi
 
 	export KCONFIG_NOTIMESTAMP=1

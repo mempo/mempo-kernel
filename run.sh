@@ -11,9 +11,47 @@ kernel_file="linux-${kernel_version}.tar"
 kernel_file_download="${kernel_file}.xz" # the compressed for download version of file
 user_download_folder="${HOME}/Downloads/" # where user stores downloads, use this as download cache (read it, write ther)
 
+. support.sh
+
 export LC_ALL="C"
 
-echo "Tools: checking prerequisites..."
+function warn_env() {
+	echo "Currently, if you want to get the same checksums as other users,"
+	echo "then you must run this script as unix user 'kernelbuild' (create new user), "
+	echo "and in directory /home/kernelbuild/deterministic-kernel/ (git clone in home, or copy files there)"
+}
+
+function ask_quit() {
+	echo ""
+	echo "Due to above-mentioned problems, this script will probably not work fully correctly"
+	echo "(e.g. will produce other checksums that rest of users has)."
+	echo ""
+	echo "Do you want to ignore this problem and try to continue anyway? y/N?"
+	read yn
+	if [[ $yn == "y" ]] ; then echo ; echo "*** ignoring this problem, but the resulting checksums will be probably not correct ***" ; echo ; 
+	else exit_error ; fi
+}
+
+echo "Checking environment"
+id=$(id -u )
+echo " * USER=$USER (id=$id)"
+
+if [[ $id -eq 0 ]] ; then 
+	echo "ERROR: Do not run this script as root (uid 0) (this is not needed at all)." ; warn_env ;	exit_error
+fi
+
+if [[ $USER == "root" ]] ; then 
+	echo "ERROR: Do not run this script as user root (this is not needed at all)." ; warn_env ;	exit_error
+fi
+
+if [[ $USER!='kernelbuild' ]] ; then
+	echo "WARNING: wrong user ($USER)." ; warn_env ;	ask_quit;
+fi
+if [[ $PWD!='/home/kernelbuild/deterministic-kernel/' ]] ; then
+	echo "WARNING: wrong directory ($PWD)." ; warn_env ;	ask_quit;
+fi
+
+echo "" ; echo "Tools: checking prerequisites..."
 DPKG_VER=$(dpkg-query -W --showformat='${Version}\n' dpkg)
 DPKG_VER_NEEDED="1.17.5"
 
@@ -87,7 +125,7 @@ fi
 #cd ..
 
 # TODO nicer way of entering the correct one / warning if more then one
-cd kernel-build/linux-mempo || { echo "Can not enter build directory." ; exit 1; }
+cd kernel-build/linux-mempo || { echo "Can not enter build directory." ; exit_error; }
 echo 
 echo "Executing the build script"
 echo 

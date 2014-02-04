@@ -5,24 +5,27 @@
 # linuxdir = linux-3.2.48   used to create linux-3.2.48.tar file name,
 # dir names etc.
 
+. ../../support.sh
 
+
+echo "Loading env.sh"
 . env.sh
 echo "kernel_general_name=$kernel_general_version" # from env.sh
 export linuxdir="linux-$kernel_general_version" # e.g.: linux-3.2.53
 echo "Working on linux sources in linuxdir=$linuxdir"
 
-match='^[-a-zA-Z0-9]+[-.a-zA-Z0-9]*$'; dir="$linuxdir" ; [[ "$dir" =~ $match ]] || { echo "ERROR invalid directory name ($dir)"; exit 1 ; }
+match='^[-a-zA-Z0-9]+[-.a-zA-Z0-9]*$'; dir="$linuxdir" ; [[ "$dir" =~ $match ]] || { echo "ERROR invalid directory name ($dir)"; exit_error ; }
 rm -rf $dir
 
 out="mempo-report-$kernel_general_name-5.txt"
 
 echo ""
 echo "=== PATCH ======================================"
-bash patch.sh "$linuxdir" || { echo "ERROR: in the patch.sh step" ; exit 1 ; }
+bash patch.sh "$linuxdir" || { echo "ERROR: in the patch.sh step" ; exit_error ; }
 
 echo ""
 echo "=== BUILD ======================================"
-bash build.sh "$linuxdir" || { echo "ERROR: in the build.sh step" ; exit 1 ; }
+bash build.sh "$linuxdir" || { echo "ERROR: in the build.sh step" ; exit_error ; }
 
 echo ""
 echo "=== READY ======================================"

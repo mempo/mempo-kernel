@@ -2,6 +2,8 @@
 
 # Test do we have needed tool chain programs 
 
+. support.sh
+
 all_ok=1
 
 echo "Looking for toolchian..."
@@ -33,7 +35,7 @@ case $? in
 		echo "You probably did not install our special dpkg version, or you use too old version of it."
 		echo "Please see information on https://wiki.debian.org/SameKernel/#dpkg how to install the required version."  
 		echo "Usually it should be enough to install the speciall dpkg only locally as user (does not require root) so it should be very easy."
-		exit 1;
+		exit_error;
 	;;
 esac
 echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo)"
@@ -68,7 +70,7 @@ if [[ 0 != "$exitcode" ]]  ; then
 		echo "Please install it from: "
 		echo "  https://github.com/mempo/mempo-deb/ once this is ready, or while not available use:"
 		echo "  https://github.com/mempo/various/tree/master/tar once this is ready, or while not available use:"
-		exit 1 # error
+		exit_error # error
 	fi
 fi
 
