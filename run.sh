@@ -44,13 +44,15 @@ if [[ $USER == "root" ]] ; then
 	echo "ERROR: Do not run this script as user root (this is not needed at all)." ; warn_env ;	exit_error
 fi
 
+USER="kernelbuild"
 if [[ $USER != 'kernelbuild' ]] ; then
 	echo "WARNING: wrong user ($USER)." ; warn_env ;	ask_quit;
 fi
 
 echo " * PWD=$PWD"
-if [[ $PWD != '/home/kernelbuild/deterministic-kernel/' ]] ; then
-	echo "WARNING: wrong directory ($PWD)." ; warn_env ;	ask_quit;
+good_dir='/home/kernelbuild/deterministic-kernel'
+if [[ $PWD != "$good_dir" ]] ; then
+	echo "WARNING: wrong directory '$PWD' should be '$good_dir'." ; warn_env ;	ask_quit;
 fi
 
 echo "" ; echo "Tools: checking prerequisites..."
