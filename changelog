@@ -9,6 +9,8 @@ linux-image (linux-3.2.55-mempo-0.1.23) UNRELEASED; urgency=low
 	* XZ crc options fix
 	* check if user/pwd are correct. better support/error msg
 	* v0.1.23-rc2
+	* corrected user/pwd check... doh.
+	* v0.1.23-rc3
 	
  -- mempo <mempo@mempo.org>  Mon, 03 Feb 2014 12:00:00 +0200
 
