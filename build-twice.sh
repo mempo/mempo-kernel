@@ -32,9 +32,9 @@ do
 	now=$(date) ; echo "TOP LEVEL RUN build nr=$nr at $now" >> "$log1"
 
 	cd ~
-	rm -rf deterministic-kernel/
+	rm -rf ~/deterministic-kernel/
 	git clone https://github.com/mempo/deterministic-kernel.git
-	cd deterministic-kernel/
+	cd ~/deterministic-kernel/
 
 	now=$(date) ; echo "Will executed run.sh at $now" >> "$log1"
 
