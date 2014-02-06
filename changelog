@@ -2,7 +2,8 @@
 linux-image (linux-3.2.54-mempo-0.1.24) UNRELEASED; urgency=low
 
   * updated to grsecurity-3.0-3.2.54-201401281850.patch
-	* TODO requiring dpkg 0.1.23.6 that fixes XZ compression level
+	* requiring dpkg 0.1.23.7 that fixes XZ compression level
+	* v0.1.24-rc1
 	
  -- mempo <mempo@mempo.org>  Mon, 03 Feb 2014 12:00:00 +0200
 
