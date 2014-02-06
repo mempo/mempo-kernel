@@ -27,7 +27,7 @@ if [[ $tools_dpkg_vermempo == $tools_dpkg_ver ]] ; then tools_dpkg_vermempo="NON
 
 . dpkg-vercomp.sh 
 
-ver_have=$tools_dpkg_vermempo ; ver_need="0.1.23.5"
+ver_have=$tools_dpkg_vermempo ; ver_need="0.1.23.6"
 vercomp $ver_have $ver_need
 case $? in
   2) echo ; echo "ERROR: dpkg mempo version is bad (too old?)"

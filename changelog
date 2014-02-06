@@ -1,5 +1,12 @@
 
-linux-image (linux-3.2.55-mempo-0.1.23) UNRELEASED; urgency=low
+linux-image (linux-3.2.54-mempo-0.1.24) UNRELEASED; urgency=low
+
+  * updated to grsecurity-3.0-3.2.54-201401281850.patch
+	* TODO requiring dpkg 0.1.23.6 that fixes XZ compression level
+	
+ -- mempo <mempo@mempo.org>  Mon, 03 Feb 2014 12:00:00 +0200
+
+linux-image (linux-3.2.54-mempo-0.1.23) UNRELEASED; urgency=low
 
   * updated to grsecurity-3.0-3.2.54-201401281850.patch
 	* doc updates etc
@@ -16,6 +23,7 @@ linux-image (linux-3.2.55-mempo-0.1.23) UNRELEASED; urgency=low
 	* build-twice.sh deletes previous builds correctly
 	* the time of build is and will be set by mempo version now
 	* v0.1.23-rc5
+	* requiring dpkg that fixes XZ checksum/crc mode
 	
  -- mempo <mempo@mempo.org>  Mon, 03 Feb 2014 12:00:00 +0200
 
