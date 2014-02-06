@@ -1,3 +1,39 @@
+commit 026e375ba60b6866de10b3238e083ef9d35846dc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 3 17:28:44 2014 -0500
+
+    select DEBUG_KERNEL in addition to DEBUG_LIST
+
+ security/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 4f18c21f3dbcc85b0d65746ac1ef57fe820af6ae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 2 21:23:30 2014 -0500
+
+    update copyright date
+
+ grsecurity/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 8386e86f2202ea78b3f552c2446946d44799a46f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 2 21:23:08 2014 -0500
+
+    update copyright message
+
+ grsecurity/Makefile |   22 ++++++++++++++++------
+ 1 files changed, 16 insertions(+), 6 deletions(-)
+
+commit 6ad9fb0b598b5e77be4578116cde54a39aada70a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 1 09:46:46 2014 -0500
+
+    disable verbose random debugging messages at boot
+
+ drivers/char/random.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
 commit 9a257eeac61664e3a7b17f6e89e10bd8e3dc8285
 Author: Weston Andros Adamson <dros@netapp.com>
 Date:   Tue Dec 17 12:16:11 2013 -0500
