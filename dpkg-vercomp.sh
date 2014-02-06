@@ -2,12 +2,19 @@
 # http://stackoverflow.com/questions/4023830/bash-how-compare-two-strings-in-version-format
 
 vercomp () {
-    if [[ $1 == $2 ]]
+	a=$(printf "%s\n" "$1" | sed -e 's/\+/\./g')
+	b=$(printf "%s\n" "$2" | sed -e 's/\+/\./g')
+
+	echo $a
+	echo $b
+	
+
+    if [[ $a == $b ]]
     then
         return 0
     fi
     local IFS=.
-    local i ver1=($1) ver2=($2)
+    local i ver1=($a) ver2=($b)
     # fill empty fields in ver1 with zeros
     for ((i=${#ver1[@]}; i<${#ver2[@]}; i++))
     do
