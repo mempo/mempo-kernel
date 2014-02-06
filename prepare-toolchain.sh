@@ -21,13 +21,13 @@ echo " * testing with PATH=$PATH"
 echo "Testing dpkg version"
 tools_dpkg_which=$(which dpkg)
 tools_dpkg_ver=$( $tools_dpkg_which --version | head -n 1 | sed -e 's/.*program version \([^ ]*\).*/\1/' )
-tools_dpkg_vermempo=$( echo $tools_dpkg_ver | sed -e 's/.*-mempo\([0-9.]*\).*/\1/g' )
+tools_dpkg_vermempo=$( echo $tools_dpkg_ver | sed -e 's/.*-mempo\([0-9+a-zA-Z.]*\).*/\1/g' )
 if [[ $tools_dpkg_vermempo == $tools_dpkg_ver ]] ; then tools_dpkg_vermempo="NONE"; echo "WARNING: no mempo version detected in dpkg, you are not using mempo version of dpkg" ; fi ;
 # | head -n 1 | sed -e 's/.*program version \([^ ]*\).*/\1/' | sed -e 's/.*-mempo\([0-9.]*\).*/\1/g'
 
 . dpkg-vercomp.sh 
 
-ver_have=$tools_dpkg_vermempo ; ver_need="0.1.23"
+ver_have=$tools_dpkg_vermempo ; ver_need="0.1.23.5"
 vercomp $ver_have $ver_need
 case $? in
   2) echo ; echo "ERROR: dpkg mempo version is bad (too old?)"
@@ -38,7 +38,7 @@ case $? in
 		exit_error;
 	;;
 esac
-echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo)"
+echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo) needed=$ver_need"
 
 
 # deprecated tests - to remove later?

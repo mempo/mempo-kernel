@@ -5,9 +5,7 @@ vercomp () {
 	a=$(printf "%s\n" "$1" | sed -e 's/\+/\./g')
 	b=$(printf "%s\n" "$2" | sed -e 's/\+/\./g')
 
-	echo $a
-	echo $b
-	
+	echo "Version A=$a Version B=$b"
 
     if [[ $a == $b ]]
     then
