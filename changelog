@@ -2,6 +2,8 @@
 linux-image (linux-3.2.54-mempo-0.1.25) UNRELEASED; urgency=low
   * date upgraded now since grsecurity was updated
   * v0.1.25-rc1
+  * requiring dpkg 0.1.24.5 that really fixes crc (fix: one of args=0)
+  * v0.1.25-rc2
  -- mempo <mempo@mempo.org>  Mon, 03 Feb 2014 12:00:00 +0200
 
 linux-image (linux-3.2.54-mempo-0.1.24) UNRELEASED; urgency=low
