@@ -52869,10 +52869,25 @@ index 49eefdb..547693e 100644
  		do_chunk_alloc(trans, root->fs_info->extent_root,
  			       num_bytes, data, CHUNK_ALLOC_FORCE);
 diff --git a/fs/btrfs/ioctl.c b/fs/btrfs/ioctl.c
-index 618ae6f..118fe0c 100644
+index 618ae6f..82d0bc6 100644
 --- a/fs/btrfs/ioctl.c
 +++ b/fs/btrfs/ioctl.c
-@@ -2733,9 +2733,12 @@ long btrfs_ioctl_space_info(struct btrfs_root *root, void __user *arg)
+@@ -1329,6 +1329,14 @@ static noinline int btrfs_ioctl_snap_create_transid(struct file *file,
+ 			ret = -EINVAL;
+ 			fput(src_file);
+ 			goto out;
++		} else if (!inode_owner_or_capable(src_inode)) {
++			/*
++			 * Subvolume creation is not restricted, but snapshots
++			 * are limited to own subvolumes only
++			 */
++			ret = -EPERM;
++			fput(src_file);
++			goto out;
+ 		}
+ 		ret = btrfs_mksubvol(&file->f_path, name, namelen,
+ 				     BTRFS_I(src_inode)->root,
+@@ -2733,9 +2741,12 @@ long btrfs_ioctl_space_info(struct btrfs_root *root, void __user *arg)
  	for (i = 0; i < num_types; i++) {
  		struct btrfs_space_info *tmp;
  
@@ -52885,7 +52900,7 @@ index 618ae6f..118fe0c 100644
  		info = NULL;
  		rcu_read_lock();
  		list_for_each_entry_rcu(tmp, &root->fs_info->space_info,
-@@ -2757,15 +2760,12 @@ long btrfs_ioctl_space_info(struct btrfs_root *root, void __user *arg)
+@@ -2757,15 +2768,12 @@ long btrfs_ioctl_space_info(struct btrfs_root *root, void __user *arg)
  				memcpy(dest, &space, sizeof(space));
  				dest++;
  				space_args.total_spaces++;
@@ -62842,10 +62857,10 @@ index 0000000..c4717f9
 +endmenu
 diff --git a/grsecurity/Makefile b/grsecurity/Makefile
 new file mode 100644
-index 0000000..5cb186f
+index 0000000..f96524e
 --- /dev/null
 +++ b/grsecurity/Makefile
-@@ -0,0 +1,53 @@
+@@ -0,0 +1,54 @@
 +# grsecurity – access control and security hardening for Linux
 +# All code in this directory and various hooks located throughout the Linux kernel are
 +# Copyright (C) 2001-2014 Bradley Spengler, Open Source Security, Inc.
@@ -62897,6 +62912,7 @@ index 0000000..5cb186f
 +	@-chmod -f 500 /lib64/modules
 +	@-chmod -f 500 /lib32/modules
 +	@-chmod -f 700 .
++	@-chmod -f 700 $(objtree)
 +	@echo '  grsec: protected kernel image paths'
 +endif
 diff --git a/grsecurity/gracl.c b/grsecurity/gracl.c
@@ -104658,6 +104674,21 @@ index b43813c..74be837 100644
  }
  #else
  static inline int selinux_xfrm_enabled(void)
+diff --git a/security/selinux/ss/services.c b/security/selinux/ss/services.c
+index 185f849..72b20b1 100644
+--- a/security/selinux/ss/services.c
++++ b/security/selinux/ss/services.c
+@@ -1229,6 +1229,10 @@ static int security_context_to_sid_core(const char *scontext, u32 scontext_len,
+ 	struct context context;
+ 	int rc = 0;
+ 
++	/* An empty security context is never valid. */
++	if (!scontext_len)
++		return -EINVAL;
++
+ 	if (!ss_initialized) {
+ 		int i;
+ 
 diff --git a/security/smack/smack_lsm.c b/security/smack/smack_lsm.c
 index 7db62b4..ee4d949 100644
 --- a/security/smack/smack_lsm.c

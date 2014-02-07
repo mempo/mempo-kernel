@@ -1,3 +1,59 @@
+commit 799f4942cecf292385820730dd7d253cc27df988
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 6 18:15:24 2014 -0500
+
+    make GRKERNSEC_HIDESYM also protect the target directory specified with the O= arg to 'make'
+
+ grsecurity/Makefile |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 23a8287c65bb4933e3e6c28242b0dad3be1bc8bd
+Author: David Sterba <dsterba@suse.cz>
+Date:   Wed Jan 15 18:15:52 2014 +0100
+
+    Upstream commit: b572f9aaacdcb9b22ee6483fecaaa7a38c757896
+    
+    btrfs: restrict snapshotting to own subvolumes
+    
+    commit d024206133ce21936b3d5780359afc00247655b7 upstream.
+    
+    Currently, any user can snapshot any subvolume if the path is accessible and
+    thus indirectly create and keep files he does not own under his direcotries.
+    This is not possible with traditional directories.
+    
+    In security context, a user can snapshot root filesystem and pin any
+    potentially buggy binaries, even if the updates are applied.
+    
+    All the snapshots are visible to the administrator, so it's possible to
+    verify if there are suspicious snapshots.
+    
+    Another more practical problem is that any user can pin the space used
+    by eg. root and cause ENOSPC.
+    
+    Original report:
+    https://bugs.launchpad.net/ubuntu/+source/apparmor/+bug/484786
+    
+    Signed-off-by: David Sterba <dsterba@suse.cz>
+    Signed-off-by: Josef Bacik <jbacik@fb.com>
+    Signed-off-by: Chris Mason <clm@fb.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    
+    Conflicts:
+    
+    	fs/btrfs/ioctl.c
+
+ fs/btrfs/ioctl.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit bf11284994657b38a9066c95146b5f2d726b1c27
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 6 20:20:41 2014 -0500
+
+    Backport SELinux DoS fix from http://marc.info/?l=selinux&m=139110025203759&w=2
+
+ security/selinux/ss/services.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
 commit 026e375ba60b6866de10b3238e083ef9d35846dc
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Feb 3 17:28:44 2014 -0500

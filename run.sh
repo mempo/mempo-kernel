@@ -21,17 +21,6 @@ function warn_env() {
 	echo "and in directory /home/kernelbuild/deterministic-kernel/ (git clone in home, or copy files there)"
 }
 
-function ask_quit() {
-	echo ""
-	echo "Due to above-mentioned problems, this script will probably not work fully correctly"
-	echo "(e.g. will produce other checksums that rest of users has)."
-	echo ""
-	echo "Do you want to ignore this problem and try to continue anyway? y/N?"
-	read yn
-	if [[ $yn == "y" ]] ; then echo ; echo "*** ignoring this problem, but the resulting checksums will be probably not correct ***" ; echo ; 
-	else exit_error ; fi
-}
-
 echo "Checking environment"
 id=$(id -u )
 echo " * USER=$USER (id=$id)"
@@ -57,7 +46,7 @@ fi
 
 echo "" ; echo "Tools: checking prerequisites..."
 DPKG_VER=$(dpkg-query -W --showformat='${Version}\n' dpkg)
-DPKG_VER_NEEDED="1.17.5"
+DPKG_VER_NEEDED="1.17.5" # more exact checks in prepare-toolchain.sh
 
 function show_dpkg_why {
 	echo "We need dpkg version that packs files in same way, see http://tinyurl.com/pcrrvag and https://wiki.debian.org/ReproducibleBuildsKernel"

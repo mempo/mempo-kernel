@@ -27,7 +27,7 @@ if [[ $tools_dpkg_vermempo == $tools_dpkg_ver ]] ; then tools_dpkg_vermempo="NON
 
 . dpkg-vercomp.sh 
 
-ver_have=$tools_dpkg_vermempo ; ver_need="0.1.23.7"
+ver_have=$tools_dpkg_vermempo ; ver_need="0.1.24.3"
 vercomp $ver_have $ver_need
 case $? in
   2) echo ; echo "ERROR: dpkg mempo version is bad (too old?)"
@@ -35,7 +35,7 @@ case $? in
 		echo "You probably did not install our special dpkg version, or you use too old version of it."
 		echo "Please see information on https://wiki.debian.org/SameKernel/#dpkg how to install the required version."  
 		echo "Usually it should be enough to install the speciall dpkg only locally as user (does not require root) so it should be very easy."
-		exit_error;
+		ask_quit;
 	;;
 esac
 echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo) needed=$ver_need"

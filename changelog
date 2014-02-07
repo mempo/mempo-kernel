@@ -6,6 +6,9 @@ linux-image (linux-3.2.54-mempo-0.1.24) UNRELEASED; urgency=low
 	* v0.1.24-rc1
 	* missing files added to git
 	* v0.1.24-rc2
+	* requiring dpkg 0.1.24.3 (bugfix) with correct XZ compression
+	* updated to grsecurity-3.0-3.2.54-201402062221.patch
+	* v0.1.24-rc3
 	
  -- mempo <mempo@mempo.org>  Mon, 03 Feb 2014 12:00:00 +0200
 

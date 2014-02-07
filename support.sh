@@ -17,4 +17,15 @@ function exit_error() {
 	exit 1
 }
 
+function ask_quit() {
+	echo ""
+	echo "Due to above-mentioned problems, this script will probably not work fully correctly"
+	echo "(e.g. will produce other checksums that rest of users has)."
+	echo ""
+	echo "Do you want to ignore this problem and try to continue anyway? y/N?"
+	read yn
+	if [[ $yn == "y" ]] ; then echo ; echo "*** ignoring this problem, but the resulting checksums will be probably not correct ***" ; echo ; 
+	else exit_error ; fi
+}
+
 
