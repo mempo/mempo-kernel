@@ -1,0 +1,48 @@
+This are hardened (grsecurity) kernels for Linux (debian)
+- modern vanilla kernel
+- applied GrSecurity - the excellent linux security patches
+- used base options 
+- configure kernel options for 5+ levels of security to choose
+- release as distribution (e.g. .deb files)
+
+---------------------------------------------------------------------
+Using:
+
+Choose a kernel to use, as root do:   dpkg -i filename.deb   to install it. Then boot it, that's all.
+Possibly set pax flags later if any problems with applications.
+
+* Choose a kernel: start with [goodsrv] kernel.
+- boot: if system does not boot at all, use other kernel
+- video: if system boots but video mode is not working, try patching Xorg (no ioports) or use other/open driver, if this can not be resolved, use other kernel
+- apps-pax: if all works but some programs crash/hang: firefox, icedove, java, python - then set proper PAX flags with setfattr (google it - TODO documentation, it's one command easy) else use other kernel
+
+* Choose a [good] kernel.
+- boot: if it fails again, skip this kernel
+- video: if it fails again, skip this kernel
+- apps-pax: if it fails again, skip this kernel
+
+* Choose a regular kernel (return to normal kernel) 
+- but we will release more compatible kernels [normal] and [light] in future. 
+PLEASE, please report the bug to us!
+All your bugreports and any other constructive feedback is very important to us, see wiki.debian.org/Mempo
+
+---------------------------------------------------------------------
+Secured Kernel variants:
+
+min     - desktop: 100% compatible identical operation to regualar system
+
+light   - desktop: compatible but changes (e.g. hides processes, dmesg), very light
+
+normsrv - server:  most grsecurity except expensive stuff
+norm    - desktop: most grsecurity except expensive stuff (except kmem/IOports)
+
+goodsrv - server: all grsecurity is used
+good    - desktop: all grsecurity is used (except kmem/IOports)
+
+bestsrv - server: all grsecurity is used and some other asserts/debugs
+
+maxsrv  - server: all grsecurity is used and very expensive asserts like IOMMU/VM debug/assert
+
+crazysrv - server: absolutelly all possible security options, checks, asserts etc are turned on
+
+
