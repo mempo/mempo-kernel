@@ -1,6 +1,66 @@
+diff -Nuar a/arch/x86/math-emu/errors.c b/arch/x86/math-emu/errors.c
+--- a/arch/x86/math-emu/errors.c	2014-01-03 05:33:36.000000000 +0100
++++ b/arch/x86/math-emu/errors.c	2014-02-13 17:27:30.174421388 +0100
+@@ -332,7 +332,7 @@
+ 	if ((~control_word & n & CW_Exceptions) || (n == EX_INTERNAL)) {
+ #ifdef PRINT_MESSAGES
+ 		/* My message from the sponsor */
+-		printk(FPU_VERSION " " __DATE__ " (C) W. Metzenthen.\n");
++		printk(FPU_VERSION " " _MY_BUILD__DATE__ " (C) W. Metzenthen.\n");
+ #endif /* PRINT_MESSAGES */
+ 
+ 		/* Get a name string for error reporting */
+diff -Nuar a/drivers/net/wireless/brcm80211/brcmfmac/dhd_common.c b/drivers/net/wireless/brcm80211/brcmfmac/dhd_common.c
+--- a/drivers/net/wireless/brcm80211/brcmfmac/dhd_common.c	2014-01-03 05:33:36.000000000 +0100
++++ b/drivers/net/wireless/brcm80211/brcmfmac/dhd_common.c	2014-02-13 17:27:30.822421386 +0100
+@@ -43,7 +43,7 @@
+ #ifdef BCMDBG
+ static const char brcmf_version[] =
+ 	"Dongle Host Driver, version " BRCMF_VERSION_STR "\nCompiled on "
+-	__DATE__ " at " __TIME__;
++	_MY_BUILD__TIME__ " at " _MY_BUILD__DATE__;
+ #else
+ static const char brcmf_version[] =
+ 	"Dongle Host Driver, version " BRCMF_VERSION_STR;
+diff -Nuar a/drivers/staging/rts5139/rts51x_scsi.c b/drivers/staging/rts5139/rts51x_scsi.c
+--- a/drivers/staging/rts5139/rts51x_scsi.c	2014-01-03 05:33:36.000000000 +0100
++++ b/drivers/staging/rts5139/rts51x_scsi.c	2014-02-13 17:27:31.266421384 +0100
+@@ -2067,7 +2067,7 @@
+ 	SPRINTF("       Vendor: Realtek Corp.\n");
+ 	SPRINTF("      Product: RTS51xx USB Card Reader\n");
+ 	SPRINTF("      Version: %s\n", DRIVER_VERSION);
+-	SPRINTF("        Build: %s\n", __TIME__);
++	SPRINTF("        Build: %s\n", _MY_BUILD__TIME__);
+ 
+ 	/*
+ 	 * Calculate start of next buffer, and return value.
+diff -Nuar a/drivers/staging/wlags49_h2/wl_version.h b/drivers/staging/wlags49_h2/wl_version.h
+--- a/drivers/staging/wlags49_h2/wl_version.h	2014-01-03 05:33:36.000000000 +0100
++++ b/drivers/staging/wlags49_h2/wl_version.h	2014-02-13 17:27:31.630421383 +0100
+@@ -130,7 +130,7 @@
+ #endif  /* BUS_XXX */
+ 
+ #ifdef DBG
+-#define MODULE_DATE         __DATE__ " " __TIME__
++#define MODULE_DATE         _MY_BUILD__DATE__ " " _MY_BUILD__TIME__
+ #else
+ #define MODULE_DATE         "07/18/2004 13:30:00"
+ #endif // DBG
+diff -Nuar a/fs/ubifs/super.c b/fs/ubifs/super.c
+--- a/fs/ubifs/super.c	2014-02-13 17:26:56.110421505 +0100
++++ b/fs/ubifs/super.c	2014-02-13 17:27:31.770421383 +0100
+@@ -1435,7 +1435,7 @@
+ 	ubifs_msg("reserved for root:  %llu bytes (%llu KiB)",
+ 		c->report_rp_size, c->report_rp_size >> 10);
+ 
+-	dbg_msg("compiled on:         " __DATE__ " at " __TIME__);
++	dbg_msg("compiled on:         " _MY_BUILD__DATE__ " at " _MY_BUILD__TIME__);
+ 	dbg_msg("min. I/O unit size:  %d bytes", c->min_io_size);
+ 	dbg_msg("max. write size:     %d bytes", c->max_write_size);
+ 	dbg_msg("LEB size:            %d bytes (%d KiB)",
 diff -Nuar a/Makefile b/Makefile
---- a/Makefile	2014-01-12 06:12:42.408045849 +0100
-+++ b/Makefile	2014-01-12 04:52:01.676062457 +0100
+--- a/Makefile	2014-02-13 17:26:53.066421515 +0100
++++ b/Makefile	2014-02-13 17:27:29.214421391 +0100
 @@ -377,6 +377,17 @@
  KBUILD_CFLAGS_MODULE  := -DMODULE
  KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
@@ -19,69 +79,20 @@ diff -Nuar a/Makefile b/Makefile
  # Read KERNELRELEASE from include/config/kernel.release (if it exists)
  KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
  KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
-diff -Nuar a/arch/x86/math-emu/errors.c b/arch/x86/math-emu/errors.c
---- a/arch/x86/math-emu/errors.c	2014-01-12 06:12:42.384045849 +0100
-+++ b/arch/x86/math-emu/errors.c	2014-01-12 04:52:01.668062457 +0100
-@@ -332,7 +332,7 @@
- 	if ((~control_word & n & CW_Exceptions) || (n == EX_INTERNAL)) {
- #ifdef PRINT_MESSAGES
- 		/* My message from the sponsor */
--		printk(FPU_VERSION " " __DATE__ " (C) W. Metzenthen.\n");
-+		printk(FPU_VERSION " " _MY_BUILD__DATE__ " (C) W. Metzenthen.\n");
- #endif /* PRINT_MESSAGES */
+diff -Nuar a/scripts/Makefile b/scripts/Makefile
+--- a/scripts/Makefile	2014-01-03 05:33:36.000000000 +0100
++++ b/scripts/Makefile	2014-02-13 17:28:15.058421234 +0100
+@@ -9,6 +9,7 @@
+ # docproc:       Used in Documentation/DocBook
  
- 		/* Get a name string for error reporting */
-diff -Nuar a/drivers/net/wireless/brcm80211/brcmfmac/dhd_common.c b/drivers/net/wireless/brcm80211/brcmfmac/dhd_common.c
---- a/drivers/net/wireless/brcm80211/brcmfmac/dhd_common.c	2014-01-12 06:12:42.404045849 +0100
-+++ b/drivers/net/wireless/brcm80211/brcmfmac/dhd_common.c	2014-01-12 04:52:01.668062457 +0100
-@@ -43,7 +43,7 @@
- #ifdef BCMDBG
- static const char brcmf_version[] =
- 	"Dongle Host Driver, version " BRCMF_VERSION_STR "\nCompiled on "
--	__DATE__ " at " __TIME__;
-+	_MY_BUILD__TIME__ " at " _MY_BUILD__DATE__;
- #else
- static const char brcmf_version[] =
- 	"Dongle Host Driver, version " BRCMF_VERSION_STR;
-diff -Nuar a/drivers/staging/rts5139/rts51x_scsi.c b/drivers/staging/rts5139/rts51x_scsi.c
---- a/drivers/staging/rts5139/rts51x_scsi.c	2014-01-12 06:12:42.404045849 +0100
-+++ b/drivers/staging/rts5139/rts51x_scsi.c	2014-01-12 04:52:01.668062457 +0100
-@@ -2067,7 +2067,7 @@
- 	SPRINTF("       Vendor: Realtek Corp.\n");
- 	SPRINTF("      Product: RTS51xx USB Card Reader\n");
- 	SPRINTF("      Version: %s\n", DRIVER_VERSION);
--	SPRINTF("        Build: %s\n", __TIME__);
-+	SPRINTF("        Build: %s\n", _MY_BUILD__TIME__);
+ HOST_EXTRACFLAGS += -I$(srctree)/tools/include
++HOST_EXTRACFLAGS += -Wl,--build-id=none 
  
- 	/*
- 	 * Calculate start of next buffer, and return value.
-diff -Nuar a/drivers/staging/wlags49_h2/wl_version.h b/drivers/staging/wlags49_h2/wl_version.h
---- a/drivers/staging/wlags49_h2/wl_version.h	2014-01-12 06:12:42.408045849 +0100
-+++ b/drivers/staging/wlags49_h2/wl_version.h	2014-01-12 04:52:01.668062457 +0100
-@@ -130,7 +130,7 @@
- #endif  /* BUS_XXX */
- 
- #ifdef DBG
--#define MODULE_DATE         __DATE__ " " __TIME__
-+#define MODULE_DATE         _MY_BUILD__DATE__ " " _MY_BUILD__TIME__
- #else
- #define MODULE_DATE         "07/18/2004 13:30:00"
- #endif // DBG
-diff -Nuar a/fs/ubifs/super.c b/fs/ubifs/super.c
---- a/fs/ubifs/super.c	2014-01-12 06:12:42.408045849 +0100
-+++ b/fs/ubifs/super.c	2014-01-12 04:52:01.676062457 +0100
-@@ -1435,7 +1435,7 @@
- 	ubifs_msg("reserved for root:  %llu bytes (%llu KiB)",
- 		c->report_rp_size, c->report_rp_size >> 10);
- 
--	dbg_msg("compiled on:         " __DATE__ " at " __TIME__);
-+	dbg_msg("compiled on:         " _MY_BUILD__DATE__ " at " _MY_BUILD__TIME__);
- 	dbg_msg("min. I/O unit size:  %d bytes", c->min_io_size);
- 	dbg_msg("max. write size:     %d bytes", c->max_write_size);
- 	dbg_msg("LEB size:            %d bytes (%d KiB)",
+ hostprogs-$(CONFIG_KALLSYMS)     += kallsyms
+ hostprogs-$(CONFIG_LOGO)         += pnmtologo
 diff -Nuar a/scripts/mkcompile_h b/scripts/mkcompile_h
---- a/scripts/mkcompile_h	2014-01-12 06:12:42.408045849 +0100
-+++ b/scripts/mkcompile_h	2014-01-12 04:52:01.676062457 +0100
+--- a/scripts/mkcompile_h	2014-01-03 05:33:36.000000000 +0100
++++ b/scripts/mkcompile_h	2014-02-13 17:27:31.770421383 +0100
 @@ -42,6 +42,11 @@
  else
  	TIMESTAMP=$KBUILD_BUILD_TIMESTAMP
@@ -95,8 +106,8 @@ diff -Nuar a/scripts/mkcompile_h b/scripts/mkcompile_h
  	LINUX_COMPILE_BY=$(whoami | sed 's/\\/\\\\/')
  else
 diff -Nuar a/scripts/package/builddeb b/scripts/package/builddeb
---- a/scripts/package/builddeb	2014-01-12 06:11:29.004046101 +0100
-+++ b/scripts/package/builddeb	2014-01-12 05:51:47.536050154 +0100
+--- a/scripts/package/builddeb	2014-02-13 17:26:59.038421495 +0100
++++ b/scripts/package/builddeb	2014-02-13 17:27:31.770421383 +0100
 @@ -17,7 +17,7 @@
  
  	cp debian/copyright "$pdir/usr/share/doc/$pname/"
@@ -117,7 +128,7 @@ diff -Nuar a/scripts/package/builddeb b/scripts/package/builddeb
  	cp System.map "$tmpdir/boot/System.map-$version"
 diff -Nuar a/scripts/package/buildtar b/scripts/package/buildtar
 --- a/scripts/package/buildtar	2014-01-03 05:33:36.000000000 +0100
-+++ b/scripts/package/buildtar	2014-01-12 05:57:00.064049082 +0100
++++ b/scripts/package/buildtar	2014-02-13 17:27:31.774421383 +0100
 @@ -28,16 +28,18 @@
  		file_ext=""
  		;;

@@ -1,3 +1,8 @@
+linux-image (linux-3.2.54-mempo-0.1.26) UNRELEASED; urgency=low
+  * updated to grsecurity-3.0-3.2.54-201402111745.patch
+  * v0.1.26
+  * Removed build-id from all binaries in headers deb package (mempo patch)
+-- mempo <mempo@mempo.org>  Thu, 13 Feb 2014 17:00:00 +0200
 
 linux-image (linux-3.2.54-mempo-0.1.25) UNRELEASED; urgency=low
   * date upgraded now since grsecurity was updated

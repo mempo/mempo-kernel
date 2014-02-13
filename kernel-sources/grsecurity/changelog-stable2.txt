@@ -1,3 +1,615 @@
+commit 2f04aaaaed6bc1a63152202d4013d21653f01005
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Feb 11 17:33:49 2014 -0500
+
+    [PATCH] random: fix overflow for big nbits values in credit_entropy_bits()
+    
+    Commit 30e37ec516ae "random: account for entropy loss due to overwrites"
+    introduced an overflow in the arithmetics of credit_entropy_bits() when
+    CONFIG_GRKERNSEC_RANDNET is enabled as the latter quadruples the pool
+    size and therefore invalidates the assumptions of the "nifty" formula.
+    
+    Fix the overflow by using 64bit arithmetics.
+    
+    Reported-by: Torsten Hilbrich <torsten.hilbrich@secunet.com>
+    Signed-off-by: Mathias Krause <mathias.krause@secunet.com>
+    
+    This bug is at worst a privileged DoS -- with RANDNET enabled, an admin
+    with CAP_SYS_ADMIN feeding large amounts of entropy into the pool at once
+    can cause less than expected entropy to be credited (but this doesn't
+    affect how much is actually added).  For specific buffer sizes, this
+    can result in 0 entropy being credited and end in a situation in which
+    the kernel can't recover, causing future reads from /dev/random to stall.
+    
+    Many thanks to Torsten and Mathias for the report!
+
+ drivers/char/random.c |    5 +----
+ 1 files changed, 1 insertions(+), 4 deletions(-)
+
+commit 464ca7e89e3a1e5833a6877ead67662caf3ecf6a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 9 11:30:53 2014 -0500
+
+    just ignore the seed file, the hash is in a different dir
+
+ tools/gcc/.gitignore |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit e6c2635a2bc4e5d9b60559ffb58d8939d399f80c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 9 11:27:22 2014 -0500
+
+    Don't pass the hashed seed via build commandline, generate a header to include in vermagic.h instead
+    
+    Conflicts:
+    
+    	Makefile
+
+ Documentation/dontdiff       |    2 +-
+ Makefile                     |    4 +---
+ include/linux/vermagic.h     |    1 +
+ tools/gcc/.gitignore         |    4 ++--
+ tools/gcc/Makefile           |    9 ++++-----
+ tools/gcc/gen-random-seed.sh |    3 ++-
+ 6 files changed, 11 insertions(+), 12 deletions(-)
+
+commit f7928dccf4c16676ff44d067e7d6eb64d1b2a37c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 31 18:11:51 2014 -0500
+
+    force on modversion support if RANDSTRUCT is enabled so that we're sure
+    no modules can be loaded that were built with a different seed
+
+ grsecurity/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 74bc16d2da44b78a8f08cceafb7f4c6e1e2581a0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 8 23:37:13 2014 -0500
+
+    compile fix for RANDSTRUCT
+
+ drivers/staging/media/solo6x10/g723.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 55487724150cf128355dc5a2dd14bbab9e066c1b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 8 23:20:07 2014 -0500
+
+    fix initializers for use with RANDSTRUCT
+
+ drivers/gpu/drm/nouveau/nouveau_mem.c |   20 ++++++++++----------
+ 1 files changed, 10 insertions(+), 10 deletions(-)
+
+commit d12a71b090b59adf1e97e22731d6116fddcbb295
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 8 23:10:16 2014 -0500
+
+    compile fix for ipc hardening
+
+ grsecurity/grsec_ipc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit b4fc8d77c9a707b6759f775d0b901de5c70a2061
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 8 23:01:58 2014 -0500
+
+    backport IPC hardening for 3.2 which has no proper user namespaces
+
+ grsecurity/grsec_ipc.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 1f49c8104f89773d4e34c89e884cf9677101d8e3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Dec 30 11:13:49 2013 -0500
+
+    Update to phase two of the IPC hardening.  I've heard no complaints about
+    the patch I released, but including it here will generate better information.
+
+ grsecurity/Kconfig     |   16 ++++++++++------
+ grsecurity/grsec_ipc.c |   32 +++++++++++++++++++++++++++++---
+ include/linux/grmsg.h  |    2 +-
+ ipc/util.c             |    3 ++-
+ 4 files changed, 42 insertions(+), 11 deletions(-)
+
+commit 31da7adbf5c68ddb3cf5ff8deb9e9d71074fd8da
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Nov 14 20:15:51 2013 -0500
+
+    GRKERNSEC_HARDEN_IPC should depend on SYSVIPC
+    
+    Signed-off-by: Brad Spengler <spender@grsecurity.net>
+
+ grsecurity/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit bc7dcd78312d954f28bd7ed3bb305aaf3fb6b0d8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Nov 14 19:01:59 2013 -0500
+
+    Add a new feature: GRKERNSEC_HARDEN_IPC in response to Tim Brown's research on overly-permissive shared memory found in hundreds of areas in Linux distros: http://labs.portcullis.co.uk/whitepapers/memory-squatting-attacks-on-system-v-shared-memory/
+    
+    No reported problems while this has been present in -test
+    
+    Signed-off-by: Brad Spengler <spender@grsecurity.net>
+    
+    Conflicts:
+    
+    	ipc/util.c
+
+ grsecurity/Kconfig         |   17 +++++++++++++++++
+ grsecurity/Makefile        |    2 +-
+ grsecurity/grsec_init.c    |    4 ++++
+ grsecurity/grsec_ipc.c     |   22 ++++++++++++++++++++++
+ grsecurity/grsec_sysctl.c  |    9 +++++++++
+ include/linux/grinternal.h |    1 +
+ include/linux/grmsg.h      |    1 +
+ ipc/util.c                 |    5 +++++
+ 8 files changed, 60 insertions(+), 1 deletions(-)
+
+commit 421cc90d6b0897702b319dcfb91120d8c9cf64d6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 8 22:50:50 2014 -0500
+
+    GRKERNSEC_JIT_HARDEN exists only for x86/x64, restrict Kconfig appropriately
+
+ grsecurity/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 50aff165b5427d039fb24f8f654cedde1c1417de
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 3 19:39:04 2013 -0500
+
+    Update documentation for GRKERNSEC_KMEM and GRKERNSEC_IO,
+    see: http://forums.grsecurity.net/viewtopic.php?f=3&t=3879
+    The previous info was many years outdated.
+    
+    Disable KEXEC when GRKERNSEC_KMEM is enabled:
+    http://mjg59.dreamwidth.org/28746.html
+    
+    Also workaround the GRKERNSEC_IO incompatibility with Xorg by returning
+    -ENODEV instead of -EPERM in the cases where CAP_SYS_RAWIO is present
+    
+    Conflicts:
+    
+    	arch/arm/Kconfig
+    	arch/ia64/Kconfig
+    	arch/mips/Kconfig
+    	arch/powerpc/Kconfig
+
+ arch/arm/Kconfig         |    1 +
+ arch/ia64/Kconfig        |    1 +
+ arch/mips/Kconfig        |    1 +
+ arch/powerpc/Kconfig     |    1 +
+ arch/tile/Kconfig        |    1 +
+ arch/x86/Kconfig         |    1 +
+ arch/x86/kernel/ioport.c |   12 ++++++------
+ grsecurity/Kconfig       |   27 +++++++++++----------------
+ 8 files changed, 23 insertions(+), 22 deletions(-)
+
+commit f287dcd432b99d6365e7609472b77fa867559b4f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 26 11:26:44 2014 -0500
+
+    Force HIDESYM on if RANDSTRUCT is used, just in case there is a user
+    who already isn't enabling it (to prevent the seed from potentially being
+    visible to other users if compiled on the same machine).
+    Suggested by minipli
+
+ grsecurity/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 51675df74ad0bac7abdeafaaa4d3ec5792983324
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 14:54:11 2014 -0500
+
+    Fix another compiler error caught by RANDSTRUCT
+    
+    Signed-off-by: Brad Spengler <spender@grsecurity.net>
+
+ sound/isa/sb/emu8000_synth.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 96d1e15dead6eb84b4ffd6c513b01dab5b90cb86
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 14:34:12 2014 -0500
+
+    Fix another compiler error caught by RANDSTRUCT
+    
+    Signed-off-by: Brad Spengler <spender@grsecurity.net>
+
+ drivers/net/wan/z85230.c |   24 ++++++++++++------------
+ 1 files changed, 12 insertions(+), 12 deletions(-)
+
+commit 052f770e6d9118a4f097d1d4fde81763a086881a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 14:30:46 2014 -0500
+
+    fix compilation with RANDSTRUCT plugin
+    
+    Signed-off-by: Brad Spengler <spender@grsecurity.net>
+
+ sound/drivers/opl4/opl4_seq.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit e8b62b046ded4a3322b55b4eae617d0d4285a139
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 5 23:43:27 2014 -0500
+
+    avoid printing jibberish in some instances with RANDSTRUCT and modules
+    built with other seeds, as the kernel's module loader trusts the
+    module layout
+    
+    Conflicts:
+    
+    	kernel/module.c
+
+ kernel/module.c |   31 +++++++++++++++++++++++++++----
+ 1 files changed, 27 insertions(+), 4 deletions(-)
+
+commit d195dd1b7432aab2602aa5f68a382f5e0175f4aa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 8 22:32:57 2014 -0500
+
+    compile fix
+
+ include/linux/moduleparam.h |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit a4840142ad7a2f0aa0ea23fcf74a8b2604ce0814
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 8 22:25:21 2014 -0500
+
+    fix some 3.2-specific initializers for RANDSTRUCT
+
+ arch/x86/kernel/setup.c     |   12 ++++++++++--
+ include/linux/moduleparam.h |    2 +-
+ 2 files changed, 11 insertions(+), 3 deletions(-)
+
+commit e008742fbfcfdf661c9f82e15a56f7ee279399f8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 8 21:57:10 2014 -0500
+
+    update RANDSTRUCT .gitignore
+
+ tools/gcc/.gitignore |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit fc39b489d6b44c9189601d0873d8bcbd3bd7d6ed
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 6 21:26:51 2014 -0500
+
+    gcc 4.9 update for RANDSTRUCT plugin part 1
+
+ tools/gcc/randomize_layout_plugin.c |    7 +------
+ 1 files changed, 1 insertions(+), 6 deletions(-)
+
+commit 9bf4a234f85ecd0ab80c5640c35f0d1e1505b83f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 6 20:16:57 2014 -0500
+
+    don't pass the seed via build commandline, store it in a header file instead
+    and build it into the RANDSTRUCT plugin.
+    set up proper dependencies for the generated files used by the RANDSTRUCT plugin,
+    fixing some race conditions in the build process
+    support O= argument to make and place generated files in the target directory tree
+    update RANDSTRUCT documentation
+    
+    Conflicts:
+    
+    	Makefile
+
+ Makefile                            |    8 +++-----
+ grsecurity/Kconfig                  |    2 +-
+ scripts/gen-random-seed.sh          |    8 --------
+ tools/gcc/Makefile                  |   10 +++++++++-
+ tools/gcc/gen-random-seed.sh        |    7 +++++++
+ tools/gcc/randomize_layout_plugin.c |   23 ++++++++---------------
+ 6 files changed, 28 insertions(+), 30 deletions(-)
+
+commit a1c274bf9f3c731b545e1d4d2390b6e96612aad0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 5 23:32:26 2014 -0500
+
+    Introduce the non-performance mode -- the performance mode had previously been
+    inadvertently forced on regardless of config setting
+    
+    Resolve an issue with gcc completing declarations for recently finished
+    types *before* the plugin's finish_type being called to randomize that structure.
+    This resulted in too small a structure size being emitted for this_module
+    and generally crashes whenever modules were loaded.
+    
+    Conflicts:
+    
+    	Makefile
+
+ Makefile                            |    4 ++--
+ tools/gcc/randomize_layout_plugin.c |   23 +++++++++++++++++++++++
+ 2 files changed, 25 insertions(+), 2 deletions(-)
+
+commit a7db043cf43a7882ce1edf31d3340fe748d689bc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 1 19:53:04 2014 -0500
+
+    update RANDSTRUCT plugin to eliminate false posities on struct type mismatches
+    resulting from an IS_ERR() sequence
+    add checks for bad casts in local and global variable initializers
+    use the main variant when comparing types
+
+ tools/gcc/randomize_layout_plugin.c |  150 +++++++++++++++++++++++++++++++++--
+ 1 files changed, 144 insertions(+), 6 deletions(-)
+
+commit 9e5a1a80d623574b24c55f57e40b5b7707999cca
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 1 15:13:06 2014 -0500
+
+    remove unnecessary TODO_* flags for our passive bad cast gimple pass
+
+ tools/gcc/randomize_layout_plugin.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 9ba79cc1a206b24d68e0818776044338f510b060
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 1 10:55:36 2014 -0500
+
+    fix RANDSTRUCT plugin compatibility with gcc 4.9
+
+ tools/gcc/randomize_layout_plugin.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 1b7af865815f4a208f7ac681d2c18f96bd88cfe1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jan 31 21:52:14 2014 -0500
+
+    sanity check to make sure we never randomize a struct in include/uapi/*
+
+ scripts/gen-random-seed.sh          |    2 +-
+ tools/gcc/randomize_layout_plugin.c |    7 +++++++
+ 2 files changed, 8 insertions(+), 1 deletions(-)
+
+commit 3b37eecf6f83d264aaab51c12e98bbbd27dcb1a3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 26 12:44:21 2014 -0500
+
+    add a sha256-hashed version of the seed to modversion to ensure no
+    modules compiled with another seed can be loaded
+    
+    Conflicts:
+    
+    	Documentation/dontdiff
+    	Makefile
+
+ Makefile                   |    4 +++-
+ include/linux/vermagic.h   |    8 +++++++-
+ scripts/gen-random-seed.sh |    2 +-
+ tools/gcc/.gitignore       |    1 +
+ 4 files changed, 12 insertions(+), 3 deletions(-)
+
+commit f1d2e403be5bf1842428a9161e17f274c431bf71
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 27 20:33:30 2014 -0500
+
+    Relicense RANDSTRUCT plugin as GPLv2, removing the GPLv3 option
+
+ tools/gcc/randomize_layout_plugin.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit b2c3736f6f9a648e6c7a66c6833370debdc2cb3b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 26 18:24:44 2014 -0500
+
+    fix typo
+
+ tools/gcc/randomize_layout_plugin.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 8f2d87da2eda2d510e543080d42accc9cb4b4c63
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 26 18:22:33 2014 -0500
+
+    Update RANDSTRUCT plugin for gcc 4.9 and gcc-common.h
+
+ tools/gcc/randomize_layout_plugin.c |   77 +++++++++++++++++++----------------
+ 1 files changed, 42 insertions(+), 35 deletions(-)
+
+commit e66f5494154f0b1708c3f8a374fce9ea7bb50846
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 14:16:18 2014 -0500
+
+    avoid problems by just building our fake field decl node from scratch
+    
+    Signed-off-by: Brad Spengler <spender@grsecurity.net>
+
+ tools/gcc/randomize_layout_plugin.c |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 1d8ebfacb2d536ed3019a4214c1539fa72b5f362
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 13:45:18 2014 -0500
+
+    while in non-debug mode, don't emit notes for non-randomized struct types
+    
+    clear all signs from our fake field decl of being a bitfield
+    
+    Signed-off-by: Brad Spengler <spender@grsecurity.net>
+
+ tools/gcc/randomize_layout_plugin.c |   11 +++++++++++
+ 1 files changed, 11 insertions(+), 0 deletions(-)
+
+commit e98e8b1fa16cbf5c0d85790b18ea813d52c208ae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 12:56:05 2014 -0500
+
+    revert change to read-only marking of fake struct field
+    
+    Signed-off-by: Brad Spengler <spender@grsecurity.net>
+
+ tools/gcc/randomize_layout_plugin.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ce8b04272f6016c11d2d03a06f11784fe213f231
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 12:42:48 2014 -0500
+
+    Update RANDSTRUCT plugin help
+    
+    Signed-off-by: Brad Spengler <spender@grsecurity.net>
+
+ tools/gcc/randomize_layout_plugin.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit db7d20642a7ad48f3db9426e665a672a2ceadf56
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jan 25 12:25:43 2014 -0500
+
+    Initial backport of RANDSTRUCT to 3.2
+    
+    Introduce GRKERNSEC_RANDSTRUCT: automatic structure layout randomization of pure ops structs randomization of marked sensitive kernel structures
+    
+    automatically enabled by GRKERNSEC_CONFIG_AUTO
+    performance mode is activated if the config priority is set to performance
+    
+    Signed-off-by: Brad Spengler <spender@grsecurity.net>
+    
+    Conflicts:
+    
+    	Documentation/dontdiff
+    	Makefile
+    	arch/x86/include/asm/paravirt_types.h
+    	drivers/acpi/acpica/hwxfsleep.c
+    	drivers/block/drbd/drbd_interval.c
+    	drivers/gpu/drm/nouveau/nouveau_ttm.c
+    	drivers/scsi/bfa/bfa_fcs_lport.c
+    	drivers/staging/lustre/lustre/ldlm/ldlm_flock.c
+    	drivers/staging/lustre/lustre/libcfs/module.c
+    	drivers/staging/media/solo6x10/solo6x10-g723.c
+    	fs/mount.h
+    	fs/proc/internal.h
+    	include/linux/cred.h
+    	include/linux/dcache.h
+    	include/linux/fs.h
+    	include/linux/ipc_namespace.h
+    	include/linux/module.h
+    	include/linux/mount.h
+    	include/linux/pid_namespace.h
+    	include/linux/proc_ns.h
+    	include/linux/rbtree_augmented.h
+    	include/linux/sched.h
+    	include/linux/user_namespace.h
+    	include/linux/utsname.h
+    	include/net/net_namespace.h
+    	lib/rbtree.c
+    	net/vmw_vsock/vmci_transport_notify.c
+    	net/vmw_vsock/vmci_transport_notify_qstate.c
+
+ Documentation/dontdiff                        |    2 +
+ Makefile                                      |   10 +
+ arch/x86/include/asm/floppy.h                 |   20 +-
+ arch/x86/include/asm/paravirt_types.h         |   23 +-
+ arch/x86/include/asm/processor.h              |    2 +-
+ drivers/block/cciss.h                         |   30 +-
+ drivers/block/smart1,2.h                      |   40 +-
+ drivers/gpu/drm/ttm/ttm_bo_manager.c          |   10 +-
+ drivers/gpu/drm/vmwgfx/vmwgfx_gmrid_manager.c |   10 +-
+ drivers/infiniband/hw/ipath/ipath_dma.c       |   26 +-
+ drivers/infiniband/hw/nes/nes_cm.c            |   22 +-
+ drivers/isdn/gigaset/bas-gigaset.c            |   32 +-
+ drivers/isdn/gigaset/ser-gigaset.c            |   32 +-
+ drivers/isdn/gigaset/usb-gigaset.c            |   32 +-
+ drivers/isdn/i4l/isdn_concap.c                |    6 +-
+ drivers/isdn/i4l/isdn_x25iface.c              |   16 +-
+ drivers/misc/sgi-xp/xp_main.c                 |   12 +-
+ drivers/net/ethernet/brocade/bna/bna_enet.c   |    8 +-
+ drivers/net/wan/lmc/lmc_media.c               |   97 ++--
+ drivers/scsi/bfa/bfa_fcs.c                    |   19 +-
+ drivers/scsi/bfa/bfa_fcs_lport.c              |   22 +-
+ drivers/scsi/bfa/bfa_modules.h                |   12 +-
+ drivers/scsi/hpsa.h                           |   20 +-
+ drivers/video/matrox/matroxfb_DAC1064.c       |   10 +-
+ drivers/video/matrox/matroxfb_Ti3026.c        |    5 +-
+ fs/reiserfs/item_ops.c                        |   24 +-
+ grsecurity/Kconfig                            |   31 +-
+ include/linux/compiler-gcc4.h                 |    5 +
+ include/linux/compiler.h                      |    8 +
+ include/linux/cred.h                          |    4 +-
+ include/linux/dcache.h                        |    2 +-
+ include/linux/fs.h                            |   14 +-
+ include/linux/fs_struct.h                     |    2 +-
+ include/linux/ipc_namespace.h                 |    2 +-
+ include/linux/kobject.h                       |    2 +-
+ include/linux/mm_types.h                      |    4 +-
+ include/linux/module.h                        |    4 +-
+ include/linux/mount.h                         |    2 +-
+ include/linux/pid_namespace.h                 |    2 +-
+ include/linux/proc_fs.h                       |    4 +-
+ include/linux/sched.h                         |    6 +-
+ include/linux/sysctl.h                        |    2 +-
+ include/linux/tty.h                           |    2 +-
+ include/linux/tty_driver.h                    |    2 +-
+ include/linux/user_namespace.h                |    2 +-
+ include/linux/utsname.h                       |    2 +-
+ include/net/neighbour.h                       |    2 +-
+ include/net/net_namespace.h                   |    2 +-
+ net/atm/lec.c                                 |    6 +-
+ net/atm/mpoa_caches.c                         |   42 +-
+ net/decnet/dn_dev.c                           |    2 +-
+ net/x25/sysctl_net_x25.c                      |    2 +-
+ scripts/Makefile                              |    2 +
+ scripts/gen-random-seed.sh                    |    8 +
+ sound/core/seq/oss/seq_oss.c                  |    4 +-
+ sound/core/seq/seq_midi.c                     |    4 +-
+ sound/drivers/opl3/opl3_seq.c                 |    4 +-
+ sound/pci/emu10k1/emu10k1_synth.c             |    4 +-
+ sound/synth/emux/emux_seq.c                   |   14 +-
+ tools/gcc/.gitignore                          |    1 +
+ tools/gcc/Makefile                            |    2 +
+ tools/gcc/randomize_layout_plugin.c           |  726 +++++++++++++++++++++++++
+ 62 files changed, 1147 insertions(+), 322 deletions(-)
+
+commit 6c1dfb8e0c4342aafaf3da38143aff565f74e357
+Merge: c0c1e89 f6b9aab
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 8 21:25:13 2014 -0500
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit f6b9aab54f0b4b4b99dbe494cb56ed6fcab3c7fe
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 8 21:24:26 2014 -0500
+
+    Update to pax-linux-3.2.54-test136.patch:
+    - fixed the PLUGIN_START_UNIT callback names in the latent entropy and size overflow plugins, reported by spender
+    - added a new header to gcc-common.h, reported by spender
+    - some useful backports from upstream 3.14:
+      - debug info for .S: https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=7db436325db821b400328563ed693b09f8c4c46c
+      - make v4 -s handling: https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=e36aaea28972c57a32a3ba5365e61633739719b9
+
+ Makefile                          |    8 +++++++-
+ tools/gcc/gcc-common.h            |    1 +
+ tools/gcc/latent_entropy_plugin.c |    2 +-
+ tools/gcc/size_overflow_plugin.c  |    2 +-
+ 4 files changed, 10 insertions(+), 3 deletions(-)
+
+commit c0c1e8928b192455d42a54f54198ad5ffcafef6d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 8 20:30:40 2014 -0500
+
+    on 3.2 the proper routine is task_times()
+
+ grsecurity/gracl.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 5d09902d41934e044fcf68dd00b5f4ad77148ca3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 8 20:02:12 2014 -0500
+
+    don't divide cputime by HZ as some architectures can't handle this
+    use proper task_cputime and cputime_to_secs wrappers
+    Thanks to Michael Tremer for the report
+
+ grsecurity/gracl.c |   23 ++++++++++++-----------
+ 1 files changed, 12 insertions(+), 11 deletions(-)
+
 commit 799f4942cecf292385820730dd7d253cc27df988
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Feb 6 18:15:24 2014 -0500
