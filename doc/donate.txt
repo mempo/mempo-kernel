@@ -1,0 +1,22 @@
+
+mempo-user-v
+Donations:
+
+Dogecoin:  DGGcXaNA6wUDn2GUnaPwmJz9WFAA9iLSWw
+Noblecoin: 9iLGmzy365g98xXjUM81QJNdpVXKACXMyw
+
+(this are temporary addresses).
+Newer addresses will be always signed and on github!
+
+Donations will be used for:
+
+1. sponsoring some of the developers
+2. sponsoring costs like hardware, domains, (software?), bounties(!)
+3. sponsoring other people who would help us
+4. sponsoring external projects that we cooperate with like grsecurity, tails(?), openwall(?), freenet, tor, i2p, bitcoin, *coin, etc
+5. sponsoring other external projects and organisations with goals related to Freedom and Security
+
+probably in this order.
+
+Perhaps in future we will establish organisation or organisations to manage the funds.
+
