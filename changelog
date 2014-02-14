@@ -5,6 +5,7 @@ linux-image (linux-3.2.54-mempo-0.1.26) UNRELEASED; urgency=low
   * Removed build-id from all binaries in headers deb package (mempo patch)
   * doc (changelog)
   * v0.1.26-rc2
+  * added tools for setfattr
 
  -- mempo <mempo@mempo.org>  Thu, 13 Feb 2014 17:00:00 +0200
 

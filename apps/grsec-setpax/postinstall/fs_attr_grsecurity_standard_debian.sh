@@ -1,6 +1,7 @@
 #!/bin/bash 
+# see: https://wiki.debian.org/grsecurity
 
-# needed package: attr  
+# needed package: attr - install this
 
 # this programs do NOT have proper protection form kernel, it is disabled to let them run!
 # mempo.org project will aim to remedy this one day by turning runtime-JIT to separated precompile
