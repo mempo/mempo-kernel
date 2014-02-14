@@ -18,13 +18,31 @@ function exit_error() {
 }
 
 function ask_quit() {
+	kind=$1
+	echo $kind
 	echo ""
-	echo "Due to above-mentioned problems, this script will probably not work fully correctly"
-	echo "(e.g. will produce other checksums that rest of users has)."
-	echo ""
+	if [[ $kind == "nosum" ]] ; then
+		:
+	else
+		echo "***************************************************************************************"
+		echo "!!! Due to above-mentioned problems, this script will probably not work fully correctly"
+		echo "!!! (e.g. will produce other checksums that rest of users has)."
+		echo "***************************************************************************************"
+		echo ""
+	fi
+
+	echo "*** Help: read FAQ: https://wiki.debian.org/SameKernel/#FAQ"
 	echo "Do you want to ignore this problem and try to continue anyway? y/N?"
 	read yn
-	if [[ $yn == "y" ]] ; then echo ; echo "*** ignoring this problem, but the resulting checksums will be probably not correct ***" ; echo ; 
+	if [[ $yn == "y" ]] ; then 
+		echo ; 
+		if [[ $kind == "nosum" ]] ; then
+			echo "*** ignoring this problem ***" ; 
+		else
+			echo "*** ignoring this problem - !!! IT WILL LIKELLY PRODUCE DIFFERENT CHECKSUMS THEN EXPECTED !!! ***" ; 
+			sleep 1
+		fi
+		echo ; 
 	else exit_error ; fi
 }
 

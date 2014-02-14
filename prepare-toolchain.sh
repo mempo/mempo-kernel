@@ -41,10 +41,25 @@ esac
 echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo) needed=$ver_need" ; echo ;
 
 
-echo " WARNING: You need libc version 2.13-38+deb7u1 to build packages that will have correct checksums. Please check package version. Continue [Y/n]?"
-read yn
-        if [[ $yn == "y" ]] ; then echo ; echo "*** Continue ***" ; echo ;
-        else  exit_error; fi
+NAME_ver="libc6"; libc_ver=$( LC_ALL=C dpkg -s $NAME_ver | grep 'Version' | head -n 1 | sed -e "s/^Version: \([^ ]*\)$/\1/" ) ; v=$libc_ver
+# | sed -e "s/Version: \([^ ]*\).*/\1/" | cut -d'-' -f1 ) ; 
+echo " * $NAME_ver version=$v"
+ver_what="$NAME_ver"; ver_have=$v ; ver_need="2.13-38+deb7u1"
+
+if [[ "$v" != "$ver_need" ]] ; then
+	echo "ERROR: you seem to have wrong version of $ver_what - version $v instead $ver_need"
+	echo "If you have older version then needed, then simply updating the system should help"
+	echo "If you have newer version - then you are probably checking some older version of our kernel,"
+	echo "then try to get new our newest kernel, kernel script."
+	echo "If you really want to verify old kernel then you need to obtain the older version to get identical deb files"
+	echo "(or continue, and verify the .deb by hand by unpacking and comparing files)"
+	echo ""
+	echo "libc only:"
+ 	echo "In theory you could also write script to override the name/version that is embbed in generated elf files"
+	echo "during the build. See also this: https://wiki.debian.org/SameKernel/#bug2 or ask us at #mempo"
+	ask_quit;
+fi
+
 
 # deprecated tests - to remove later?
 if false ; then

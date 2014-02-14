@@ -21,7 +21,21 @@ function warn_env() {
 	echo "and in directory /home/kernelbuild/deterministic-kernel/ (git clone in home, or copy files there)"
 }
 
+echo "-------------------------------------------------------------------------"
+
 echo "Checking environment"
+
+df_need_mb=$((11*1024))
+df_need=$((df_need_mb*1024*1024))
+df_now=$(($(stat -f --format="%a*%S" .)))
+
+if [[ $df_now -lt $df_need ]] ; then
+	echo "WARNING: LOW DISK SPACE ($df_now < $df_need bytes)"
+	echo "the build process might use around $df_need_mb MB of disk space"
+	echo "you seem to have less free space here (in $PWD)"
+	ask_quit "nosum";
+fi
+
 id=$(id -u )
 echo " * USER=$USER (id=$id)"
 
