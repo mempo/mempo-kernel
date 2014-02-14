@@ -86,7 +86,7 @@ diff -Nuar a/scripts/Makefile b/scripts/Makefile
  # docproc:       Used in Documentation/DocBook
  
  HOST_EXTRACFLAGS += -I$(srctree)/tools/include
-+HOST_EXTRACFLAGS += -Wl,--build-id=none 
++# HOST_EXTRACFLAGS += -Wl,--build-id=sha1 # This line doing nothing (only for testing purposes)
  
  hostprogs-$(CONFIG_KALLSYMS)     += kallsyms
  hostprogs-$(CONFIG_LOGO)         += pnmtologo
