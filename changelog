@@ -1,8 +1,12 @@
 linux-image (linux-3.2.54-mempo-0.1.26) UNRELEASED; urgency=low
+
   * updated to grsecurity-3.0-3.2.54-201402111745.patch
-  * v0.1.26
+  * v0.1.26-wip
   * Removed build-id from all binaries in headers deb package (mempo patch)
--- mempo <mempo@mempo.org>  Thu, 13 Feb 2014 17:00:00 +0200
+  * doc (changelog)
+  * v0.1.26-rc2
+
+ -- mempo <mempo@mempo.org>  Thu, 13 Feb 2014 17:00:00 +0200
 
 linux-image (linux-3.2.54-mempo-0.1.25) UNRELEASED; urgency=low
   * date upgraded now since grsecurity was updated
@@ -22,28 +26,28 @@ linux-image (linux-3.2.54-mempo-0.1.24) UNRELEASED; urgency=low
   * updated to grsecurity-3.0-3.2.54-201402062221.patch
   * v0.1.24-rc3
   * (info) date, numbering
-	
+
  -- mempo <mempo@mempo.org>  Mon, 03 Feb 2014 12:00:00 +0200
 
 linux-image (linux-3.2.54-mempo-0.1.23) UNRELEASED; urgency=low
 
   * updated to grsecurity-3.0-3.2.54-201401281850.patch
-	* doc updates etc
-	* v0.1.23-rc1
-	* testing dpkg version, we need 0.1.23
-	* corrected this change log version entry
-	* XZ crc options fix
-	* check if user/pwd are correct. better support/error msg
-	* v0.1.23-rc2
-	* corrected user/pwd check... doh.
-	* v0.1.23-rc3
-	* corrected user/pwd check again, regarding the path
-	* v0.1.23-rc4
-	* build-twice.sh deletes previous builds correctly
-	* the time of build is and will be set by mempo version now
-	* v0.1.23-rc5
-	* requiring dpkg that fixes XZ checksum/crc mode
-	
+  * doc updates etc
+  * v0.1.23-rc1
+  * testing dpkg version, we need 0.1.23
+  * corrected this change log version entry
+  * XZ crc options fix
+  * check if user/pwd are correct. better support/error msg
+  * v0.1.23-rc2
+  * corrected user/pwd check... doh.
+  * v0.1.23-rc3
+  * corrected user/pwd check again, regarding the path
+  * v0.1.23-rc4
+  * build-twice.sh deletes previous builds correctly
+  * the time of build is and will be set by mempo version now
+  * v0.1.23-rc5
+  * requiring dpkg that fixes XZ checksum/crc mode
+
  -- mempo <mempo@mempo.org>  Mon, 03 Feb 2014 12:00:00 +0200
 
 linux-image (linux-3.2.54-mempo-0.1.22) UNRELEASED; urgency=low

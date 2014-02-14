@@ -75,6 +75,12 @@ function download_wget() {
 
 echo "Kernel: $kernel_version"
 
+
+echo "======================================================="
+echo "Please, make sure that: "
+echo "you run an updated system (or if you build old version, then tools like gcc need to match the old situation"
+echo "======================================================="
+
 if [ ! -r "kernel-sources/kernel/${kernel_file}" ]
 then
 (

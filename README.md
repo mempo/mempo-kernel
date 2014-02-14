@@ -44,14 +44,14 @@ When releasing new tag (_RR_)
 
 When incresing Mempo (_M.M.M_)
 * changelog
-* reset _RR_=0
+* reset _RR_=0 as written above
 * linux-mempo/configs/(every).config - write the proper version in `CONFIG_LOCALVERSION`
 
 When upstream grsecurity/patches change, then update:
 * changelog
 * sources.list - the checksum and file name of patch
 * linux-mempo/env.sh - `KERNEL_DATE`
-* increase _M.M.M_
+* increase _M.M.M_ as written above
 
 When new upstream vanilla kernel (_V.V.V_)
 * changelog
