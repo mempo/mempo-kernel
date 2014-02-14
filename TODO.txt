@@ -18,6 +18,8 @@
 === BUGS TODO ===
 (newest added on top)
 
+* bugs are tracked on wiki.debian.org/SameKernel/#bugs - see it too
+
 * later restore kernel_debug  kernel_doc kernel_manual and make option quick build or full build
 * dpkg still does not sort the input files?
 
