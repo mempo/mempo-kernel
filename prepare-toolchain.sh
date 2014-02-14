@@ -38,8 +38,13 @@ case $? in
 		ask_quit;
 	;;
 esac
-echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo) needed=$ver_need"
+echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo) needed=$ver_need" ; echo ;
 
+
+echo " WARNING: You need libc version 2.13-38+deb7u1 to build packages that will have correct checksums. Please check package version. Continue [Y/n]?"
+read yn
+        if [[ $yn == "y" ]] ; then echo ; echo "*** Continue ***" ; echo ;
+        else  exit_error; fi
 
 # deprecated tests - to remove later?
 if false ; then
