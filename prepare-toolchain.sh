@@ -6,12 +6,14 @@
 
 all_ok=1
 
-echo "Looking for toolchian..."
+echo "Looking for tools"
 
+. dpkg-vercomp.sh
+
+echo "-----------------------------"
+echo "Dpkg"
 #PATH="$HOME/.local/bin:$PATH"
 #PATH="$HOME/.local/usr/bin:$PATH"
-
-
 PATH="$HOME/.local/bin:$PATH" # dpkg
 export PERL5LIB="$HOME/.local/share/perl5" # dpkg needs this
 #export DH_AUTOSCRIPTDIR="$HOME/.local/usr/share/debhelper/autoscripts"
@@ -25,7 +27,6 @@ tools_dpkg_vermempo=$( echo $tools_dpkg_ver | sed -e 's/.*-mempo\([0-9+a-zA-Z.]*
 if [[ $tools_dpkg_vermempo == $tools_dpkg_ver ]] ; then tools_dpkg_vermempo="0.0.0.0.0.NONE"; echo "WARNING: no mempo version detected in dpkg, you are not using mempo version of dpkg" ; fi ;
 # | head -n 1 | sed -e 's/.*program version \([^ ]*\).*/\1/' | sed -e 's/.*-mempo\([0-9.]*\).*/\1/g'
 
-. dpkg-vercomp.sh 
 
 ver_have=$tools_dpkg_vermempo ; ver_need="0.1.24.5"
 vercomp $ver_have $ver_need
@@ -39,6 +40,17 @@ case $? in
 	;;
 esac
 echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo) needed=$ver_need" ; echo ;
+
+echo "Copy dpkg status"
+dpkg_status_target="$HOME/.local/var/lib/dpkg/status"
+cp /var/lib/dpkg/status "$dpkg_status_target"
+ok=$?
+if [[ $ok != 0 ]] ; then
+	echo "Failed to copy dpkg status to $dpkg_status_target"
+	exit_error;
+else
+	file "$dpkg_status_target"
+fi
 
 echo "-----------------------------"
 echo "Version of gcc and C libraries (embed in binaries - affecting build-id)"
