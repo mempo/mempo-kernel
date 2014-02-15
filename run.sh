@@ -140,7 +140,23 @@ echo
 echo "Executing the build script"
 echo 
 
+pwd_normal=$PWD
+
 echo "Will now execute ./all.sh to build the kernel."
 ./all.sh $@
 set +x
+
+cd $pwd_normal
+
+echo "==========================================================================================="
+echo "Please check sha256sum checksums of the generated .deb files that you can find here below:"
+
+sha256sum kernel-build/linux-mempo/*.deb
+
+echo "If you see checksums line above, then please compare/publish them with other users."
+echo "If there are any errors, please consult us ( but first read https://wiki.debian.org/SameKernel#FAQ )"
+echo ""
+echo "Thanks for using this script! Please join our security-privacy-for-everyone efforts:"
+echo "why not join us and idle on irc #mempo irc.oftc.net or irc2p of freenode?"
+echo "-- Mempo team < https://wiki.debian.org/Mempo >"
 
