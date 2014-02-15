@@ -1,6 +1,6 @@
 
 function show_support_info {
-	echo "--------------------------------------------------"
+	echo "**************************************************"
 	echo "It seems there was some problem, as written above?"
 	echo ""
 	echo "SUPPORT: for help, see https://wiki.debian.org/Mempo#contact"
@@ -19,16 +19,12 @@ function exit_error() {
 
 function ask_quit() {
 	kind=$1
-	echo $kind
-	echo ""
 	if [[ $kind == "nosum" ]] ; then
 		:
 	else
 		echo "***************************************************************************************"
-		echo "!!! Due to above-mentioned problems, this script will probably not work fully correctly"
-		echo "!!! (e.g. will produce other checksums that rest of users has)."
+		echo "!!! Due to above-mentioned problems, this script will probably not work, e.g. produce other checksums"
 		echo "***************************************************************************************"
-		echo ""
 	fi
 
 	echo "*** Help: read FAQ: https://wiki.debian.org/SameKernel/#FAQ"
@@ -40,7 +36,6 @@ function ask_quit() {
 			echo "*** ignoring this problem ***" ; 
 		else
 			echo "*** ignoring this problem - !!! IT WILL LIKELLY PRODUCE DIFFERENT CHECKSUMS THEN EXPECTED !!! ***" ; 
-			sleep 1
 		fi
 		echo ; 
 	else exit_error ; fi

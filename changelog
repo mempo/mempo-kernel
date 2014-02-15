@@ -6,6 +6,8 @@ linux-image (linux-3.2.54-mempo-0.1.26) UNRELEASED; urgency=low
   * doc (changelog)
   * v0.1.26-rc2
   * added tools for setfattr
+  * checking of exact version of libc, gcc, etc
+  * v0.1.26-rc3
 
  -- mempo <mempo@mempo.org>  Thu, 13 Feb 2014 17:00:00 +0200
 

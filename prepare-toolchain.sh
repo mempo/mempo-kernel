@@ -22,7 +22,7 @@ echo "Testing dpkg version"
 tools_dpkg_which=$(which dpkg)
 tools_dpkg_ver=$( $tools_dpkg_which --version | head -n 1 | sed -e 's/.*program version \([^ ]*\).*/\1/' )
 tools_dpkg_vermempo=$( echo $tools_dpkg_ver | sed -e 's/.*-mempo\([0-9+a-zA-Z.]*\).*/\1/g' )
-if [[ $tools_dpkg_vermempo == $tools_dpkg_ver ]] ; then tools_dpkg_vermempo="NONE"; echo "WARNING: no mempo version detected in dpkg, you are not using mempo version of dpkg" ; fi ;
+if [[ $tools_dpkg_vermempo == $tools_dpkg_ver ]] ; then tools_dpkg_vermempo="0.0.0.0.0.NONE"; echo "WARNING: no mempo version detected in dpkg, you are not using mempo version of dpkg" ; fi ;
 # | head -n 1 | sed -e 's/.*program version \([^ ]*\).*/\1/' | sed -e 's/.*-mempo\([0-9.]*\).*/\1/g'
 
 . dpkg-vercomp.sh 
@@ -40,22 +40,47 @@ case $? in
 esac
 echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo) needed=$ver_need" ; echo ;
 
+echo "-----------------------------"
+echo "Version of gcc and C libraries (embed in binaries - affecting build-id)"
 
-NAME_ver="libc6"; libc_ver=$( LC_ALL=C dpkg -s $NAME_ver | grep 'Version' | head -n 1 | sed -e "s/^Version: \([^ ]*\)$/\1/" ) ; v=$libc_ver
-# | sed -e "s/Version: \([^ ]*\).*/\1/" | cut -d'-' -f1 ) ; 
-echo " * $NAME_ver version=$v"
-ver_what="$NAME_ver"; ver_have=$v ; ver_need="2.13-38+deb7u1"
+count_lib_error_exact=0
+count_lib_error_tool=0
 
-if [[ "$v" != "$ver_need" ]] ; then
-	echo "ERROR: you seem to have wrong version of $ver_what - version $v instead $ver_need"
+function require_exact_ver() { # ($name,$ver_needed)
+	name=$1
+	ver_needed=$2
+	ver_now=$( LC_ALL=C dpkg -s $name | grep 'Version' | head -n 1 | sed -e "s/^Version: \([^ ]*\)$/\1/" ) 
+	msg="OK";
+	if [[ "$ver_now" != "$ver_needed" ]] ; then
+		count_lib_error_exact=$((count_lib_error_exact+1))
+		msg=" WARNING: miss-matched version! [errors: $count_lib_error_exact]"
+	fi
+	echo " * $name: now $ver_now (need $ver_needed) $msg"
+}
+
+# (for p in libc6 gcc gcc-4.7 gcc-4.7-plugin-dev gcc-4.4-doc ; do dpkg -l $p ; done ; gcc --version ; gcc-4.7 --version) | egrep "gcc|libc"
+# ii  libc6:amd64                      2.13-38+deb7u1                amd64        Embedded GNU C Library: Shared libraries
+# ii  gcc                              4:4.7.2-1                     amd64        GNU C compiler
+# ii  gcc-4.7                          4.7.2-5                       amd64        GNU C compiler
+# ii  gcc-4.7-plugin-dev               4.7.2-5                       amd64        Files for GNU GCC plugin development.
+# (no gcc-4.4-doc)
+# gcc (Debian 4.7.2-5) 4.7.2
+# gcc-4.7 (Debian 4.7.2-5) 4.7.2
+
+require_exact_ver "libc6" "2.13-38+deb7u1"
+require_exact_ver "gcc" "4:4.7.2-1"
+require_exact_ver "gcc-4.7" "4.7.2-5"
+require_exact_ver "gcc-4.7-plugin-dev" "4.7.2-5"
+
+if [[ "$count_lib_error_exact" -gt 0 ]] ; then
+	echo ; echo "ERROR: you seem to have wrong version of some library as listed above."
 	echo "If you have older version then needed, then simply updating the system should help"
 	echo "If you have newer version - then you are probably checking some older version of our kernel,"
 	echo "then try to get new our newest kernel, kernel script."
 	echo "If you really want to verify old kernel then you need to obtain the older version to get identical deb files"
 	echo "(or continue, and verify the .deb by hand by unpacking and comparing files)"
 	echo ""
-	echo "libc only:"
- 	echo "In theory you could also write script to override the name/version that is embbed in generated elf files"
+ 	echo "In theory you could also write script to override the name/version that is embed in generated elf files"
 	echo "during the build. See also this: https://wiki.debian.org/SameKernel/#bug2 or ask us at #mempo"
 	ask_quit;
 fi

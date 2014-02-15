@@ -30,7 +30,7 @@ df_need=$((df_need_mb*1024*1024))
 df_now=$(($(stat -f --format="%a*%S" .)))
 
 if [[ $df_now -lt $df_need ]] ; then
-	echo "WARNING: LOW DISK SPACE ($df_now < $df_need bytes)"
+	echo ; echo "WARNING: LOW DISK SPACE ($df_now < $df_need bytes)"
 	echo "the build process might use around $df_need_mb MB of disk space"
 	echo "you seem to have less free space here (in $PWD)"
 	ask_quit "nosum";
@@ -40,22 +40,22 @@ id=$(id -u )
 echo " * USER=$USER (id=$id)"
 
 if [[ $id -eq 0 ]] ; then 
-	echo "ERROR: Do not run this script as root (uid 0) (this is not needed at all)." ; warn_env ;	exit_error
+	echo ; echo "ERROR: Do not run this script as root (uid 0) (this is not needed at all)." ; warn_env ;	exit_error
 fi
 
 if [[ $USER == "root" ]] ; then 
-	echo "ERROR: Do not run this script as user root (this is not needed at all)." ; warn_env ;	exit_error
+	echo ; echo "ERROR: Do not run this script as user root (this is not needed at all)." ; warn_env ;	exit_error
 fi
 
 USER="kernelbuild"
 if [[ $USER != 'kernelbuild' ]] ; then
-	echo "WARNING: wrong user ($USER)." ; warn_env ;	ask_quit;
+	echo ; echo "WARNING: wrong user ($USER)." ; warn_env ;	ask_quit;
 fi
 
 echo " * PWD=$PWD"
 good_dir='/home/kernelbuild/deterministic-kernel'
 if [[ $PWD != "$good_dir" ]] ; then
-	echo "WARNING: wrong directory '$PWD' should be '$good_dir'." ; warn_env ;	ask_quit;
+	echo ; echo "WARNING: wrong directory '$PWD' should be '$good_dir'." ; warn_env ;	ask_quit;
 fi
 
 echo "" ; echo "Tools: checking prerequisites..."
@@ -72,14 +72,11 @@ function show_mempo_contact {
 	echo "We will gladly help fellow Hackers and security researchers."
 }
 
-echo "(TODO check if packets like build-essentials etc are installed, warn if not)" # TODO
-
-. prepare-toolchain.sh
-
-echo "Tools: all ok, prerequisites seem fine"
-
+echo "-------------------------------------------------------------------------"
+. prepare-toolchain.sh # check toolchain and libs
 echo ""
 
+echo "-------------------------------------------------------------------------"
 echo "Will get kernel sources (will verify checksum later - before actually using them)"
 
 function download_wget() {
