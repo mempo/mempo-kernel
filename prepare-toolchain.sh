@@ -27,6 +27,9 @@ tools_dpkg_vermempo=$( echo $tools_dpkg_ver | sed -e 's/.*-mempo\([0-9+a-zA-Z.]*
 if [[ $tools_dpkg_vermempo == $tools_dpkg_ver ]] ; then tools_dpkg_vermempo="0.0.0.0.0.NONE"; echo "WARNING: no mempo version detected in dpkg, you are not using mempo version of dpkg" ; fi ;
 # | head -n 1 | sed -e 's/.*program version \([^ ]*\).*/\1/' | sed -e 's/.*-mempo\([0-9.]*\).*/\1/g'
 
+export tools_dpkg_which
+export tools_dpkg_ver
+export tools_dpkg_vermempo
 
 ver_have=$tools_dpkg_vermempo ; ver_need="0.1.24.5"
 vercomp $ver_have $ver_need
