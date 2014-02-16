@@ -1,3 +1,200 @@
+commit 86d245898feca3788abd59400a6190e5d9e89439
+Merge: 9550679 08d74bb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 15 19:38:45 2014 -0500
+
+    Merge branch 'pax-stable2' into grsec-stable2
+    
+    Conflicts:
+    	arch/x86/kernel/traps.c
+    	mm/mmap.c
+    	net/ipv4/inet_diag.c
+
+commit 08d74bbf2389cb14cebeb54cf5a6f2c4413c06b6
+Merge: 3c749fc 39716f2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 15 19:35:37 2014 -0500
+
+    Update to pax-linux-3.2.55-test137.patch
+    
+    Merge branch 'linux-3.2.y' into pax-stable2
+    
+    Conflicts:
+    	mm/memory-failure.c
+    	mm/mmap.c
+
+commit 9550679471718fb7082fc40068a81a580ac34eca
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Feb 15 14:43:58 2014 -0500
+
+    add note on how to disable rate limiting on log messages
+
+ grsecurity/Kconfig |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 3d39f46966283b73145304c1fa69b2ee12d39077
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 13 16:50:39 2014 -0500
+
+    Force off all virtualization guest options if the autoconfig choice
+    was not for the kernel to be used for vm guests
+    likewise force off Xen if it wasn't mentioned in the autoconfig
+    
+    Conflicts:
+    
+    	arch/x86/Kconfig
+    	arch/x86/xen/Kconfig
+
+ arch/x86/Kconfig     |    1 +
+ arch/x86/xen/Kconfig |    1 +
+ 2 files changed, 2 insertions(+), 0 deletions(-)
+
+commit e9c1e89ad6c783d5d9b1068bb0cf86c0eb185775
+Merge: 3239e60 3c749fc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 13 15:26:38 2014 -0500
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit 3c749fc72f906ba0db476db1ab0cad2edb2e698e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 13 15:25:58 2014 -0500
+
+    Update to pax-linux-3.2.54-test137.patch:
+    - fixed some gcc plugins to work in low-memory environments as well, reported by many, big thanks to niv <n@e-ix.net> for help
+
+ tools/gcc/Makefile                |    2 +-
+ tools/gcc/latent_entropy_plugin.c |   18 +++++++++--
+ tools/gcc/size_overflow_plugin.c  |   19 +++++++++--
+ tools/gcc/stackleak_plugin.c      |   58 ++++++++++++++++++++++++++++--------
+ 4 files changed, 76 insertions(+), 21 deletions(-)
+
+commit 3239e609887cec3078527d1a8ed3feae24d017c9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 13 12:35:16 2014 -0500
+
+    add missing header
+
+ grsecurity/grsec_mem.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 9ddf6ee010dcd333077a1e6b2b9d3f2e4623608c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 13 12:04:44 2014 -0500
+
+    export msr_write logging function and convert all exported symbols to EXPORT_SYMBOL_GPL
+
+ grsecurity/gracl.c          |    8 ++++----
+ grsecurity/grsec_chroot.c   |    2 +-
+ grsecurity/grsec_disabled.c |    6 +++---
+ grsecurity/grsec_exec.c     |    4 ++--
+ grsecurity/grsec_init.c     |    2 +-
+ grsecurity/grsec_mem.c      |    1 +
+ grsecurity/grsec_sock.c     |   12 ++++++------
+ grsecurity/grsec_time.c     |    2 +-
+ 8 files changed, 19 insertions(+), 18 deletions(-)
+
+commit 73ce22c244ede935910517a418e1b3fa3a020407
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 13 11:28:26 2014 -0500
+
+    add missing header
+
+ arch/x86/kernel/msr.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 83fa54221c9ce274117fb8a828c60b8fae7ae6d1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 13 11:12:36 2014 -0500
+
+    fix typo
+
+ arch/x86/kernel/msr.c      |    4 ++--
+ include/linux/grsecurity.h |    2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit e6fdb064145e3cf3f077c453acfdcdd72f05749b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 13 10:57:06 2014 -0500
+
+    PLUGIN_FINISH_DECL is an enum, so use explicit gcc version checking instead
+
+ tools/gcc/randomize_layout_plugin.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 64c804f844b66c2e8cc651d4cdafd4367ee6284f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 13 09:23:29 2014 -0500
+
+    Relax MSR restrictions under GRKERNSEC_KMEM, allow MSR reads but not writes.  Log all writing attempts.
+
+ arch/x86/Kconfig           |    1 -
+ arch/x86/kernel/msr.c      |    9 +++++++++
+ grsecurity/grsec_mem.c     |    6 ++++++
+ include/linux/grmsg.h      |    1 +
+ include/linux/grsecurity.h |    1 +
+ 5 files changed, 17 insertions(+), 1 deletions(-)
+
+commit 2a81ca372d0e3dc8d944782c6c653b78757abd96
+Author: Richard Yao <ryao@gentoo.org>
+Date:   Sat Feb 8 19:32:01 2014 -0500
+
+    Upstream commit: b6f52ae2f0d32387bde2b89883e3b64d88b9bfe8
+    
+    9p/trans_virtio.c: Fix broken zero-copy on vmalloc() buffers
+    
+    The 9p-virtio transport does zero copy on things larger than 1024 bytes
+    in size. It accomplishes this by returning the physical addresses of
+    pages to the virtio-pci device. At present, the translation is usually a
+    bit shift.
+    
+    That approach produces an invalid page address when we read/write to
+    vmalloc buffers, such as those used for Linux kernel modules. Any
+    attempt to load a Linux kernel module from 9p-virtio produces the
+    following stack.
+    
+    [<ffffffff814878ce>] p9_virtio_zc_request+0x45e/0x510
+    [<ffffffff814814ed>] p9_client_zc_rpc.constprop.16+0xfd/0x4f0
+    [<ffffffff814839dd>] p9_client_read+0x15d/0x240
+    [<ffffffff811c8440>] v9fs_fid_readn+0x50/0xa0
+    [<ffffffff811c84a0>] v9fs_file_readn+0x10/0x20
+    [<ffffffff811c84e7>] v9fs_file_read+0x37/0x70
+    [<ffffffff8114e3fb>] vfs_read+0x9b/0x160
+    [<ffffffff81153571>] kernel_read+0x41/0x60
+    [<ffffffff810c83ab>] copy_module_from_fd.isra.34+0xfb/0x180
+    
+    Subsequently, QEMU will die printing:
+    
+    qemu-system-x86_64: virtio: trying to map MMIO memory
+    
+    This patch enables 9p-virtio to correctly handle this case. This not
+    only enables us to load Linux kernel modules off virtfs, but also
+    enables ZFS file-based vdevs on virtfs to be used without killing QEMU.
+    
+    Special thanks to both Avi Kivity and Alexander Graf for their
+    interpretation of QEMU backtraces. Without their guidence, tracking down
+    this bug would have taken much longer. Also, special thanks to Linus
+    Torvalds for his insightful explanation of why this should use
+    is_vmalloc_addr() instead of is_vmalloc_or_module_addr():
+    
+    https://lkml.org/lkml/2014/2/8/272
+    
+    Signed-off-by: Richard Yao <ryao@gentoo.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/9p/trans_virtio.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit b2844ed398049b161754f5d4744b198b967be788
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 13 08:38:14 2014 -0500
+
+    rename finish_decl function to fix compat with gcc 4.7.2 that exposed too much of its internals
+    add a useful compile error if we try building with < gcc 4.6.4
+
+ tools/gcc/randomize_layout_plugin.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
 commit 2f04aaaaed6bc1a63152202d4013d21653f01005
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Feb 11 17:33:49 2014 -0500

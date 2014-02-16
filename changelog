@@ -1,3 +1,12 @@
+
+linux-image (linux-3.2.55-mempo-0.1.27) UNRELEASED; urgency=low
+
+  * updated to linux-3.2.55
+  * updated to grsecurity-3.0-3.2.55-201402152203.patch
+  * v0.1.27-wip
+
+ -- mempo <mempo@mempo.org>  Thu, 13 Feb 2014 17:00:00 +0200
+
 linux-image (linux-3.2.54-mempo-0.1.26) UNRELEASED; urgency=low
 
   * updated to grsecurity-3.0-3.2.54-201402111745.patch

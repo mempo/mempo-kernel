@@ -203,7 +203,7 @@ index dfa6fc6..ccbfbf3 100644
 +zconf.lex.c
  zoffset.h
 diff --git a/Documentation/kernel-parameters.txt b/Documentation/kernel-parameters.txt
-index 2ba8272..e2a9806 100644
+index 1b196ea..ea70ff0 100644
 --- a/Documentation/kernel-parameters.txt
 +++ b/Documentation/kernel-parameters.txt
 @@ -859,6 +859,9 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
@@ -216,7 +216,7 @@ index 2ba8272..e2a9806 100644
  	hashdist=	[KNL,NUMA] Large hashes allocated during boot
  			are distributed across NUMA nodes.  Defaults on
  			for 64-bit NUMA, off otherwise.
-@@ -1960,6 +1963,22 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
+@@ -1962,6 +1965,22 @@ bytes respectively. Such letter suffixes can also be entirely omitted.
  			the specified number of seconds.  This is to be used if
  			your oopses keep scrolling off the screen.
  
@@ -273,7 +273,7 @@ index 88fd7f5..b318a78 100644
  ==============================================================
  
 diff --git a/Makefile b/Makefile
-index 848be26..296b92f 100644
+index 538463e..d1011ba 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -245,8 +245,9 @@ CONFIG_SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
@@ -2054,10 +2054,10 @@ index 90fa8b3..a3a2212 100644
  		return scno;
  	if (!(current->ptrace & PT_PTRACED))
 diff --git a/arch/arm/kernel/traps.c b/arch/arm/kernel/traps.c
-index 7ac5dfd..0ce09c2 100644
+index d45fd22..1f2471d 100644
 --- a/arch/arm/kernel/traps.c
 +++ b/arch/arm/kernel/traps.c
-@@ -57,7 +57,7 @@ static void dump_mem(const char *, const char *, unsigned long, unsigned long);
+@@ -63,7 +63,7 @@ static void dump_mem(const char *, const char *, unsigned long, unsigned long);
  void dump_backtrace_entry(unsigned long where, unsigned long from, unsigned long frame)
  {
  #ifdef CONFIG_KALLSYMS
@@ -2066,7 +2066,7 @@ index 7ac5dfd..0ce09c2 100644
  #else
  	printk("Function entered at [<%08lx>] from [<%08lx>]\n", where, from);
  #endif
-@@ -259,6 +259,8 @@ static int __die(const char *str, int err, struct thread_info *thread, struct pt
+@@ -265,6 +265,8 @@ static int __die(const char *str, int err, struct thread_info *thread, struct pt
  
  static DEFINE_RAW_SPINLOCK(die_lock);
  
@@ -2075,7 +2075,7 @@ index 7ac5dfd..0ce09c2 100644
  /*
   * This function is protected against re-entrancy.
   */
-@@ -288,6 +290,9 @@ void die(const char *str, struct pt_regs *regs, int err)
+@@ -294,6 +296,9 @@ void die(const char *str, struct pt_regs *regs, int err)
  		panic("Fatal exception in interrupt");
  	if (panic_on_oops)
  		panic("Fatal exception");
@@ -9518,7 +9518,7 @@ index ad8f795..2c7eec6 100644
  /*
   * Memory returned by kmalloc() may be used for DMA, so we must make
 diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index fb2e69d..200616a 100644
+index fb2e69d..205753c 100644
 --- a/arch/x86/Kconfig
 +++ b/arch/x86/Kconfig
 @@ -75,6 +75,7 @@ config X86
@@ -9538,14 +9538,14 @@ index fb2e69d..200616a 100644
  
  config ARCH_HWEIGHT_CFLAGS
  	string
-@@ -999,6 +1000,7 @@ config MICROCODE_OLD_INTERFACE
+@@ -525,6 +526,7 @@ config SCHED_OMIT_FRAME_POINTER
  
- config X86_MSR
- 	tristate "/dev/cpu/*/msr - Model-specific register support"
-+	depends on !GRKERNSEC_KMEM
+ menuconfig PARAVIRT_GUEST
+ 	bool "Paravirtualized guest support"
++	depends on !GRKERNSEC_CONFIG_AUTO || GRKERNSEC_CONFIG_VIRT_GUEST
  	---help---
- 	  This device gives privileged processes access to the x86
- 	  Model-Specific Registers (MSRs).  It is a character device with
+ 	  Say Y here to get to see options related to running Linux under
+ 	  various hypervisors.  This option alone does not add any kernel code.
 @@ -1022,7 +1024,7 @@ choice
  
  config NOHIGHMEM
@@ -21438,10 +21438,41 @@ index 925179f..b151b74 100644
  			if ((s64)val != *(s32 *)loc)
  				goto overflow;
 diff --git a/arch/x86/kernel/msr.c b/arch/x86/kernel/msr.c
-index f7d1a64..399615a 100644
+index f7d1a64..28afc4a 100644
 --- a/arch/x86/kernel/msr.c
 +++ b/arch/x86/kernel/msr.c
-@@ -235,7 +235,7 @@ static int __cpuinit msr_class_cpu_callback(struct notifier_block *nfb,
+@@ -37,6 +37,7 @@
+ #include <linux/notifier.h>
+ #include <linux/uaccess.h>
+ #include <linux/gfp.h>
++#include <linux/grsecurity.h>
+ 
+ #include <asm/processor.h>
+ #include <asm/msr.h>
+@@ -104,6 +105,11 @@ static ssize_t msr_write(struct file *file, const char __user *buf,
+ 	int err = 0;
+ 	ssize_t bytes = 0;
+ 
++#ifdef CONFIG_GRKERNSEC_KMEM
++	gr_handle_msr_write();
++	return -EPERM;
++#endif
++
+ 	if (count % 8)
+ 		return -EINVAL;	/* Invalid chunk size */
+ 
+@@ -151,6 +157,10 @@ static long msr_ioctl(struct file *file, unsigned int ioc, unsigned long arg)
+ 			err = -EBADF;
+ 			break;
+ 		}
++#ifdef CONFIG_GRKERNSEC_KMEM
++		gr_handle_msr_write();
++		return -EPERM;
++#endif
+ 		if (copy_from_user(&regs, uregs, sizeof regs)) {
+ 			err = -EFAULT;
+ 			break;
+@@ -235,7 +245,7 @@ static int __cpuinit msr_class_cpu_callback(struct notifier_block *nfb,
  	return notifier_from_errno(err);
  }
  
@@ -23231,7 +23262,7 @@ index 09ff517..df19fbff 100644
  	.short 0
  	.quad	0x00cf9b000000ffff	# __KERNEL32_CS
 diff --git a/arch/x86/kernel/traps.c b/arch/x86/kernel/traps.c
-index e6fbb94..b372995 100644
+index 20061b9..56d1e1d 100644
 --- a/arch/x86/kernel/traps.c
 +++ b/arch/x86/kernel/traps.c
 @@ -70,12 +70,6 @@ asmlinkage int system_call(void);
@@ -23376,7 +23407,7 @@ index e6fbb94..b372995 100644
  	{
  		if (!fixup_exception(regs)) {
  			task->thread.error_code = error_code;
-@@ -576,18 +605,19 @@ asmlinkage void __attribute__((weak)) smp_threshold_interrupt(void)
+@@ -576,8 +605,8 @@ asmlinkage void __attribute__((weak)) smp_threshold_interrupt(void)
  void __math_state_restore(struct task_struct *tsk)
  {
  	/* We need a safe address that is cheap to find and that is already
@@ -23387,23 +23418,6 @@ index e6fbb94..b372995 100644
  
  	/* AMD K7/K8 CPUs don't save/restore FDP/FIP/FOP unless an exception
  	   is pending.  Clear the x87 state here by setting it to fixed
- 	   values. safe_address is a random variable that should be in L1 */
--	alternative_input(
--		ASM_NOP8 ASM_NOP2,
--		"emms\n\t"	  	/* clear stack tags */
--		"fildl %P[addr]",	/* set F?P to defined value */
--		X86_FEATURE_FXSAVE_LEAK,
--		[addr] "m" (safe_address));
-+	if (unlikely(static_cpu_has(X86_FEATURE_FXSAVE_LEAK))) {
-+		asm volatile(
-+			"fnclex\n\t"
-+			"emms\n\t"
-+			"fildl %P[addr]"	/* set F?P to defined value */
-+			: : [addr] "m" (init_tss[raw_smp_processor_id()].x86_tss.sp0));
-+	}
- 
- 	/*
- 	 * Paranoid restore. send a SIGSEGV if we fail to restore the state.
 diff --git a/arch/x86/kernel/verify_cpu.S b/arch/x86/kernel/verify_cpu.S
 index b9242ba..50c5edd 100644
 --- a/arch/x86/kernel/verify_cpu.S
@@ -23916,7 +23930,7 @@ index f5302da..6ee193e 100644
  
  /* instruction has only one source operand, destination is implicit (e.g. mul, div, imul, idiv) */
 diff --git a/arch/x86/kvm/lapic.c b/arch/x86/kvm/lapic.c
-index 43e7753..873f4440 100644
+index 757c716..11c70cf 100644
 --- a/arch/x86/kvm/lapic.c
 +++ b/arch/x86/kvm/lapic.c
 @@ -53,7 +53,7 @@
@@ -24119,7 +24133,7 @@ index aac5ea7..266eda9 100644
  
  	vmx->exit_reason = vmcs_read32(VM_EXIT_REASON);
 diff --git a/arch/x86/kvm/x86.c b/arch/x86/kvm/x86.c
-index 57867e4..1d5ff81 100644
+index 7774cca..97dedc9 100644
 --- a/arch/x86/kvm/x86.c
 +++ b/arch/x86/kvm/x86.c
 @@ -1341,8 +1341,8 @@ static int xen_hvm_config(struct kvm_vcpu *vcpu, u64 data)
@@ -24198,7 +24212,7 @@ index 57867e4..1d5ff81 100644
  		return -EINVAL;
  	if (irqchip_in_kernel(vcpu->kvm))
  		return -ENXIO;
-@@ -5182,7 +5193,7 @@ static void kvm_set_mmio_spte_mask(void)
+@@ -5181,7 +5192,7 @@ static void kvm_set_mmio_spte_mask(void)
  	kvm_mmu_set_mmio_spte_mask(mask);
  }
  
@@ -31034,6 +31048,18 @@ index 153407c..611cba9 100644
 -	return 0;
 -}
 -__setup("vdso=", vdso_setup);
+diff --git a/arch/x86/xen/Kconfig b/arch/x86/xen/Kconfig
+index 26c731a..fb510c7 100644
+--- a/arch/x86/xen/Kconfig
++++ b/arch/x86/xen/Kconfig
+@@ -8,6 +8,7 @@ config XEN
+ 	select PARAVIRT_CLOCK
+ 	depends on X86_64 || (X86_32 && X86_PAE && !X86_VISWS)
+ 	depends on X86_CMPXCHG && X86_TSC
++	depends on !GRKERNSEC_CONFIG_AUTO || GRKERNSEC_CONFIG_VIRT_XEN
+ 	help
+ 	  This is the Linux Xen port.  Enabling this will allow the
+ 	  kernel to boot in a paravirtualized environment under the
 diff --git a/arch/x86/xen/enlighten.c b/arch/x86/xen/enlighten.c
 index 5189fe8..d937469 100644
 --- a/arch/x86/xen/enlighten.c
@@ -31901,10 +31927,10 @@ index de2802c..2260da9 100644
  				unsigned long timeout_msec)
  {
 diff --git a/drivers/ata/libata-core.c b/drivers/ata/libata-core.c
-index a0a3987..d029614 100644
+index 72bbb5e..19f16d3 100644
 --- a/drivers/ata/libata-core.c
 +++ b/drivers/ata/libata-core.c
-@@ -4746,7 +4746,7 @@ void ata_qc_free(struct ata_queued_cmd *qc)
+@@ -4749,7 +4749,7 @@ void ata_qc_free(struct ata_queued_cmd *qc)
  	struct ata_port *ap;
  	unsigned int tag;
  
@@ -31913,7 +31939,7 @@ index a0a3987..d029614 100644
  	ap = qc->ap;
  
  	qc->flags = 0;
-@@ -4762,7 +4762,7 @@ void __ata_qc_complete(struct ata_queued_cmd *qc)
+@@ -4765,7 +4765,7 @@ void __ata_qc_complete(struct ata_queued_cmd *qc)
  	struct ata_port *ap;
  	struct ata_link *link;
  
@@ -31922,7 +31948,7 @@ index a0a3987..d029614 100644
  	WARN_ON_ONCE(!(qc->flags & ATA_QCFLAG_ACTIVE));
  	ap = qc->ap;
  	link = qc->dev->link;
-@@ -5767,6 +5767,7 @@ static void ata_finalize_port_ops(struct ata_port_operations *ops)
+@@ -5770,6 +5770,7 @@ static void ata_finalize_port_ops(struct ata_port_operations *ops)
  		return;
  
  	spin_lock(&lock);
@@ -31930,7 +31956,7 @@ index a0a3987..d029614 100644
  
  	for (cur = ops->inherits; cur; cur = cur->inherits) {
  		void **inherit = (void **)cur;
-@@ -5780,8 +5781,9 @@ static void ata_finalize_port_ops(struct ata_port_operations *ops)
+@@ -5783,8 +5784,9 @@ static void ata_finalize_port_ops(struct ata_port_operations *ops)
  		if (IS_ERR(*pp))
  			*pp = NULL;
  
@@ -37221,7 +37247,7 @@ index 93e74fb..4a1182d 100644
  	INIT_WORK(&dev_priv->hotplug_work, i915_hotplug_work_func);
  	INIT_WORK(&dev_priv->error_work, i915_error_work_func);
 diff --git a/drivers/gpu/drm/i915/intel_display.c b/drivers/gpu/drm/i915/intel_display.c
-index 6d36695..4a3e870 100644
+index 61b708b..c8ca0e9 100644
 --- a/drivers/gpu/drm/i915/intel_display.c
 +++ b/drivers/gpu/drm/i915/intel_display.c
 @@ -2215,7 +2215,7 @@ intel_finish_fb(struct drm_framebuffer *old_fb)
@@ -38097,10 +38123,10 @@ index 0b5468b..74cfb87 100644
  
  #endif
 diff --git a/drivers/gpu/drm/radeon/rs690.c b/drivers/gpu/drm/radeon/rs690.c
-index 93bce72..00332c1 100644
+index 414a681..2b17775 100644
 --- a/drivers/gpu/drm/radeon/rs690.c
 +++ b/drivers/gpu/drm/radeon/rs690.c
-@@ -304,9 +304,11 @@ void rs690_crtc_bandwidth_compute(struct radeon_device *rdev,
+@@ -314,9 +314,11 @@ void rs690_crtc_bandwidth_compute(struct radeon_device *rdev,
  		if (rdev->pm.max_bandwidth.full > rdev->pm.sideport_bandwidth.full &&
  			rdev->pm.sideport_bandwidth.full)
  			rdev->pm.max_bandwidth = rdev->pm.sideport_bandwidth;
@@ -38608,7 +38634,7 @@ index 83d2fbd6..93017f7 100644
  {
  	sysfs_attr_init(&attr->attr);
 diff --git a/drivers/hwmon/coretemp.c b/drivers/hwmon/coretemp.c
-index 3d630bb..77756d7 100644
+index e6ec920..7664a6b 100644
 --- a/drivers/hwmon/coretemp.c
 +++ b/drivers/hwmon/coretemp.c
 @@ -787,7 +787,7 @@ static int __cpuinit coretemp_cpu_callback(struct notifier_block *nfb,
@@ -41458,27 +41484,9 @@ index c706a7b..2cc7511 100644
  					       "md/raid1:%s: read error corrected "
  					       "(%d sectors at %llu on %s)\n",
 diff --git a/drivers/md/raid10.c b/drivers/md/raid10.c
-index 8bba438..a579e8c 100644
+index 6d05e26..a579e8c 100644
 --- a/drivers/md/raid10.c
 +++ b/drivers/md/raid10.c
-@@ -997,7 +997,7 @@ read_again:
- 			/* Could not read all from this device, so we will
- 			 * need another r10_bio.
- 			 */
--			sectors_handled = (r10_bio->sectors + max_sectors
-+			sectors_handled = (r10_bio->sector + max_sectors
- 					   - bio->bi_sector);
- 			r10_bio->sectors = max_sectors;
- 			spin_lock_irq(&conf->device_lock);
-@@ -1005,7 +1005,7 @@ read_again:
- 				bio->bi_phys_segments = 2;
- 			else
- 				bio->bi_phys_segments++;
--			spin_unlock(&conf->device_lock);
-+			spin_unlock_irq(&conf->device_lock);
- 			/* Cannot call generic_make_request directly
- 			 * as that will be queued in __generic_make_request
- 			 * and subsequent mempool_alloc might block
 @@ -1465,7 +1465,7 @@ static void end_sync_read(struct bio *bio, int error)
  		/* The write handler will notice the lack of
  		 * R10BIO_Uptodate and record any errors etc
@@ -41538,30 +41546,8 @@ index 8bba438..a579e8c 100644
  			}
  
  			rdev_dec_pending(rdev, mddev);
-@@ -2563,10 +2563,6 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
- 			if (j == conf->copies) {
- 				/* Cannot recover, so abort the recovery or
- 				 * record a bad block */
--				put_buf(r10_bio);
--				if (rb2)
--					atomic_dec(&rb2->remaining);
--				r10_bio = rb2;
- 				if (any_working) {
- 					/* problem is that there are bad blocks
- 					 * on other device(s)
-@@ -2590,6 +2586,10 @@ static sector_t sync_request(struct mddev *mddev, sector_t sector_nr,
- 					conf->mirrors[i].recovery_disabled
- 						= mddev->recovery_disabled;
- 				}
-+				put_buf(r10_bio);
-+				if (rb2)
-+					atomic_dec(&rb2->remaining);
-+				r10_bio = rb2;
- 				break;
- 			}
- 		}
 diff --git a/drivers/md/raid5.c b/drivers/md/raid5.c
-index 26ef63a..bd587cd 100644
+index fb67833..09c4732 100644
 --- a/drivers/md/raid5.c
 +++ b/drivers/md/raid5.c
 @@ -1618,19 +1618,19 @@ static void raid5_end_read_request(struct bio * bi, int error)
@@ -43601,31 +43587,6 @@ index d4d2bc1..14b8672 100644
  };
  
  static int stmmac_init_fs(struct net_device *dev)
-diff --git a/drivers/net/hamradio/hdlcdrv.c b/drivers/net/hamradio/hdlcdrv.c
-index a4a3516..3b3a7e0 100644
---- a/drivers/net/hamradio/hdlcdrv.c
-+++ b/drivers/net/hamradio/hdlcdrv.c
-@@ -571,6 +571,8 @@ static int hdlcdrv_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
- 	case HDLCDRVCTL_CALIBRATE:
- 		if(!capable(CAP_SYS_RAWIO))
- 			return -EPERM;
-+		if (bi.data.calibrate > INT_MAX / s->par.bitrate)
-+			return -EINVAL;
- 		s->hdlctx.calibrate = bi.data.calibrate * s->par.bitrate / 16;
- 		return 0;
- 
-diff --git a/drivers/net/hamradio/yam.c b/drivers/net/hamradio/yam.c
-index 96a98d2..e4260ab 100644
---- a/drivers/net/hamradio/yam.c
-+++ b/drivers/net/hamradio/yam.c
-@@ -1060,6 +1060,7 @@ static int yam_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
- 		break;
- 
- 	case SIOCYAMGCFG:
-+		memset(&yi, 0, sizeof(yi));
- 		yi.cfg.mask = 0xffffffff;
- 		yi.cfg.iobase = yp->iobase;
- 		yi.cfg.irq = yp->irq;
 diff --git a/drivers/net/loopback.c b/drivers/net/loopback.c
 index d0893e4..14b0d44 100644
 --- a/drivers/net/loopback.c
@@ -44302,10 +44263,10 @@ index b346d04..04436fa 100644
  	avf->bbuf->skb = skb;
  	ret = ath5k_beacon_setup(ah, avf->bbuf);
 diff --git a/drivers/net/wireless/ath/ath9k/ar9002_mac.c b/drivers/net/wireless/ath/ath9k/ar9002_mac.c
-index b592016..fe47870 100644
+index f4caeb3..8da6f5d 100644
 --- a/drivers/net/wireless/ath/ath9k/ar9002_mac.c
 +++ b/drivers/net/wireless/ath/ath9k/ar9002_mac.c
-@@ -183,8 +183,8 @@ ar9002_set_txdesc(struct ath_hw *ah, void *ds, struct ath_tx_info *i)
+@@ -217,8 +217,8 @@ ar9002_set_txdesc(struct ath_hw *ah, void *ds, struct ath_tx_info *i)
  	ads->ds_txstatus6 = ads->ds_txstatus7 = 0;
  	ads->ds_txstatus8 = ads->ds_txstatus9 = 0;
  
@@ -44316,7 +44277,7 @@ index b592016..fe47870 100644
  
  	ctl1 = i->buf_len[0] | (i->is_last ? 0 : AR_TxMore);
  	ctl6 = SM(i->keytype, AR_EncrType);
-@@ -198,26 +198,26 @@ ar9002_set_txdesc(struct ath_hw *ah, void *ds, struct ath_tx_info *i)
+@@ -232,26 +232,26 @@ ar9002_set_txdesc(struct ath_hw *ah, void *ds, struct ath_tx_info *i)
  
  	if ((i->is_first || i->is_last) &&
  	    i->aggr != AGGR_BUF_MIDDLE && i->aggr != AGGR_BUF_LAST) {
@@ -44350,7 +44311,7 @@ index b592016..fe47870 100644
  		return;
  	}
  
-@@ -242,7 +242,7 @@ ar9002_set_txdesc(struct ath_hw *ah, void *ds, struct ath_tx_info *i)
+@@ -276,7 +276,7 @@ ar9002_set_txdesc(struct ath_hw *ah, void *ds, struct ath_tx_info *i)
  		break;
  	}
  
@@ -44359,7 +44320,7 @@ index b592016..fe47870 100644
  		| (i->flags & ATH9K_TXDESC_VMF ? AR_VirtMoreFrag : 0)
  		| SM(i->txpower, AR_XmitPower)
  		| (i->flags & ATH9K_TXDESC_VEOL ? AR_VEOL : 0)
-@@ -252,19 +252,19 @@ ar9002_set_txdesc(struct ath_hw *ah, void *ds, struct ath_tx_info *i)
+@@ -286,19 +286,19 @@ ar9002_set_txdesc(struct ath_hw *ah, void *ds, struct ath_tx_info *i)
  		| (i->flags & ATH9K_TXDESC_RTSENA ? AR_RTSEnable :
  		   (i->flags & ATH9K_TXDESC_CTSENA ? AR_CTSEnable : 0));
  
@@ -47391,10 +47352,10 @@ index ed147c4..94fc3c6 100644
  
  /* core tmem accessor functions */
 diff --git a/drivers/target/iscsi/iscsi_target.c b/drivers/target/iscsi/iscsi_target.c
-index 3effde2..dda7d46 100644
+index 45c13a6..f8c847c 100644
 --- a/drivers/target/iscsi/iscsi_target.c
 +++ b/drivers/target/iscsi/iscsi_target.c
-@@ -1351,7 +1351,7 @@ static int iscsit_handle_data_out(struct iscsi_conn *conn, unsigned char *buf)
+@@ -1349,7 +1349,7 @@ static int iscsit_handle_data_out(struct iscsi_conn *conn, unsigned char *buf)
  		 * outstanding_r2ts reaches zero, go ahead and send the delayed
  		 * TASK_ABORTED status.
  		 */
@@ -56068,10 +56029,10 @@ index a8cbe1b..fed04cb 100644
  		(sbi->s_resgid == 0 || !in_group_p (sbi->s_resgid))) {
  		return 0;
 diff --git a/fs/ext2/super.c b/fs/ext2/super.c
-index bd8ac16..43811b9 100644
+index 94b9e32..4b85c15 100644
 --- a/fs/ext2/super.c
 +++ b/fs/ext2/super.c
-@@ -1494,6 +1494,7 @@ static struct file_system_type ext2_fs_type = {
+@@ -1495,6 +1495,7 @@ static struct file_system_type ext2_fs_type = {
  	.kill_sb	= kill_block_super,
  	.fs_flags	= FS_REQUIRES_DEV,
  };
@@ -56174,10 +56135,10 @@ index 2845a1f..f29de63 100644
  		if (free_clusters >= (nclusters + dirty_clusters))
  			return 1;
 diff --git a/fs/ext4/ext4.h b/fs/ext4/ext4.h
-index 22c71b9..ba28a7d 100644
+index 68b1602..830e05c 100644
 --- a/fs/ext4/ext4.h
 +++ b/fs/ext4/ext4.h
-@@ -1206,19 +1206,19 @@ struct ext4_sb_info {
+@@ -1216,19 +1216,19 @@ struct ext4_sb_info {
  	unsigned long s_mb_last_start;
  
  	/* stats for buddy allocator */
@@ -56208,7 +56169,7 @@ index 22c71b9..ba28a7d 100644
  
  	/* locality groups */
 diff --git a/fs/ext4/mballoc.c b/fs/ext4/mballoc.c
-index 9b8c131..d469b31 100644
+index 81feb17..d1ac883 100644
 --- a/fs/ext4/mballoc.c
 +++ b/fs/ext4/mballoc.c
 @@ -1794,7 +1794,7 @@ void ext4_mb_simple_scan_group(struct ext4_allocation_context *ac,
@@ -56288,7 +56249,7 @@ index 9b8c131..d469b31 100644
  	}
  
  	if (ac->ac_op == EXT4_MB_HISTORY_ALLOC)
-@@ -3514,7 +3514,7 @@ ext4_mb_new_inode_pa(struct ext4_allocation_context *ac)
+@@ -3519,7 +3519,7 @@ ext4_mb_new_inode_pa(struct ext4_allocation_context *ac)
  	trace_ext4_mb_new_inode_pa(ac, pa);
  
  	ext4_mb_use_inode_pa(ac, pa);
@@ -56297,7 +56258,7 @@ index 9b8c131..d469b31 100644
  
  	ei = EXT4_I(ac->ac_inode);
  	grp = ext4_get_group_info(sb, ac->ac_b_ex.fe_group);
-@@ -3574,7 +3574,7 @@ ext4_mb_new_group_pa(struct ext4_allocation_context *ac)
+@@ -3579,7 +3579,7 @@ ext4_mb_new_group_pa(struct ext4_allocation_context *ac)
  	trace_ext4_mb_new_group_pa(ac, pa);
  
  	ext4_mb_use_group_pa(ac, pa);
@@ -56306,7 +56267,7 @@ index 9b8c131..d469b31 100644
  
  	grp = ext4_get_group_info(sb, ac->ac_b_ex.fe_group);
  	lg = ac->ac_lg;
-@@ -3663,7 +3663,7 @@ ext4_mb_release_inode_pa(struct ext4_buddy *e4b, struct buffer_head *bitmap_bh,
+@@ -3668,7 +3668,7 @@ ext4_mb_release_inode_pa(struct ext4_buddy *e4b, struct buffer_head *bitmap_bh,
  		 * from the bitmap and continue.
  		 */
  	}
@@ -56315,7 +56276,7 @@ index 9b8c131..d469b31 100644
  
  	return err;
  }
-@@ -3681,7 +3681,7 @@ ext4_mb_release_group_pa(struct ext4_buddy *e4b,
+@@ -3686,7 +3686,7 @@ ext4_mb_release_group_pa(struct ext4_buddy *e4b,
  	ext4_get_group_no_and_offset(sb, pa->pa_pstart, &group, &bit);
  	BUG_ON(group != e4b->bd_group && pa->pa_len != 0);
  	mb_free_blocks(pa->pa_inode, e4b, bit, pa->pa_len);
@@ -56338,7 +56299,7 @@ index f3358ab..fbb1d90 100644
  		       "MMP failure info: last update time: %llu, last update "
  		       "node: %s, last update device: %s\n",
 diff --git a/fs/ext4/super.c b/fs/ext4/super.c
-index 84f84bf..a8770cd 100644
+index acf2baf..31c5131 100644
 --- a/fs/ext4/super.c
 +++ b/fs/ext4/super.c
 @@ -92,6 +92,8 @@ static struct file_system_type ext2_fs_type = {
@@ -59491,34 +59452,6 @@ index 6a66fc0..cfdadae 100644
  	set_fs(oldfs);
  
  	if (host_err < 0)
-diff --git a/fs/nilfs2/segment.c b/fs/nilfs2/segment.c
-index 233d3ed..3ceaced 100644
---- a/fs/nilfs2/segment.c
-+++ b/fs/nilfs2/segment.c
-@@ -1437,17 +1437,19 @@ static int nilfs_segctor_collect(struct nilfs_sc_info *sci,
- 
- 		nilfs_clear_logs(&sci->sc_segbufs);
- 
--		err = nilfs_segctor_extend_segments(sci, nilfs, nadd);
--		if (unlikely(err))
--			return err;
--
- 		if (sci->sc_stage.flags & NILFS_CF_SUFREED) {
- 			err = nilfs_sufile_cancel_freev(nilfs->ns_sufile,
- 							sci->sc_freesegs,
- 							sci->sc_nfreesegs,
- 							NULL);
- 			WARN_ON(err); /* do not happen */
-+			sci->sc_stage.flags &= ~NILFS_CF_SUFREED;
- 		}
-+
-+		err = nilfs_segctor_extend_segments(sci, nilfs, nadd);
-+		if (unlikely(err))
-+			return err;
-+
- 		nadd = min_t(int, nadd << 1, SC_MAX_SEGDELTA);
- 		sci->sc_stage = prev_stage;
- 	}
 diff --git a/fs/nilfs2/super.c b/fs/nilfs2/super.c
 index 97bfbdd..e7f644a 100644
 --- a/fs/nilfs2/super.c
@@ -62801,10 +62734,10 @@ index 8a89949..6776861 100644
  xfs_init_zones(void)
 diff --git a/grsecurity/Kconfig b/grsecurity/Kconfig
 new file mode 100644
-index 0000000..058b9e2
+index 0000000..849ba36
 --- /dev/null
 +++ b/grsecurity/Kconfig
-@@ -0,0 +1,1133 @@
+@@ -0,0 +1,1139 @@
 +#
 +# grecurity configuration
 +#
@@ -63927,6 +63860,9 @@ index 0000000..058b9e2
 +	  to allow informative logs to be produced, but large enough to
 +	  prevent flooding.
 +
++	  Setting both this value and GRKERNSEC_FLOODBURST to 0 will disable
++	  any rate limiting on grsecurity log messages.
++
 +config GRKERNSEC_FLOODBURST
 +	int "Number of messages in a burst (maximum)"
 +	default 6
@@ -63936,6 +63872,9 @@ index 0000000..058b9e2
 +	  default should be suitable for most people, however if you find that
 +	  many of your logs are being interpreted as flooding, you may want to
 +	  raise this value.
++
++	  Setting both this value and GRKERNSEC_FLOODTIME to 0 will disable
++	  any rate limiting on grsecurity log messages.
 +
 +endmenu
 diff --git a/grsecurity/Makefile b/grsecurity/Makefile
@@ -64000,7 +63939,7 @@ index 0000000..5307c8a
 +endif
 diff --git a/grsecurity/gracl.c b/grsecurity/gracl.c
 new file mode 100644
-index 0000000..bd57acb
+index 0000000..8532ed2
 --- /dev/null
 +++ b/grsecurity/gracl.c
 @@ -0,0 +1,2826 @@
@@ -66822,12 +66761,12 @@ index 0000000..bd57acb
 +
 +
 +#ifdef CONFIG_NETFILTER_XT_MATCH_GRADM_MODULE
-+EXPORT_SYMBOL(gr_acl_is_enabled);
++EXPORT_SYMBOL_GPL(gr_acl_is_enabled);
 +#endif
-+EXPORT_SYMBOL(gr_learn_resource);
++EXPORT_SYMBOL_GPL(gr_learn_resource);
 +#ifdef CONFIG_SECURITY
-+EXPORT_SYMBOL(gr_check_user_change);
-+EXPORT_SYMBOL(gr_check_group_change);
++EXPORT_SYMBOL_GPL(gr_check_user_change);
++EXPORT_SYMBOL_GPL(gr_check_group_change);
 +#endif
 +
 diff --git a/grsecurity/gracl_alloc.c b/grsecurity/gracl_alloc.c
@@ -70621,7 +70560,7 @@ index 0000000..bc0be01
 +}
 diff --git a/grsecurity/grsec_chroot.c b/grsecurity/grsec_chroot.c
 new file mode 100644
-index 0000000..6b654b0
+index 0000000..12eb2bd
 --- /dev/null
 +++ b/grsecurity/grsec_chroot.c
 @@ -0,0 +1,353 @@
@@ -70762,7 +70701,7 @@ index 0000000..6b654b0
 +	return 0;
 +}
 +
-+EXPORT_SYMBOL(gr_pid_is_chrooted);
++EXPORT_SYMBOL_GPL(gr_pid_is_chrooted);
 +
 +#if defined(CONFIG_GRKERNSEC_CHROOT_DOUBLE) || defined(CONFIG_GRKERNSEC_CHROOT_FCHDIR)
 +int gr_is_outside_chroot(const struct dentry *u_dentry, const struct vfsmount *u_mnt)
@@ -70980,7 +70919,7 @@ index 0000000..6b654b0
 +}
 diff --git a/grsecurity/grsec_disabled.c b/grsecurity/grsec_disabled.c
 new file mode 100644
-index 0000000..91cef85
+index 0000000..dcc6b9f
 --- /dev/null
 +++ b/grsecurity/grsec_disabled.c
 @@ -0,0 +1,441 @@
@@ -71420,14 +71359,14 @@ index 0000000..91cef85
 +	return;
 +}
 +
-+EXPORT_SYMBOL(gr_learn_resource);
++EXPORT_SYMBOL_GPL(gr_learn_resource);
 +#ifdef CONFIG_SECURITY
-+EXPORT_SYMBOL(gr_check_user_change);
-+EXPORT_SYMBOL(gr_check_group_change);
++EXPORT_SYMBOL_GPL(gr_check_user_change);
++EXPORT_SYMBOL_GPL(gr_check_group_change);
 +#endif
 diff --git a/grsecurity/grsec_exec.c b/grsecurity/grsec_exec.c
 new file mode 100644
-index 0000000..ee1f60f
+index 0000000..c6db3ee
 --- /dev/null
 +++ b/grsecurity/grsec_exec.c
 @@ -0,0 +1,159 @@
@@ -71588,8 +71527,8 @@ index 0000000..ee1f60f
 +#endif
 +}
 +
-+EXPORT_SYMBOL(gr_is_capable);
-+EXPORT_SYMBOL(gr_is_capable_nolog);
++EXPORT_SYMBOL_GPL(gr_is_capable);
++EXPORT_SYMBOL_GPL(gr_is_capable_nolog);
 diff --git a/grsecurity/grsec_fifo.c b/grsecurity/grsec_fifo.c
 new file mode 100644
 index 0000000..d3ee748
@@ -71651,7 +71590,7 @@ index 0000000..8ca18bf
 +}
 diff --git a/grsecurity/grsec_init.c b/grsecurity/grsec_init.c
 new file mode 100644
-index 0000000..454a98e
+index 0000000..7bcfc7a
 --- /dev/null
 +++ b/grsecurity/grsec_init.c
 @@ -0,0 +1,272 @@
@@ -71703,7 +71642,7 @@ index 0000000..454a98e
 +int grsec_tpe_gid;
 +int grsec_enable_blackhole;
 +#ifdef CONFIG_IPV6_MODULE
-+EXPORT_SYMBOL(grsec_enable_blackhole);
++EXPORT_SYMBOL_GPL(grsec_enable_blackhole);
 +#endif
 +int grsec_lastack_retries;
 +int grsec_enable_tpe_all;
@@ -72390,15 +72329,23 @@ index 0000000..56b5e9d
 +}
 diff --git a/grsecurity/grsec_mem.c b/grsecurity/grsec_mem.c
 new file mode 100644
-index 0000000..f536303
+index 0000000..0e39d8c
 --- /dev/null
 +++ b/grsecurity/grsec_mem.c
-@@ -0,0 +1,40 @@
+@@ -0,0 +1,48 @@
 +#include <linux/kernel.h>
 +#include <linux/sched.h>
 +#include <linux/mm.h>
 +#include <linux/mman.h>
++#include <linux/module.h>
 +#include <linux/grinternal.h>
++
++void gr_handle_msr_write(void)
++{
++	gr_log_noargs(GR_DONT_AUDIT, GR_MSRWRITE_MSG);
++	return;
++}
++EXPORT_SYMBOL_GPL(gr_handle_msr_write);
 +
 +void
 +gr_handle_ioperm(void)
@@ -72845,7 +72792,7 @@ index 0000000..c6a07aa
 +}
 diff --git a/grsecurity/grsec_sock.c b/grsecurity/grsec_sock.c
 new file mode 100644
-index 0000000..4030d57
+index 0000000..c0aef3a
 --- /dev/null
 +++ b/grsecurity/grsec_sock.c
 @@ -0,0 +1,244 @@
@@ -72865,14 +72812,14 @@ index 0000000..4030d57
 +extern int gr_search_udp_recvmsg(const struct sock *sk, const struct sk_buff *skb);
 +extern int gr_search_udp_sendmsg(const struct sock *sk, const struct sockaddr_in *addr);
 +
-+EXPORT_SYMBOL(gr_search_udp_recvmsg);
-+EXPORT_SYMBOL(gr_search_udp_sendmsg);
++EXPORT_SYMBOL_GPL(gr_search_udp_recvmsg);
++EXPORT_SYMBOL_GPL(gr_search_udp_sendmsg);
 +
 +#ifdef CONFIG_UNIX_MODULE
-+EXPORT_SYMBOL(gr_acl_handle_unix);
-+EXPORT_SYMBOL(gr_acl_handle_mknod);
-+EXPORT_SYMBOL(gr_handle_chroot_unix);
-+EXPORT_SYMBOL(gr_handle_create);
++EXPORT_SYMBOL_GPL(gr_acl_handle_unix);
++EXPORT_SYMBOL_GPL(gr_acl_handle_mknod);
++EXPORT_SYMBOL_GPL(gr_handle_chroot_unix);
++EXPORT_SYMBOL_GPL(gr_handle_create);
 +#endif
 +
 +#ifdef CONFIG_GRKERNSEC
@@ -73578,7 +73525,7 @@ index 0000000..0d4723d
 +#endif
 diff --git a/grsecurity/grsec_time.c b/grsecurity/grsec_time.c
 new file mode 100644
-index 0000000..0dc13c3
+index 0000000..61b514e
 --- /dev/null
 +++ b/grsecurity/grsec_time.c
 @@ -0,0 +1,16 @@
@@ -73597,7 +73544,7 @@ index 0000000..0dc13c3
 +	return;
 +}
 +
-+EXPORT_SYMBOL(gr_log_timechange);
++EXPORT_SYMBOL_GPL(gr_log_timechange);
 diff --git a/grsecurity/grsec_tpe.c b/grsecurity/grsec_tpe.c
 new file mode 100644
 index 0000000..07e0dc0
@@ -76854,10 +76801,10 @@ index 0000000..7dc4203
 +#endif
 diff --git a/include/linux/grmsg.h b/include/linux/grmsg.h
 new file mode 100644
-index 0000000..195cbe4
+index 0000000..ba93581
 --- /dev/null
 +++ b/include/linux/grmsg.h
-@@ -0,0 +1,115 @@
+@@ -0,0 +1,116 @@
 +#define DEFAULTSECMSG "%.256s[%.16s:%d] uid/euid:%u/%u gid/egid:%u/%u, parent %.256s[%.16s:%d] uid/euid:%u/%u gid/egid:%u/%u"
 +#define GR_ACL_PROCACCT_MSG "%.256s[%.16s:%d] IP:%pI4 TTY:%.64s uid/euid:%u/%u gid/egid:%u/%u run time:[%ud %uh %um %us] cpu time:[%ud %uh %um %us] %s with exit code %ld, parent %.256s[%.16s:%d] IP:%pI4 TTY:%.64s uid/euid:%u/%u gid/egid:%u/%u"
 +#define GR_PTRACE_ACL_MSG "denied ptrace of %.950s(%.16s:%d) by "
@@ -76973,12 +76920,13 @@ index 0000000..195cbe4
 +#define GR_BRUTE_DAEMON_MSG "bruteforce prevention initiated for the next 30 minutes or until service restarted, stalling each fork 30 seconds.  Please investigate the crash report for "
 +#define GR_BRUTE_SUID_MSG "bruteforce prevention initiated due to crash of %.950s against uid %u, banning suid/sgid execs for %u minutes.  Please investigate the crash report for "
 +#define GR_IPC_DENIED_MSG "denied %s of overly-permissive IPC object with creator uid %u by "
++#define GR_MSRWRITE_MSG "denied write to CPU MSR by "
 diff --git a/include/linux/grsecurity.h b/include/linux/grsecurity.h
 new file mode 100644
-index 0000000..8996115
+index 0000000..f253c0e
 --- /dev/null
 +++ b/include/linux/grsecurity.h
-@@ -0,0 +1,224 @@
+@@ -0,0 +1,225 @@
 +#ifndef GR_SECURITY_H
 +#define GR_SECURITY_H
 +#include <linux/fs.h>
@@ -77039,6 +76987,7 @@ index 0000000..8996115
 +
 +void gr_handle_ioperm(void);
 +void gr_handle_iopl(void);
++void gr_handle_msr_write(void);
 +
 +umode_t gr_acl_umask(void);
 +
@@ -78482,7 +78431,7 @@ index bd4f6c7..e9b8bb8 100644
  struct iovec;
  struct kvec;
 diff --git a/include/linux/netdevice.h b/include/linux/netdevice.h
-index 8c43fd1..782342e 100644
+index 4b04097..43bda9d 100644
 --- a/include/linux/netdevice.h
 +++ b/include/linux/netdevice.h
 @@ -949,6 +949,7 @@ struct net_device_ops {
@@ -78502,7 +78451,7 @@ index 8c43fd1..782342e 100644
  					     * Do not use this in drivers.
  					     */
  
-@@ -2585,7 +2586,7 @@ static inline int netif_is_bond_slave(struct net_device *dev)
+@@ -2594,7 +2595,7 @@ static inline int netif_is_bond_slave(struct net_device *dev)
  	return dev->flags & IFF_SLAVE && dev->priv_flags & IFF_BONDING;
  }
  
@@ -79219,7 +79168,7 @@ index 2148b12..519b820 100644
  
  static inline void anon_vma_merge(struct vm_area_struct *vma,
 diff --git a/include/linux/sched.h b/include/linux/sched.h
-index 312d047..a357e91 100644
+index c17fdfb..90df630 100644
 --- a/include/linux/sched.h
 +++ b/include/linux/sched.h
 @@ -101,6 +101,7 @@ struct bio_list;
@@ -79335,7 +79284,7 @@ index 312d047..a357e91 100644
  
  struct load_weight {
  	unsigned long weight, inv_weight;
-@@ -1305,6 +1343,8 @@ struct task_struct {
+@@ -1306,6 +1344,8 @@ struct task_struct {
  				 * execve */
  	unsigned in_iowait:1;
  
@@ -79344,7 +79293,7 @@ index 312d047..a357e91 100644
  
  	/* Revert to default priority/policy when forking */
  	unsigned sched_reset_on_fork:1;
-@@ -1345,8 +1385,8 @@ struct task_struct {
+@@ -1346,8 +1386,8 @@ struct task_struct {
  	struct list_head thread_group;
  
  	struct completion *vfork_done;		/* for vfork() */
@@ -79355,7 +79304,7 @@ index 312d047..a357e91 100644
  
  	cputime_t utime, stime, utimescaled, stimescaled;
  	cputime_t gtime;
-@@ -1362,13 +1402,6 @@ struct task_struct {
+@@ -1363,13 +1403,6 @@ struct task_struct {
  	struct task_cputime cputime_expires;
  	struct list_head cpu_timers[3];
  
@@ -79369,7 +79318,7 @@ index 312d047..a357e91 100644
  	char comm[TASK_COMM_LEN]; /* executable name excluding path
  				     - access with [gs]et_task_comm (which lock
  				       it with task_lock())
-@@ -1385,8 +1418,16 @@ struct task_struct {
+@@ -1386,8 +1419,16 @@ struct task_struct {
  #endif
  /* CPU-specific state of this task */
  	struct thread_struct thread;
@@ -79386,7 +79335,7 @@ index 312d047..a357e91 100644
  /* open file information */
  	struct files_struct *files;
  /* namespaces */
-@@ -1409,7 +1450,7 @@ struct task_struct {
+@@ -1410,7 +1451,7 @@ struct task_struct {
  	uid_t loginuid;
  	unsigned int sessionid;
  #endif
@@ -79395,7 +79344,7 @@ index 312d047..a357e91 100644
  
  /* Thread group tracking */
     	u32 parent_exec_id;
-@@ -1433,6 +1474,11 @@ struct task_struct {
+@@ -1434,6 +1475,11 @@ struct task_struct {
  	struct rt_mutex_waiter *pi_blocked_on;
  #endif
  
@@ -79407,7 +79356,7 @@ index 312d047..a357e91 100644
  #ifdef CONFIG_DEBUG_MUTEXES
  	/* mutex deadlock detection */
  	struct mutex_waiter *blocked_on;
-@@ -1548,6 +1594,30 @@ struct task_struct {
+@@ -1549,6 +1595,30 @@ struct task_struct {
  	unsigned long default_timer_slack_ns;
  
  	struct list_head	*scm_work_list;
@@ -79438,7 +79387,7 @@ index 312d047..a357e91 100644
  #ifdef CONFIG_FUNCTION_GRAPH_TRACER
  	/* Index of current stored address in ret_stack */
  	int curr_ret_stack;
-@@ -1580,7 +1650,54 @@ struct task_struct {
+@@ -1581,7 +1651,54 @@ struct task_struct {
  #ifdef CONFIG_HAVE_HW_BREAKPOINT
  	atomic_t ptrace_bp_refcnt;
  #endif
@@ -79494,7 +79443,7 @@ index 312d047..a357e91 100644
  
  /* Future-safe accessor for struct task_struct's cpus_allowed. */
  #define tsk_cpus_allowed(tsk) (&(tsk)->cpus_allowed)
-@@ -2097,7 +2214,9 @@ void yield(void);
+@@ -2098,7 +2215,9 @@ void yield(void);
  extern struct exec_domain	default_exec_domain;
  
  union thread_union {
@@ -79504,7 +79453,7 @@ index 312d047..a357e91 100644
  	unsigned long stack[THREAD_SIZE/sizeof(long)];
  };
  
-@@ -2130,6 +2249,7 @@ extern struct pid_namespace init_pid_ns;
+@@ -2131,6 +2250,7 @@ extern struct pid_namespace init_pid_ns;
   */
  
  extern struct task_struct *find_task_by_vpid(pid_t nr);
@@ -79512,7 +79461,7 @@ index 312d047..a357e91 100644
  extern struct task_struct *find_task_by_pid_ns(pid_t nr,
  		struct pid_namespace *ns);
  
-@@ -2251,6 +2371,12 @@ static inline void mmdrop(struct mm_struct * mm)
+@@ -2252,6 +2372,12 @@ static inline void mmdrop(struct mm_struct * mm)
  extern void mmput(struct mm_struct *);
  /* Grab a reference to a task's mm, if it is not already going away */
  extern struct mm_struct *get_task_mm(struct task_struct *task);
@@ -79525,7 +79474,7 @@ index 312d047..a357e91 100644
  /* Remove the current tasks stale references to the old mm_struct */
  extern void mm_release(struct task_struct *, struct mm_struct *);
  /* Allocate a new mm structure and copy contents from tsk->mm */
-@@ -2267,9 +2393,8 @@ extern void __cleanup_sighand(struct sighand_struct *);
+@@ -2268,9 +2394,8 @@ extern void __cleanup_sighand(struct sighand_struct *);
  extern void exit_itimers(struct signal_struct *);
  extern void flush_itimer_signals(void);
  
@@ -79536,7 +79485,7 @@ index 312d047..a357e91 100644
  extern int allow_signal(int);
  extern int disallow_signal(int);
  
-@@ -2432,9 +2557,9 @@ static inline unsigned long *end_of_stack(struct task_struct *p)
+@@ -2433,9 +2558,9 @@ static inline unsigned long *end_of_stack(struct task_struct *p)
  
  #endif
  
@@ -87037,10 +86986,10 @@ index 3d9f31c..7fefc9e 100644
  
  	default:
 diff --git a/kernel/sched.c b/kernel/sched.c
-index d93369a..700af59 100644
+index ea85b0d..e0b6326 100644
 --- a/kernel/sched.c
 +++ b/kernel/sched.c
-@@ -5046,7 +5046,7 @@ EXPORT_SYMBOL(wait_for_completion_interruptible);
+@@ -5050,7 +5050,7 @@ EXPORT_SYMBOL(wait_for_completion_interruptible);
   * The return value is -ERESTARTSYS if interrupted, 0 if timed out,
   * positive (at least 1, or number of jiffies left till timeout) if completed.
   */
@@ -87049,7 +86998,7 @@ index d93369a..700af59 100644
  wait_for_completion_interruptible_timeout(struct completion *x,
  					  unsigned long timeout)
  {
-@@ -5063,7 +5063,7 @@ EXPORT_SYMBOL(wait_for_completion_interruptible_timeout);
+@@ -5067,7 +5067,7 @@ EXPORT_SYMBOL(wait_for_completion_interruptible_timeout);
   *
   * The return value is -ERESTARTSYS if interrupted, 0 if completed.
   */
@@ -87058,7 +87007,7 @@ index d93369a..700af59 100644
  {
  	long t = wait_for_common(x, MAX_SCHEDULE_TIMEOUT, TASK_KILLABLE);
  	if (t == -ERESTARTSYS)
-@@ -5084,7 +5084,7 @@ EXPORT_SYMBOL(wait_for_completion_killable);
+@@ -5088,7 +5088,7 @@ EXPORT_SYMBOL(wait_for_completion_killable);
   * The return value is -ERESTARTSYS if interrupted, 0 if timed out,
   * positive (at least 1, or number of jiffies left till timeout) if completed.
   */
@@ -87067,7 +87016,7 @@ index d93369a..700af59 100644
  wait_for_completion_killable_timeout(struct completion *x,
  				     unsigned long timeout)
  {
-@@ -5293,6 +5293,8 @@ int can_nice(const struct task_struct *p, const int nice)
+@@ -5297,6 +5297,8 @@ int can_nice(const struct task_struct *p, const int nice)
  	/* convert nice value [19,-20] to rlimit style value [1,40] */
  	int nice_rlim = 20 - nice;
  
@@ -87076,7 +87025,7 @@ index d93369a..700af59 100644
  	return (nice_rlim <= task_rlimit(p, RLIMIT_NICE) ||
  		capable(CAP_SYS_NICE));
  }
-@@ -5326,7 +5328,8 @@ SYSCALL_DEFINE1(nice, int, increment)
+@@ -5330,7 +5332,8 @@ SYSCALL_DEFINE1(nice, int, increment)
  	if (nice > 19)
  		nice = 19;
  
@@ -87086,7 +87035,7 @@ index d93369a..700af59 100644
  		return -EPERM;
  
  	retval = security_task_setnice(current, nice);
-@@ -5483,6 +5486,7 @@ recheck:
+@@ -5487,6 +5490,7 @@ recheck:
  			unsigned long rlim_rtprio =
  					task_rlimit(p, RLIMIT_RTPRIO);
  
@@ -87094,7 +87043,7 @@ index d93369a..700af59 100644
  			/* can't set/change the rt policy */
  			if (policy != p->policy && !rlim_rtprio)
  				return -EPERM;
-@@ -6626,7 +6630,7 @@ static void migrate_tasks(unsigned int dead_cpu)
+@@ -6629,7 +6633,7 @@ static void unthrottle_offline_cfs_rqs(struct rq *rq) {}
  
  #if defined(CONFIG_SCHED_DEBUG) && defined(CONFIG_SYSCTL)
  
@@ -87103,7 +87052,7 @@ index d93369a..700af59 100644
  	{
  		.procname	= "sched_domain",
  		.mode		= 0555,
-@@ -6643,17 +6647,17 @@ static struct ctl_table sd_ctl_root[] = {
+@@ -6646,17 +6650,17 @@ static struct ctl_table sd_ctl_root[] = {
  	{}
  };
  
@@ -87125,7 +87074,7 @@ index d93369a..700af59 100644
  
  	/*
  	 * In the intermediate directories, both the child directory and
-@@ -6661,22 +6665,25 @@ static void sd_free_ctl_entry(struct ctl_table **tablep)
+@@ -6664,22 +6668,25 @@ static void sd_free_ctl_entry(struct ctl_table **tablep)
  	 * will always be set. In the lowest directory the names are
  	 * static strings and all have proc handlers.
  	 */
@@ -87157,7 +87106,7 @@ index d93369a..700af59 100644
  		const char *procname, void *data, int maxlen,
  		mode_t mode, proc_handler *proc_handler,
  		bool load_idx)
-@@ -6696,7 +6703,7 @@ set_table_entry(struct ctl_table *entry,
+@@ -6699,7 +6706,7 @@ set_table_entry(struct ctl_table *entry,
  static struct ctl_table *
  sd_alloc_ctl_domain_table(struct sched_domain *sd)
  {
@@ -87166,7 +87115,7 @@ index d93369a..700af59 100644
  
  	if (table == NULL)
  		return NULL;
-@@ -6731,9 +6738,9 @@ sd_alloc_ctl_domain_table(struct sched_domain *sd)
+@@ -6734,9 +6741,9 @@ sd_alloc_ctl_domain_table(struct sched_domain *sd)
  	return table;
  }
  
@@ -87178,7 +87127,7 @@ index d93369a..700af59 100644
  	struct sched_domain *sd;
  	int domain_num = 0, i;
  	char buf[32];
-@@ -6760,11 +6767,13 @@ static struct ctl_table_header *sd_sysctl_header;
+@@ -6763,11 +6770,13 @@ static struct ctl_table_header *sd_sysctl_header;
  static void register_sched_domain_sysctl(void)
  {
  	int i, cpu_num = num_possible_cpus();
@@ -87193,7 +87142,7 @@ index d93369a..700af59 100644
  
  	if (entry == NULL)
  		return;
-@@ -6787,8 +6796,12 @@ static void unregister_sched_domain_sysctl(void)
+@@ -6790,8 +6799,12 @@ static void unregister_sched_domain_sysctl(void)
  	if (sd_sysctl_header)
  		unregister_sysctl_table(sd_sysctl_header);
  	sd_sysctl_header = NULL;
@@ -87208,7 +87157,7 @@ index d93369a..700af59 100644
  }
  #else
  static void register_sched_domain_sysctl(void)
-@@ -6886,7 +6899,7 @@ migration_call(struct notifier_block *nfb, unsigned long action, void *hcpu)
+@@ -6889,7 +6902,7 @@ migration_call(struct notifier_block *nfb, unsigned long action, void *hcpu)
   * happens before everything else.  This has to be lower priority than
   * the notifier in the perf_event subsystem, though.
   */
@@ -87240,7 +87189,7 @@ index f280df1..da1281d 100644
  #ifdef CONFIG_RT_GROUP_SCHED
  	/*
 diff --git a/kernel/sched_fair.c b/kernel/sched_fair.c
-index 5b9e456..03c74cd 100644
+index 37f3f39..6d3b6e1 100644
 --- a/kernel/sched_fair.c
 +++ b/kernel/sched_fair.c
 @@ -4803,7 +4803,7 @@ static void nohz_idle_balance(int this_cpu, enum cpu_idle_type idle) { }
@@ -88946,7 +88895,7 @@ index 16fc34a..efd8bb8 100644
  	ret = -EIO;
  	bt->dropped_file = debugfs_create_file("dropped", 0444, dir, bt,
 diff --git a/kernel/trace/ftrace.c b/kernel/trace/ftrace.c
-index d40d7f6..b4e9662 100644
+index cf8b439..fe97a05 100644
 --- a/kernel/trace/ftrace.c
 +++ b/kernel/trace/ftrace.c
 @@ -1598,12 +1598,17 @@ ftrace_code_disable(struct module *mod, struct dyn_ftrace *rec)
@@ -90949,10 +90898,10 @@ index ed0ed8a..cc835b9 100644
  	/* if an huge pmd materialized from under us just retry later */
  	if (unlikely(pmd_trans_huge(*pmd)))
 diff --git a/mm/hugetlb.c b/mm/hugetlb.c
-index ddf2128..af57f40 100644
+index 3a5aae2..ef6f89a 100644
 --- a/mm/hugetlb.c
 +++ b/mm/hugetlb.c
-@@ -1990,15 +1990,17 @@ static int hugetlb_sysctl_handler_common(bool obey_mempolicy,
+@@ -2007,15 +2007,17 @@ static int hugetlb_sysctl_handler_common(bool obey_mempolicy,
  	struct hstate *h = &default_hstate;
  	unsigned long tmp;
  	int ret;
@@ -90973,7 +90922,7 @@ index ddf2128..af57f40 100644
  	if (ret)
  		goto out;
  
-@@ -2055,15 +2057,17 @@ int hugetlb_overcommit_handler(struct ctl_table *table, int write,
+@@ -2072,15 +2074,17 @@ int hugetlb_overcommit_handler(struct ctl_table *table, int write,
  	struct hstate *h = &default_hstate;
  	unsigned long tmp;
  	int ret;
@@ -90994,7 +90943,7 @@ index ddf2128..af57f40 100644
  	if (ret)
  		goto out;
  
-@@ -2482,6 +2486,27 @@ static int unmap_ref_private(struct mm_struct *mm, struct vm_area_struct *vma,
+@@ -2499,6 +2503,27 @@ static int unmap_ref_private(struct mm_struct *mm, struct vm_area_struct *vma,
  	return 1;
  }
  
@@ -91022,7 +90971,7 @@ index ddf2128..af57f40 100644
  /*
   * Hugetlb_cow() should be called with page lock of the original hugepage held.
   */
-@@ -2584,6 +2609,11 @@ retry_avoidcopy:
+@@ -2601,6 +2626,11 @@ retry_avoidcopy:
  				make_huge_pte(vma, new_page, 1));
  		page_remove_rmap(old_page);
  		hugepage_add_new_anon_rmap(new_page, vma, address);
@@ -91034,7 +90983,7 @@ index ddf2128..af57f40 100644
  		/* Make the old page be freed below */
  		new_page = old_page;
  		mmu_notifier_invalidate_range_end(mm,
-@@ -2735,6 +2765,10 @@ retry:
+@@ -2752,6 +2782,10 @@ retry:
  				&& (vma->vm_flags & VM_SHARED)));
  	set_huge_pte_at(mm, address, ptep, new_pte);
  
@@ -91045,7 +90994,7 @@ index ddf2128..af57f40 100644
  	if ((flags & FAULT_FLAG_WRITE) && !(vma->vm_flags & VM_SHARED)) {
  		/* Optimization, do the COW without a second fault */
  		ret = hugetlb_cow(mm, vma, address, ptep, new_pte, page);
-@@ -2764,6 +2798,10 @@ int hugetlb_fault(struct mm_struct *mm, struct vm_area_struct *vma,
+@@ -2781,6 +2815,10 @@ int hugetlb_fault(struct mm_struct *mm, struct vm_area_struct *vma,
  	static DEFINE_MUTEX(hugetlb_instantiation_mutex);
  	struct hstate *h = hstate_vma(vma);
  
@@ -91056,7 +91005,7 @@ index ddf2128..af57f40 100644
  	ptep = huge_pte_offset(mm, address);
  	if (ptep) {
  		entry = huge_ptep_get(ptep);
-@@ -2775,6 +2813,26 @@ int hugetlb_fault(struct mm_struct *mm, struct vm_area_struct *vma,
+@@ -2792,6 +2830,26 @@ int hugetlb_fault(struct mm_struct *mm, struct vm_area_struct *vma,
  			       VM_FAULT_SET_HINDEX(h - hstates);
  	}
  
@@ -91220,7 +91169,7 @@ index 23d3a6b..e10d35a 100644
  	if (end == start)
  		goto out;
 diff --git a/mm/memory-failure.c b/mm/memory-failure.c
-index 1b03878..d62c02b 100644
+index 96c4bcf..436254e 100644
 --- a/mm/memory-failure.c
 +++ b/mm/memory-failure.c
 @@ -61,7 +61,7 @@ int sysctl_memory_failure_early_kill __read_mostly = 0;
@@ -91295,16 +91244,23 @@ index 1b03878..d62c02b 100644
  		freeit = 1;
  		if (PageHuge(page))
  			clear_page_hwpoison_huge_page(page);
-@@ -1442,7 +1442,7 @@ static int soft_offline_huge_page(struct page *page, int flags)
+@@ -1444,13 +1444,13 @@ done:
+ 	/* overcommit hugetlb page will be freed to buddy */
+ 	if (PageHuge(hpage)) {
+ 		if (!PageHWPoison(hpage))
+-			atomic_long_add(1 << compound_trans_order(hpage),
++			atomic_long_add_unchecked(1 << compound_trans_order(hpage),
+ 					&mce_bad_pages);
+ 		set_page_hwpoison_huge_page(hpage);
+ 		dequeue_hwpoisoned_huge_page(hpage);
+ 	} else {
+ 		SetPageHWPoison(page);
+-		atomic_long_inc(&mce_bad_pages);
++		atomic_long_inc_unchecked(&mce_bad_pages);
  	}
- done:
- 	if (!PageHWPoison(hpage))
--		atomic_long_add(1 << compound_trans_order(hpage), &mce_bad_pages);
-+		atomic_long_add_unchecked(1 << compound_trans_order(hpage), &mce_bad_pages);
- 	set_page_hwpoison_huge_page(hpage);
- 	dequeue_hwpoisoned_huge_page(hpage);
+ 
  	/* keep elevated page count for bad page */
-@@ -1581,7 +1581,7 @@ int soft_offline_page(struct page *page, int flags)
+@@ -1589,7 +1589,7 @@ int soft_offline_page(struct page *page, int flags)
  		return ret;
  
  done:
@@ -92240,7 +92196,7 @@ index 1ffd97a..240aa20 100644
  int mminit_loglevel;
  
 diff --git a/mm/mmap.c b/mm/mmap.c
-index dff37a6..49e182f 100644
+index 6182c8a..7d532cf 100644
 --- a/mm/mmap.c
 +++ b/mm/mmap.c
 @@ -30,6 +30,7 @@
@@ -92761,7 +92717,7 @@ index dff37a6..49e182f 100644
  	unsigned long start_addr;
 +	unsigned long offset = gr_rand_threadstack_offset(mm, filp, flags);
  
- 	if (len > TASK_SIZE)
+ 	if (len > TASK_SIZE - mmap_min_addr)
  		return -ENOMEM;
 @@ -1374,18 +1623,23 @@ arch_get_unmapped_area(struct file *filp, unsigned long addr,
  	if (flags & MAP_FIXED)
@@ -92774,12 +92730,12 @@ index dff37a6..49e182f 100644
  	if (addr) {
  		addr = PAGE_ALIGN(addr);
 -		vma = find_vma(mm, addr);
--		if (TASK_SIZE - len >= addr &&
+-		if (TASK_SIZE - len >= addr && addr >= mmap_min_addr &&
 -		    (!vma || addr + len <= vma->vm_start))
 -			return addr;
 +		if (TASK_SIZE - len >= addr) {
 +			vma = find_vma(mm, addr);
-+			if (check_heap_stack_gap(vma, &addr, len, offset))
++			if (addr >= mmap_min_addr && check_heap_stack_gap(vma, &addr, len, offset))
 +				return addr;
 +		}
  	}
@@ -92853,10 +92809,10 @@ index dff37a6..49e182f 100644
 -	unsigned long addr = addr0;
 +	unsigned long base = mm->mmap_base, addr = addr0;
 +	unsigned long offset = gr_rand_threadstack_offset(mm, filp, flags);
+ 	unsigned long low_limit = max(PAGE_SIZE, mmap_min_addr);
  
  	/* requested length too big for entire address space */
- 	if (len > TASK_SIZE)
-@@ -1450,13 +1711,18 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
+@@ -1451,13 +1712,18 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
  	if (flags & MAP_FIXED)
  		return addr;
  
@@ -92868,10 +92824,10 @@ index dff37a6..49e182f 100644
  	if (addr) {
  		addr = PAGE_ALIGN(addr);
 -		vma = find_vma(mm, addr);
--		if (TASK_SIZE - len >= addr &&
+-		if (TASK_SIZE - len >= addr && addr >= mmap_min_addr &&
 -				(!vma || addr + len <= vma->vm_start))
 -			return addr;
-+		if (TASK_SIZE - len >= addr) {
++		if (TASK_SIZE - len >= addr && addr >= mmap_min_addr) {
 +			vma = find_vma(mm, addr);
 +			if (check_heap_stack_gap(vma, &addr, len, offset))
 +				return addr;
@@ -92879,10 +92835,10 @@ index dff37a6..49e182f 100644
  	}
  
  	/* check if free_area_cache is useful for us */
-@@ -1470,10 +1736,11 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
+@@ -1471,10 +1737,11 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
  
  	/* make sure it can fit in the remaining address space */
- 	if (addr > len) {
+ 	if (addr >= low_limit + len) {
 -		vma = find_vma(mm, addr-len);
 -		if (!vma || addr <= vma->vm_start)
 +		addr -= len;
@@ -92893,8 +92849,8 @@ index dff37a6..49e182f 100644
 +			return (mm->free_area_cache = addr);
  	}
  
- 	if (mm->mmap_base < len)
-@@ -1488,7 +1755,7 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
+ 	if (mm->mmap_base < low_limit + len)
+@@ -1489,7 +1756,7 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
  		 * return with success:
  		 */
  		vma = find_vma(mm, addr);
@@ -92903,18 +92859,18 @@ index dff37a6..49e182f 100644
  			/* remember the address as a hint for next time */
  			return (mm->free_area_cache = addr);
  
-@@ -1497,8 +1764,8 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
+@@ -1498,8 +1765,8 @@ arch_get_unmapped_area_topdown(struct file *filp, const unsigned long addr0,
   		        mm->cached_hole_size = vma->vm_start - addr;
  
  		/* try just below the current vma->vm_start */
 -		addr = vma->vm_start-len;
--	} while (len < vma->vm_start);
+-	} while (vma->vm_start >= low_limit + len);
 +		addr = skip_heap_stack_gap(vma, len, offset);
-+	} while (!IS_ERR_VALUE(addr));
++	} while (!IS_ERR_VALUE(addr) && addr >= low_limit);
  
  bottomup:
  	/*
-@@ -1507,13 +1774,21 @@ bottomup:
+@@ -1508,13 +1775,21 @@ bottomup:
  	 * can happen with large stack limits and large mmap()
  	 * allocations.
  	 */
@@ -92938,7 +92894,7 @@ index dff37a6..49e182f 100644
  	mm->cached_hole_size = ~0UL;
  
  	return addr;
-@@ -1522,6 +1797,12 @@ bottomup:
+@@ -1523,6 +1798,12 @@ bottomup:
  
  void arch_unmap_area_topdown(struct mm_struct *mm, unsigned long addr)
  {
@@ -92951,7 +92907,7 @@ index dff37a6..49e182f 100644
  	/*
  	 * Is this a new hole at the highest possible address?
  	 */
-@@ -1529,8 +1810,10 @@ void arch_unmap_area_topdown(struct mm_struct *mm, unsigned long addr)
+@@ -1530,8 +1811,10 @@ void arch_unmap_area_topdown(struct mm_struct *mm, unsigned long addr)
  		mm->free_area_cache = addr;
  
  	/* dont allow allocations above current base */
@@ -92963,7 +92919,7 @@ index dff37a6..49e182f 100644
  }
  
  unsigned long
-@@ -1603,40 +1886,50 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
+@@ -1604,40 +1887,50 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
  
  EXPORT_SYMBOL(find_vma);
  
@@ -93039,7 +92995,7 @@ index dff37a6..49e182f 100644
  
  /*
   * Verify that the stack growth is acceptable and
-@@ -1654,6 +1947,7 @@ static int acct_stack_growth(struct vm_area_struct *vma, unsigned long size, uns
+@@ -1655,6 +1948,7 @@ static int acct_stack_growth(struct vm_area_struct *vma, unsigned long size, uns
  		return -ENOMEM;
  
  	/* Stack limit test */
@@ -93047,7 +93003,7 @@ index dff37a6..49e182f 100644
  	if (size > ACCESS_ONCE(rlim[RLIMIT_STACK].rlim_cur))
  		return -ENOMEM;
  
-@@ -1664,6 +1958,7 @@ static int acct_stack_growth(struct vm_area_struct *vma, unsigned long size, uns
+@@ -1665,6 +1959,7 @@ static int acct_stack_growth(struct vm_area_struct *vma, unsigned long size, uns
  		locked = mm->locked_vm + grow;
  		limit = ACCESS_ONCE(rlim[RLIMIT_MEMLOCK].rlim_cur);
  		limit >>= PAGE_SHIFT;
@@ -93055,7 +93011,7 @@ index dff37a6..49e182f 100644
  		if (locked > limit && !capable(CAP_IPC_LOCK))
  			return -ENOMEM;
  	}
-@@ -1682,7 +1977,6 @@ static int acct_stack_growth(struct vm_area_struct *vma, unsigned long size, uns
+@@ -1683,7 +1978,6 @@ static int acct_stack_growth(struct vm_area_struct *vma, unsigned long size, uns
  		return -ENOMEM;
  
  	/* Ok, everything looks good - let it rip */
@@ -93063,7 +93019,7 @@ index dff37a6..49e182f 100644
  	if (vma->vm_flags & VM_LOCKED)
  		mm->locked_vm += grow;
  	vm_stat_account(mm, vma->vm_flags, vma->vm_file, grow);
-@@ -1694,37 +1988,48 @@ static int acct_stack_growth(struct vm_area_struct *vma, unsigned long size, uns
+@@ -1695,37 +1989,48 @@ static int acct_stack_growth(struct vm_area_struct *vma, unsigned long size, uns
   * PA-RISC uses this for its stack; IA64 for its Register Backing Store.
   * vma is the last one with address > vma->vm_end.  Have to extend vma.
   */
@@ -93121,7 +93077,7 @@ index dff37a6..49e182f 100644
  		unsigned long size, grow;
  
  		size = address - vma->vm_start;
-@@ -1739,6 +2044,8 @@ int expand_upwards(struct vm_area_struct *vma, unsigned long address)
+@@ -1740,6 +2045,8 @@ int expand_upwards(struct vm_area_struct *vma, unsigned long address)
  			}
  		}
  	}
@@ -93130,7 +93086,7 @@ index dff37a6..49e182f 100644
  	vma_unlock_anon_vma(vma);
  	khugepaged_enter_vma_merge(vma);
  	return error;
-@@ -1752,6 +2059,8 @@ int expand_downwards(struct vm_area_struct *vma,
+@@ -1753,6 +2060,8 @@ int expand_downwards(struct vm_area_struct *vma,
  				   unsigned long address)
  {
  	int error;
@@ -93139,7 +93095,7 @@ index dff37a6..49e182f 100644
  
  	/*
  	 * We must make sure the anon_vma is allocated
-@@ -1765,6 +2074,15 @@ int expand_downwards(struct vm_area_struct *vma,
+@@ -1766,6 +2075,15 @@ int expand_downwards(struct vm_area_struct *vma,
  	if (error)
  		return error;
  
@@ -93155,7 +93111,7 @@ index dff37a6..49e182f 100644
  	vma_lock_anon_vma(vma);
  
  	/*
-@@ -1774,9 +2092,17 @@ int expand_downwards(struct vm_area_struct *vma,
+@@ -1775,9 +2093,17 @@ int expand_downwards(struct vm_area_struct *vma,
  	 */
  
  	/* Somebody else might have raced and expanded it already */
@@ -93174,7 +93130,7 @@ index dff37a6..49e182f 100644
  		size = vma->vm_end - address;
  		grow = (vma->vm_start - address) >> PAGE_SHIFT;
  
-@@ -1786,18 +2112,48 @@ int expand_downwards(struct vm_area_struct *vma,
+@@ -1787,18 +2113,48 @@ int expand_downwards(struct vm_area_struct *vma,
  			if (!error) {
  				vma->vm_start = address;
  				vma->vm_pgoff -= grow;
@@ -93223,7 +93179,7 @@ index dff37a6..49e182f 100644
  	return expand_upwards(vma, address);
  }
  
-@@ -1820,6 +2176,14 @@ find_extend_vma(struct mm_struct *mm, unsigned long addr)
+@@ -1821,6 +2177,14 @@ find_extend_vma(struct mm_struct *mm, unsigned long addr)
  #else
  int expand_stack(struct vm_area_struct *vma, unsigned long address)
  {
@@ -93238,7 +93194,7 @@ index dff37a6..49e182f 100644
  	return expand_downwards(vma, address);
  }
  
-@@ -1860,7 +2224,13 @@ static void remove_vma_list(struct mm_struct *mm, struct vm_area_struct *vma)
+@@ -1861,7 +2225,13 @@ static void remove_vma_list(struct mm_struct *mm, struct vm_area_struct *vma)
  	do {
  		long nrpages = vma_pages(vma);
  
@@ -93253,7 +93209,7 @@ index dff37a6..49e182f 100644
  		vm_stat_account(mm, vma->vm_flags, vma->vm_file, -nrpages);
  		vma = remove_vma(vma);
  	} while (vma);
-@@ -1905,6 +2275,16 @@ detach_vmas_to_be_unmapped(struct mm_struct *mm, struct vm_area_struct *vma,
+@@ -1906,6 +2276,16 @@ detach_vmas_to_be_unmapped(struct mm_struct *mm, struct vm_area_struct *vma,
  	insertion_point = (prev ? &prev->vm_next : &mm->mmap);
  	vma->vm_prev = NULL;
  	do {
@@ -93270,7 +93226,7 @@ index dff37a6..49e182f 100644
  		rb_erase(&vma->vm_rb, &mm->mm_rb);
  		mm->map_count--;
  		tail_vma = vma;
-@@ -1933,14 +2313,33 @@ static int __split_vma(struct mm_struct * mm, struct vm_area_struct * vma,
+@@ -1934,14 +2314,33 @@ static int __split_vma(struct mm_struct * mm, struct vm_area_struct * vma,
  	struct vm_area_struct *new;
  	int err = -ENOMEM;
  
@@ -93304,7 +93260,7 @@ index dff37a6..49e182f 100644
  	/* most fields are the same, copy all, and then fixup */
  	*new = *vma;
  
-@@ -1953,6 +2352,22 @@ static int __split_vma(struct mm_struct * mm, struct vm_area_struct * vma,
+@@ -1954,6 +2353,22 @@ static int __split_vma(struct mm_struct * mm, struct vm_area_struct * vma,
  		new->vm_pgoff += ((addr - vma->vm_start) >> PAGE_SHIFT);
  	}
  
@@ -93327,7 +93283,7 @@ index dff37a6..49e182f 100644
  	pol = mpol_dup(vma_policy(vma));
  	if (IS_ERR(pol)) {
  		err = PTR_ERR(pol);
-@@ -1978,6 +2393,42 @@ static int __split_vma(struct mm_struct * mm, struct vm_area_struct * vma,
+@@ -1979,6 +2394,42 @@ static int __split_vma(struct mm_struct * mm, struct vm_area_struct * vma,
  	else
  		err = vma_adjust(vma, vma->vm_start, addr, vma->vm_pgoff, new);
  
@@ -93370,7 +93326,7 @@ index dff37a6..49e182f 100644
  	/* Success. */
  	if (!err)
  		return 0;
-@@ -1990,10 +2441,18 @@ static int __split_vma(struct mm_struct * mm, struct vm_area_struct * vma,
+@@ -1991,10 +2442,18 @@ static int __split_vma(struct mm_struct * mm, struct vm_area_struct * vma,
  			removed_exe_file_vma(mm);
  		fput(new->vm_file);
  	}
@@ -93390,7 +93346,7 @@ index dff37a6..49e182f 100644
  	kmem_cache_free(vm_area_cachep, new);
   out_err:
  	return err;
-@@ -2006,6 +2465,15 @@ static int __split_vma(struct mm_struct * mm, struct vm_area_struct * vma,
+@@ -2007,6 +2466,15 @@ static int __split_vma(struct mm_struct * mm, struct vm_area_struct * vma,
  int split_vma(struct mm_struct *mm, struct vm_area_struct *vma,
  	      unsigned long addr, int new_below)
  {
@@ -93406,7 +93362,7 @@ index dff37a6..49e182f 100644
  	if (mm->map_count >= sysctl_max_map_count)
  		return -ENOMEM;
  
-@@ -2017,11 +2485,30 @@ int split_vma(struct mm_struct *mm, struct vm_area_struct *vma,
+@@ -2018,11 +2486,30 @@ int split_vma(struct mm_struct *mm, struct vm_area_struct *vma,
   * work.  This now handles partial unmappings.
   * Jeremy Fitzhardinge <jeremy@goop.org>
   */
@@ -93437,7 +93393,7 @@ index dff37a6..49e182f 100644
  	if ((start & ~PAGE_MASK) || start > TASK_SIZE || len > TASK_SIZE-start)
  		return -EINVAL;
  
-@@ -2096,6 +2583,8 @@ int do_munmap(struct mm_struct *mm, unsigned long start, size_t len)
+@@ -2097,6 +2584,8 @@ int do_munmap(struct mm_struct *mm, unsigned long start, size_t len)
  	/* Fix up all other VM information */
  	remove_vma_list(mm, vma);
  
@@ -93446,7 +93402,7 @@ index dff37a6..49e182f 100644
  	return 0;
  }
  
-@@ -2108,22 +2597,18 @@ SYSCALL_DEFINE2(munmap, unsigned long, addr, size_t, len)
+@@ -2109,22 +2598,18 @@ SYSCALL_DEFINE2(munmap, unsigned long, addr, size_t, len)
  
  	profile_munmap(addr);
  
@@ -93475,7 +93431,7 @@ index dff37a6..49e182f 100644
  /*
   *  this is really a simplified "do_mmap".  it only handles
   *  anonymous maps.  eventually we may be able to do some
-@@ -2137,6 +2622,7 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
+@@ -2138,6 +2623,7 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
  	struct rb_node ** rb_link, * rb_parent;
  	pgoff_t pgoff = addr >> PAGE_SHIFT;
  	int error;
@@ -93483,7 +93439,7 @@ index dff37a6..49e182f 100644
  
  	len = PAGE_ALIGN(len);
  	if (!len)
-@@ -2148,16 +2634,30 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
+@@ -2149,16 +2635,30 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
  
  	flags = VM_DATA_DEFAULT_FLAGS | VM_ACCOUNT | mm->def_flags;
  
@@ -93515,7 +93471,7 @@ index dff37a6..49e182f 100644
  		locked += mm->locked_vm;
  		lock_limit = rlimit(RLIMIT_MEMLOCK);
  		lock_limit >>= PAGE_SHIFT;
-@@ -2174,22 +2674,22 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
+@@ -2175,22 +2675,22 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
  	/*
  	 * Clear old maps.  this also does some error checking for us
  	 */
@@ -93542,7 +93498,7 @@ index dff37a6..49e182f 100644
  		return -ENOMEM;
  
  	/* Can we just expand an old private anonymous mapping? */
-@@ -2203,7 +2703,7 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
+@@ -2204,7 +2704,7 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
  	 */
  	vma = kmem_cache_zalloc(vm_area_cachep, GFP_KERNEL);
  	if (!vma) {
@@ -93551,7 +93507,7 @@ index dff37a6..49e182f 100644
  		return -ENOMEM;
  	}
  
-@@ -2217,11 +2717,12 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
+@@ -2218,11 +2718,12 @@ unsigned long do_brk(unsigned long addr, unsigned long len)
  	vma_link(mm, vma, prev, rb_link, rb_parent);
  out:
  	perf_event_mmap(vma);
@@ -93566,7 +93522,7 @@ index dff37a6..49e182f 100644
  	return addr;
  }
  
-@@ -2268,8 +2769,10 @@ void exit_mmap(struct mm_struct *mm)
+@@ -2269,8 +2770,10 @@ void exit_mmap(struct mm_struct *mm)
  	 * Walk the list again, actually closing and freeing it,
  	 * with preemption enabled, without holding any MM locks.
  	 */
@@ -93578,7 +93534,7 @@ index dff37a6..49e182f 100644
  
  	BUG_ON(mm->nr_ptes > (FIRST_USER_ADDRESS+PMD_SIZE-1)>>PMD_SHIFT);
  }
-@@ -2283,6 +2786,13 @@ int insert_vm_struct(struct mm_struct * mm, struct vm_area_struct * vma)
+@@ -2284,6 +2787,13 @@ int insert_vm_struct(struct mm_struct * mm, struct vm_area_struct * vma)
  	struct vm_area_struct * __vma, * prev;
  	struct rb_node ** rb_link, * rb_parent;
  
@@ -93592,7 +93548,7 @@ index dff37a6..49e182f 100644
  	/*
  	 * The vm_pgoff of a purely anonymous vma should be irrelevant
  	 * until its first write fault, when page's anon_vma and index
-@@ -2305,7 +2815,22 @@ int insert_vm_struct(struct mm_struct * mm, struct vm_area_struct * vma)
+@@ -2306,7 +2816,22 @@ int insert_vm_struct(struct mm_struct * mm, struct vm_area_struct * vma)
  	if ((vma->vm_flags & VM_ACCOUNT) &&
  	     security_vm_enough_memory_mm(mm, vma_pages(vma)))
  		return -ENOMEM;
@@ -93615,7 +93571,7 @@ index dff37a6..49e182f 100644
  	return 0;
  }
  
-@@ -2323,6 +2848,8 @@ struct vm_area_struct *copy_vma(struct vm_area_struct **vmap,
+@@ -2324,6 +2849,8 @@ struct vm_area_struct *copy_vma(struct vm_area_struct **vmap,
  	struct rb_node **rb_link, *rb_parent;
  	struct mempolicy *pol;
  
@@ -93624,7 +93580,7 @@ index dff37a6..49e182f 100644
  	/*
  	 * If anonymous vma has not yet been faulted, update new pgoff
  	 * to match new location, to increase its chance of merging.
-@@ -2373,6 +2900,39 @@ struct vm_area_struct *copy_vma(struct vm_area_struct **vmap,
+@@ -2374,6 +2901,39 @@ struct vm_area_struct *copy_vma(struct vm_area_struct **vmap,
  	return NULL;
  }
  
@@ -93664,7 +93620,7 @@ index dff37a6..49e182f 100644
  /*
   * Return true if the calling process may expand its vm space by the passed
   * number of pages
-@@ -2384,6 +2944,7 @@ int may_expand_vm(struct mm_struct *mm, unsigned long npages)
+@@ -2385,6 +2945,7 @@ int may_expand_vm(struct mm_struct *mm, unsigned long npages)
  
  	lim = rlimit(RLIMIT_AS) >> PAGE_SHIFT;
  
@@ -93672,7 +93628,7 @@ index dff37a6..49e182f 100644
  	if (cur + npages > lim)
  		return 0;
  	return 1;
-@@ -2454,6 +3015,22 @@ int install_special_mapping(struct mm_struct *mm,
+@@ -2455,6 +3016,22 @@ int install_special_mapping(struct mm_struct *mm,
  	vma->vm_start = addr;
  	vma->vm_end = addr + len;
  
@@ -95570,23 +95526,20 @@ index 1b7e22a..3fcd4f3 100644
  	return pgd;
  }
 diff --git a/mm/swap.c b/mm/swap.c
-index 55b266d..a532537 100644
+index a4b9016..d1a1b68 100644
 --- a/mm/swap.c
 +++ b/mm/swap.c
-@@ -31,6 +31,7 @@
- #include <linux/backing-dev.h>
- #include <linux/memcontrol.h>
- #include <linux/gfp.h>
-+#include <linux/hugetlb.h>
+@@ -70,9 +70,11 @@ static void __put_compound_page(struct page *page)
+ {
+ 	compound_page_dtor *dtor;
  
- #include "internal.h"
- 
-@@ -71,6 +72,8 @@ static void __put_compound_page(struct page *page)
- 
- 	__page_cache_release(page);
+-	if (!PageHuge(page))
+-		__page_cache_release(page);
  	dtor = get_compound_page_dtor(page);
-+	if (!PageHuge(page))
++	if (!PageHuge(page)) {
 +		BUG_ON(dtor != free_compound_page);
++		__page_cache_release(page);
++	}
  	(*dtor)(page);
  }
  
@@ -96008,6 +95961,22 @@ index fdfdb57..38d368c 100644
  	set_fs(oldfs);
  
  	if (ret <= 0 && ret != -ERESTARTSYS && ret != -EAGAIN)
+diff --git a/net/9p/trans_virtio.c b/net/9p/trans_virtio.c
+index 55f0c09..d5bf348 100644
+--- a/net/9p/trans_virtio.c
++++ b/net/9p/trans_virtio.c
+@@ -324,7 +324,10 @@ static int p9_get_mapped_pages(struct virtio_chan *chan,
+ 		int count = nr_pages;
+ 		while (nr_pages) {
+ 			s = rest_of_page(data);
+-			pages[index++] = kmap_to_page(data);
++			if (is_vmalloc_addr(data))
++				pages[index++] = vmalloc_to_page(data);
++			else
++				pages[index++] = kmap_to_page(data);
+ 			data += s;
+ 			nr_pages--;
+ 		}
 diff --git a/net/atm/atm_misc.c b/net/atm/atm_misc.c
 index f41f026..fe76ea8 100644
 --- a/net/atm/atm_misc.c
@@ -96447,7 +96416,7 @@ index 14c4864..77ff888 100644
  			err = -EFAULT;
  			break;
 diff --git a/net/bridge/br_multicast.c b/net/bridge/br_multicast.c
-index a06deca..2269299 100644
+index 2157984..430c7e1 100644
 --- a/net/bridge/br_multicast.c
 +++ b/net/bridge/br_multicast.c
 @@ -1410,7 +1410,7 @@ static int br_multicast_ipv6_rcv(struct net_bridge *br,
@@ -97953,10 +97922,10 @@ index 907ef2c..eba7111 100644
  
  void inet_get_local_port_range(int *low, int *high)
 diff --git a/net/ipv4/inet_diag.c b/net/ipv4/inet_diag.c
-index ccee270..2b3d4de 100644
+index 6be5e8e..22df23e 100644
 --- a/net/ipv4/inet_diag.c
 +++ b/net/ipv4/inet_diag.c
-@@ -114,11 +114,21 @@ static int inet_csk_diag_fill(struct sock *sk,
+@@ -114,8 +114,14 @@ static int inet_csk_diag_fill(struct sock *sk,
  	r->idiag_retrans = 0;
  
  	r->id.idiag_if = sk->sk_bound_dev_if;
@@ -97971,18 +97940,9 @@ index ccee270..2b3d4de 100644
  
  	r->id.idiag_sport = inet->inet_sport;
  	r->id.idiag_dport = inet->inet_dport;
-+
-+	memset(&r->id.idiag_src, 0, sizeof(r->id.idiag_src));
-+	memset(&r->id.idiag_dst, 0, sizeof(r->id.idiag_dst));
-+
- 	r->id.idiag_src[0] = inet->inet_rcv_saddr;
- 	r->id.idiag_dst[0] = inet->inet_daddr;
- 
-@@ -209,13 +219,26 @@ static int inet_twsk_diag_fill(struct inet_timewait_sock *tw,
- 
- 	r->idiag_family	      = tw->tw_family;
+@@ -215,8 +221,14 @@ static int inet_twsk_diag_fill(struct inet_timewait_sock *tw,
  	r->idiag_retrans      = 0;
-+
+ 
  	r->id.idiag_if	      = tw->tw_bound_dev_if;
 +
 +#ifdef CONFIG_GRKERNSEC_HIDESYM
@@ -97992,20 +97952,10 @@ index ccee270..2b3d4de 100644
  	r->id.idiag_cookie[0] = (u32)(unsigned long)tw;
  	r->id.idiag_cookie[1] = (u32)(((unsigned long)tw >> 31) >> 1);
 +#endif
-+
+ 
  	r->id.idiag_sport     = tw->tw_sport;
  	r->id.idiag_dport     = tw->tw_dport;
-+
-+	memset(&r->id.idiag_src, 0, sizeof(r->id.idiag_src));
-+	memset(&r->id.idiag_dst, 0, sizeof(r->id.idiag_dst));
-+
- 	r->id.idiag_src[0]    = tw->tw_rcv_saddr;
- 	r->id.idiag_dst[0]    = tw->tw_daddr;
-+
- 	r->idiag_state	      = tw->tw_substate;
- 	r->idiag_timer	      = 3;
- 	r->idiag_expires      = DIV_ROUND_UP(tmo * 1000, HZ);
-@@ -294,12 +317,14 @@ static int inet_diag_get_exact(struct sk_buff *in_skb,
+@@ -305,12 +317,14 @@ static int inet_diag_get_exact(struct sk_buff *in_skb,
  	if (sk == NULL)
  		goto unlock;
  
@@ -98020,7 +97970,7 @@ index ccee270..2b3d4de 100644
  
  	err = -ENOMEM;
  	rep = alloc_skb(NLMSG_SPACE((sizeof(struct inet_diag_msg) +
-@@ -589,8 +614,14 @@ static int inet_diag_fill_req(struct sk_buff *skb, struct sock *sk,
+@@ -600,8 +614,14 @@ static int inet_diag_fill_req(struct sk_buff *skb, struct sock *sk,
  	r->idiag_retrans = req->retrans;
  
  	r->id.idiag_if = sk->sk_bound_dev_if;
@@ -98035,20 +97985,6 @@ index ccee270..2b3d4de 100644
  
  	tmo = req->expires - jiffies;
  	if (tmo < 0)
-@@ -598,8 +629,13 @@ static int inet_diag_fill_req(struct sk_buff *skb, struct sock *sk,
- 
- 	r->id.idiag_sport = inet->inet_sport;
- 	r->id.idiag_dport = ireq->rmt_port;
-+
-+	memset(&r->id.idiag_src, 0, sizeof(r->id.idiag_src));
-+	memset(&r->id.idiag_dst, 0, sizeof(r->id.idiag_dst));
-+
- 	r->id.idiag_src[0] = ireq->loc_addr;
- 	r->id.idiag_dst[0] = ireq->rmt_addr;
-+
- 	r->idiag_expires = jiffies_to_msecs(tmo);
- 	r->idiag_rqueue = 0;
- 	r->idiag_wqueue = 0;
 diff --git a/net/ipv4/inet_hashtables.c b/net/ipv4/inet_hashtables.c
 index 4afcf31..392d206 100644
 --- a/net/ipv4/inet_hashtables.c
@@ -98229,25 +98165,10 @@ index 99ec116..c5628fe 100644
  	return res;
  }
 diff --git a/net/ipv4/ipmr.c b/net/ipv4/ipmr.c
-index b5e64e4..69801fa 100644
+index 140d377..69801fa 100644
 --- a/net/ipv4/ipmr.c
 +++ b/net/ipv4/ipmr.c
-@@ -155,9 +155,12 @@ static struct mr_table *ipmr_get_table(struct net *net, u32 id)
- static int ipmr_fib_lookup(struct net *net, struct flowi4 *flp4,
- 			   struct mr_table **mrt)
- {
-+	int err;
- 	struct ipmr_result res;
--	struct fib_lookup_arg arg = { .result = &res, };
--	int err;
-+	struct fib_lookup_arg arg = {
-+		.result = &res,
-+		.flags = FIB_LOOKUP_NOREF,
-+	};
- 
- 	err = fib_rules_lookup(net->ipv4.mr_rules_ops,
- 			       flowi4_to_flowi(flp4), 0, &arg);
-@@ -1320,6 +1323,10 @@ int ip_mroute_setsockopt(struct sock *sk, int optname, char __user *optval, unsi
+@@ -1323,6 +1323,10 @@ int ip_mroute_setsockopt(struct sock *sk, int optname, char __user *optval, unsi
  		if (get_user(v, (u32 __user *)optval))
  			return -EFAULT;
  
@@ -99237,25 +99158,6 @@ index d3fde7e..f526e49 100644
  }
  
  int ip6_fragment(struct sk_buff *skb, int (*output)(struct sk_buff *))
-diff --git a/net/ipv6/ip6mr.c b/net/ipv6/ip6mr.c
-index f5af259..f96c96f 100644
---- a/net/ipv6/ip6mr.c
-+++ b/net/ipv6/ip6mr.c
-@@ -139,9 +139,12 @@ static struct mr6_table *ip6mr_get_table(struct net *net, u32 id)
- static int ip6mr_fib_lookup(struct net *net, struct flowi6 *flp6,
- 			    struct mr6_table **mrt)
- {
-+	int err;
- 	struct ip6mr_result res;
--	struct fib_lookup_arg arg = { .result = &res, };
--	int err;
-+	struct fib_lookup_arg arg = {
-+		.result = &res,
-+		.flags = FIB_LOOKUP_NOREF,
-+	};
- 
- 	err = fib_rules_lookup(net->ipv6.mr6_rules_ops,
- 			       flowi6_to_flowi(flp6), 0, &arg);
 diff --git a/net/ipv6/ipv6_sockglue.c b/net/ipv6/ipv6_sockglue.c
 index b204df8..8f274f4 100644
 --- a/net/ipv6/ipv6_sockglue.c
@@ -99459,10 +99361,10 @@ index eba5deb..61e026f 100644
  	return -ENOMEM;
  }
 diff --git a/net/ipv6/route.c b/net/ipv6/route.c
-index 1768238..b28b21a 100644
+index 9a4f437..d13bf8b 100644
 --- a/net/ipv6/route.c
 +++ b/net/ipv6/route.c
-@@ -2812,7 +2812,7 @@ ctl_table ipv6_route_table_template[] = {
+@@ -2808,7 +2808,7 @@ ctl_table ipv6_route_table_template[] = {
  
  struct ctl_table * __net_init ipv6_route_sysctl_init(struct net *net)
  {
@@ -102867,10 +102769,10 @@ index 1983717..4d6102c 100644
  
  	sub->evt.event = htohl(event, sub->swap);
 diff --git a/net/unix/af_unix.c b/net/unix/af_unix.c
-index 9338ccc..9bc732b 100644
+index eddfdec..e20439d 100644
 --- a/net/unix/af_unix.c
 +++ b/net/unix/af_unix.c
-@@ -766,6 +766,12 @@ static struct sock *unix_find_other(struct net *net,
+@@ -768,6 +768,12 @@ static struct sock *unix_find_other(struct net *net,
  		err = -ECONNREFUSED;
  		if (!S_ISSOCK(inode->i_mode))
  			goto put_fail;
@@ -102883,7 +102785,7 @@ index 9338ccc..9bc732b 100644
  		u = unix_find_socket_byinode(inode);
  		if (!u)
  			goto put_fail;
-@@ -786,6 +792,13 @@ static struct sock *unix_find_other(struct net *net,
+@@ -788,6 +794,13 @@ static struct sock *unix_find_other(struct net *net,
  		if (u) {
  			struct dentry *dentry;
  			dentry = unix_sk(u)->dentry;
@@ -102897,7 +102799,7 @@ index 9338ccc..9bc732b 100644
  			if (dentry)
  				touch_atime(unix_sk(u)->mnt, dentry);
  		} else
-@@ -868,11 +881,18 @@ static int unix_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
+@@ -872,11 +885,18 @@ static int unix_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
  		err = security_path_mknod(&path, dentry, mode, 0);
  		if (err)
  			goto out_mknod_drop_write;
@@ -102916,7 +102818,7 @@ index 9338ccc..9bc732b 100644
  		mutex_unlock(&path.dentry->d_inode->i_mutex);
  		dput(path.dentry);
  		path.dentry = dentry;
-@@ -2265,9 +2285,13 @@ static int unix_seq_show(struct seq_file *seq, void *v)
+@@ -2269,9 +2289,13 @@ static int unix_seq_show(struct seq_file *seq, void *v)
  		seq_puts(seq, "Num       RefCount Protocol Flags    Type St "
  			 "Inode Path\n");
  	else {
@@ -102931,7 +102833,7 @@ index 9338ccc..9bc732b 100644
  
  		seq_printf(seq, "%pK: %08X %08X %08X %04X %02X %5lu",
  			s,
-@@ -2294,8 +2318,10 @@ static int unix_seq_show(struct seq_file *seq, void *v)
+@@ -2298,8 +2322,10 @@ static int unix_seq_show(struct seq_file *seq, void *v)
  			}
  			for ( ; i < len; i++)
  				seq_putc(seq, u->addr->name->sun_path[i]);
@@ -106158,7 +106060,7 @@ index dca1c22..4fa4591 100644
  		lock = &avc_cache.slots_lock[hvalue];
  
 diff --git a/security/selinux/hooks.c b/security/selinux/hooks.c
-index 5898f34..04f8b47 100644
+index bcf1d73..04f8b47 100644
 --- a/security/selinux/hooks.c
 +++ b/security/selinux/hooks.c
 @@ -95,8 +95,6 @@
@@ -106170,41 +106072,7 @@ index 5898f34..04f8b47 100644
  /* SECMARK reference count */
  static atomic_t selinux_secmark_refcount = ATOMIC_INIT(0);
  
-@@ -217,6 +215,14 @@ static int inode_alloc_security(struct inode *inode)
- 	return 0;
- }
- 
-+static void inode_free_rcu(struct rcu_head *head)
-+{
-+	struct inode_security_struct *isec;
-+
-+	isec = container_of(head, struct inode_security_struct, rcu);
-+	kmem_cache_free(sel_inode_cache, isec);
-+}
-+
- static void inode_free_security(struct inode *inode)
- {
- 	struct inode_security_struct *isec = inode->i_security;
-@@ -227,8 +233,16 @@ static void inode_free_security(struct inode *inode)
- 		list_del_init(&isec->list);
- 	spin_unlock(&sbsec->isec_lock);
- 
--	inode->i_security = NULL;
--	kmem_cache_free(sel_inode_cache, isec);
-+	/*
-+	 * The inode may still be referenced in a path walk and
-+	 * a call to selinux_inode_permission() can be made
-+	 * after inode_free_security() is called. Ideally, the VFS
-+	 * wouldn't do this, but fixing that is a much harder
-+	 * job. For now, simply free the i_security via RCU, and
-+	 * leave the current inode->i_security pointer intact.
-+	 * The inode will be freed after the RCU grace period too.
-+	 */
-+	call_rcu(&isec->rcu, inode_free_rcu);
- }
- 
- static int file_alloc_security(struct file *file)
-@@ -2001,6 +2015,13 @@ static int selinux_bprm_set_creds(struct linux_binprm *bprm)
+@@ -2017,6 +2015,13 @@ static int selinux_bprm_set_creds(struct linux_binprm *bprm)
  		new_tsec->sid = old_tsec->exec_sid;
  		/* Reset exec SID on execve. */
  		new_tsec->exec_sid = 0;
@@ -106218,7 +106086,7 @@ index 5898f34..04f8b47 100644
  	} else {
  		/* Check for a default transition on this program. */
  		rc = security_transition_sid(old_tsec->sid, isec->sid,
-@@ -2013,7 +2034,8 @@ static int selinux_bprm_set_creds(struct linux_binprm *bprm)
+@@ -2029,7 +2034,8 @@ static int selinux_bprm_set_creds(struct linux_binprm *bprm)
  	COMMON_AUDIT_DATA_INIT(&ad, PATH);
  	ad.u.path = bprm->file->f_path;
  
@@ -106228,33 +106096,7 @@ index 5898f34..04f8b47 100644
  		new_tsec->sid = old_tsec->sid;
  
  	if (new_tsec->sid == old_tsec->sid) {
-@@ -4181,8 +4203,10 @@ static int selinux_socket_sock_rcv_skb(struct sock *sk, struct sk_buff *skb)
- 		}
- 		err = avc_has_perm(sk_sid, peer_sid, SECCLASS_PEER,
- 				   PEER__RECV, &ad);
--		if (err)
-+		if (err) {
- 			selinux_netlbl_err(skb, err, 0);
-+			return err;
-+		}
- 	}
- 
- 	if (secmark_active) {
-@@ -5372,11 +5396,11 @@ static int selinux_setprocattr(struct task_struct *p,
- 		/* Check for ptracing, and update the task SID if ok.
- 		   Otherwise, leave SID unchanged and fail. */
- 		ptsid = 0;
--		task_lock(p);
-+		rcu_read_lock();
- 		tracer = ptrace_parent(p);
- 		if (tracer)
- 			ptsid = task_sid(tracer);
--		task_unlock(p);
-+		rcu_read_unlock();
- 
- 		if (tracer) {
- 			error = avc_has_perm(ptsid, sid, SECCLASS_PROCESS,
-@@ -5508,7 +5532,7 @@ static int selinux_key_getsecurity(struct key *key, char **_buffer)
+@@ -5526,7 +5532,7 @@ static int selinux_key_getsecurity(struct key *key, char **_buffer)
  
  #endif
  
@@ -106263,7 +106105,7 @@ index 5898f34..04f8b47 100644
  	.name =				"selinux",
  
  	.ptrace_access_check =		selinux_ptrace_access_check,
-@@ -5854,6 +5878,9 @@ static void selinux_nf_ip_exit(void)
+@@ -5872,6 +5878,9 @@ static void selinux_nf_ip_exit(void)
  #ifdef CONFIG_SECURITY_SELINUX_DISABLE
  static int selinux_disabled;
  
@@ -106273,7 +106115,7 @@ index 5898f34..04f8b47 100644
  int selinux_disable(void)
  {
  	if (ss_initialized) {
-@@ -5871,7 +5898,9 @@ int selinux_disable(void)
+@@ -5889,7 +5898,9 @@ int selinux_disable(void)
  	selinux_disabled = 1;
  	selinux_enabled = 0;
  
@@ -106284,22 +106126,6 @@ index 5898f34..04f8b47 100644
  
  	/* Try to destroy the avc node cache */
  	avc_disable();
-diff --git a/security/selinux/include/objsec.h b/security/selinux/include/objsec.h
-index 26c7eee..7b1830b 100644
---- a/security/selinux/include/objsec.h
-+++ b/security/selinux/include/objsec.h
-@@ -38,7 +38,10 @@ struct task_security_struct {
- 
- struct inode_security_struct {
- 	struct inode *inode;	/* back pointer to inode object */
--	struct list_head list;	/* list of inode_security_struct */
-+	union {
-+		struct list_head list;	/* list of inode_security_struct */
-+		struct rcu_head rcu;	/* for freeing the inode_security_struct */
-+	};
- 	u32 task_sid;		/* SID of creating task */
- 	u32 sid;		/* SID of this object */
- 	u16 sclass;		/* security class of this object */
 diff --git a/security/selinux/include/xfrm.h b/security/selinux/include/xfrm.h
 index b43813c..74be837 100644
 --- a/security/selinux/include/xfrm.h
@@ -107045,7 +106871,7 @@ index 0000000..4c2c45c
 +size_overflow_hash.h
 diff --git a/tools/gcc/Makefile b/tools/gcc/Makefile
 new file mode 100644
-index 0000000..0d1d9d3
+index 0000000..b198b6d
 --- /dev/null
 +++ b/tools/gcc/Makefile
 @@ -0,0 +1,54 @@
@@ -107060,7 +106886,7 @@ index 0000000..0d1d9d3
 +HOST_EXTRACFLAGS += -I$(GCCPLUGINS_DIR)/include -std=gnu99 -ggdb
 +else
 +HOSTLIBS := hostcxxlibs
-+HOST_EXTRACXXFLAGS += -I$(GCCPLUGINS_DIR)/include -std=gnu++98 -fno-rtti -ggdb -Wno-unused-parameter
++HOST_EXTRACXXFLAGS += -I$(GCCPLUGINS_DIR)/include -std=gnu++98 -fno-rtti -ggdb -Wno-unused-parameter -Wno-narrowing
 +endif
 +
 +$(HOSTLIBS)-$(CONFIG_PAX_CONSTIFY_PLUGIN) := constify_plugin.so
@@ -109095,10 +108921,10 @@ index 0000000..dd73713
 +}
 diff --git a/tools/gcc/latent_entropy_plugin.c b/tools/gcc/latent_entropy_plugin.c
 new file mode 100644
-index 0000000..592b923
+index 0000000..515d689
 --- /dev/null
 +++ b/tools/gcc/latent_entropy_plugin.c
-@@ -0,0 +1,325 @@
+@@ -0,0 +1,337 @@
 +/*
 + * Copyright 2012-2014 by the PaX Team <pageexec@freemail.hu>
 + * Licensed under the GPL v2
@@ -109127,7 +108953,7 @@ index 0000000..592b923
 +static tree latent_entropy_decl;
 +
 +static struct plugin_info latent_entropy_plugin_info = {
-+	.version	= "201401260140",
++	.version	= "201402131900",
 +	.help		= NULL
 +};
 +
@@ -109324,7 +109150,7 @@ index 0000000..592b923
 +	return 0;
 +}
 +
-+static void start_unit_callback(void *gcc_data, void *user_data)
++static void latent_entropy_start_unit(void *gcc_data, void *user_data)
 +{
 +	tree latent_entropy_type;
 +
@@ -109411,6 +109237,16 @@ index 0000000..592b923
 +	latent_entropy_pass_info.reference_pass_name		= "optimized";
 +	latent_entropy_pass_info.ref_pass_instance_number	= 1;
 +	latent_entropy_pass_info.pos_op 			= PASS_POS_INSERT_BEFORE;
++	static const struct ggc_root_tab gt_ggc_r_gt_latent_entropy[] = {
++		{
++			.base = &latent_entropy_decl,
++			.nelt = 1,
++			.stride = sizeof(latent_entropy_decl),
++			.cb = &gt_ggc_mx_tree_node,
++			.pchw = &gt_pch_nx_tree_node
++		},
++		LAST_GGC_ROOT_TAB
++	};
 +
 +	if (!plugin_default_version_check(version, &gcc_version)) {
 +		error(G_("incompatible gcc/plugin versions"));
@@ -109418,7 +109254,9 @@ index 0000000..592b923
 +	}
 +
 +	register_callback(plugin_name, PLUGIN_INFO, NULL, &latent_entropy_plugin_info);
-+	register_callback(plugin_name, PLUGIN_START_UNIT, &start_unit_callback, NULL);
++	register_callback(plugin_name, PLUGIN_START_UNIT, &latent_entropy_start_unit, NULL);
++	if (!in_lto_p)
++		register_callback(plugin_name, PLUGIN_REGISTER_GGC_ROOTS, NULL, (void *)&gt_ggc_r_gt_latent_entropy);
 +	register_callback(plugin_name, PLUGIN_PASS_MANAGER_SETUP, NULL, &latent_entropy_pass_info);
 +	register_callback(plugin_name, PLUGIN_ATTRIBUTES, register_attributes, NULL);
 +
@@ -109426,10 +109264,10 @@ index 0000000..592b923
 +}
 diff --git a/tools/gcc/randomize_layout_plugin.c b/tools/gcc/randomize_layout_plugin.c
 new file mode 100644
-index 0000000..fed12bf
+index 0000000..bc490ca
 --- /dev/null
 +++ b/tools/gcc/randomize_layout_plugin.c
-@@ -0,0 +1,902 @@
+@@ -0,0 +1,906 @@
 +/*
 + * Copyright 2014 by Open Source Security, Inc., Brad Spengler <spender@grsecurity.net>
 + *                   and PaX Team <pageexec@freemail.hu>
@@ -109445,6 +109283,10 @@ index 0000000..fed12bf
 +
 +#include "gcc-common.h"
 +#include "randomize_layout_seed.h"
++
++#if BUILDING_GCC_MAJOR < 4 || BUILDING_GCC_MINOR < 6 || (BUILDING_GCC_MINOR == 6 && BUILDING_GCC_PATCHLEVEL < 4)
++#error "The RANDSTRUCT plugin requires GCC 4.6.4 or newer."
++#endif
 +
 +#define ORIG_TYPE_NAME(node) \
 +	(TYPE_NAME(TYPE_MAIN_VARIANT(node)) != NULL_TREE ? ((const unsigned char *)IDENTIFIER_POINTER(TYPE_NAME(TYPE_MAIN_VARIANT(node)))) : (const unsigned char *)"anonymous")
@@ -109862,7 +109704,7 @@ index 0000000..fed12bf
 +#endif
 +}
 +
-+static void finish_decl(void *event_data, void *data)
++static void randomize_layout_finish_decl(void *event_data, void *data)
 +{
 +	tree decl = (tree)event_data;
 +	tree type;
@@ -110326,7 +110168,7 @@ index 0000000..fed12bf
 +		register_callback(plugin_name, PLUGIN_ALL_IPA_PASSES_START, check_global_variables, NULL);
 +		register_callback(plugin_name, PLUGIN_PASS_MANAGER_SETUP, NULL, &randomize_layout_bad_cast_info);
 +		register_callback(plugin_name, PLUGIN_FINISH_TYPE, finish_type, NULL);
-+		register_callback(plugin_name, PLUGIN_FINISH_DECL, finish_decl, NULL);
++		register_callback(plugin_name, PLUGIN_FINISH_DECL, randomize_layout_finish_decl, NULL);
 +	}
 +	register_callback(plugin_name, PLUGIN_ATTRIBUTES, register_attributes, NULL);
 +
@@ -116341,10 +116183,10 @@ index 0000000..7b67f2b
 +selnl_msglen_65499 selnl_msglen 0 65499 NULL
 diff --git a/tools/gcc/size_overflow_plugin.c b/tools/gcc/size_overflow_plugin.c
 new file mode 100644
-index 0000000..4a637ab
+index 0000000..4aab36f
 --- /dev/null
 +++ b/tools/gcc/size_overflow_plugin.c
-@@ -0,0 +1,4040 @@
+@@ -0,0 +1,4051 @@
 +/*
 + * Copyright 2011-2014 by Emese Revfy <re.emese@gmail.com>
 + * Licensed under the GPL v2, or (at your option) v3
@@ -116369,7 +116211,7 @@ index 0000000..4a637ab
 +int plugin_is_GPL_compatible;
 +
 +static struct plugin_info size_overflow_plugin_info = {
-+	.version	= "20140128",
++	.version	= "20140213",
 +	.help		= "no-size-overflow\tturn off size overflow checking\n",
 +};
 +
@@ -116437,7 +116279,6 @@ index 0000000..4a637ab
 +};
 +
 +static tree report_size_overflow_decl;
-+static const_tree const_char_ptr_type_node;
 +
 +static tree expand(struct pointer_set_t *visited, struct cgraph_node *caller_node, tree lhs);
 +static void set_conditions(struct pointer_set_t *visited, bool *interesting_conditions, const_tree lhs);
@@ -120210,8 +120051,9 @@ index 0000000..4a637ab
 +}
 +
 +// Create the noreturn report_size_overflow() function decl.
-+static void start_unit_callback(void __unused *gcc_data, void __unused *user_data)
++static void size_overflow_start_unit(void __unused *gcc_data, void __unused *user_data)
 +{
++	tree const_char_ptr_type_node;
 +	tree fntype;
 +
 +	const_char_ptr_type_node = build_pointer_type(build_type_variant(char_type_node, 1, 0));
@@ -120339,6 +120181,16 @@ index 0000000..4a637ab
 +	struct register_pass_info __unused dump_before_pass_info;
 +	struct register_pass_info __unused dump_after_pass_info;
 +	struct register_pass_info ipa_pass_info;
++	static const struct ggc_root_tab gt_ggc_r_gt_size_overflow[] = {
++		{
++			.base = &report_size_overflow_decl,
++			.nelt = 1,
++			.stride = sizeof(report_size_overflow_decl),
++			.cb = &gt_ggc_mx_tree_node,
++			.pchw = &gt_pch_nx_tree_node
++		},
++		LAST_GGC_ROOT_TAB
++	};
 +
 +	insert_size_overflow_asm_pass_info.pass				= make_insert_size_overflow_asm_pass();
 +	insert_size_overflow_asm_pass_info.reference_pass_name		= "ssa";
@@ -120375,7 +120227,8 @@ index 0000000..4a637ab
 +
 +	register_callback(plugin_name, PLUGIN_INFO, NULL, &size_overflow_plugin_info);
 +	if (enable) {
-+		register_callback(plugin_name, PLUGIN_START_UNIT, &start_unit_callback, NULL);
++		register_callback(plugin_name, PLUGIN_START_UNIT, &size_overflow_start_unit, NULL);
++		register_callback(plugin_name, PLUGIN_REGISTER_GGC_ROOTS, NULL, (void *)&gt_ggc_r_gt_size_overflow);
 +		register_callback(plugin_name, PLUGIN_PASS_MANAGER_SETUP, NULL, &insert_size_overflow_asm_pass_info);
 +//		register_callback(plugin_name, PLUGIN_PASS_MANAGER_SETUP, NULL, &dump_before_pass_info);
 +		register_callback(plugin_name, PLUGIN_PASS_MANAGER_SETUP, NULL, &ipa_pass_info);
@@ -120387,10 +120240,10 @@ index 0000000..4a637ab
 +}
 diff --git a/tools/gcc/stackleak_plugin.c b/tools/gcc/stackleak_plugin.c
 new file mode 100644
-index 0000000..a4f816a
+index 0000000..e684c74
 --- /dev/null
 +++ b/tools/gcc/stackleak_plugin.c
-@@ -0,0 +1,341 @@
+@@ -0,0 +1,373 @@
 +/*
 + * Copyright 2011-2014 by the PaX Team <pageexec@freemail.hu>
 + * Licensed under the GPL v2
@@ -120418,10 +120271,11 @@ index 0000000..a4f816a
 +static int track_frame_size = -1;
 +static const char track_function[] = "pax_track_stack";
 +static const char check_function[] = "pax_check_alloca";
++static tree track_function_decl, check_function_decl;
 +static bool init_locals;
 +
 +static struct plugin_info stackleak_plugin_info = {
-+	.version	= "201401260140",
++	.version	= "201402131920",
 +	.help		= "track-lowest-sp=nn\ttrack sp in functions whose frame size is at least nn bytes\n"
 +//			  "initialize-locals\t\tforcibly initialize all stack frames\n"
 +};
@@ -120429,29 +120283,20 @@ index 0000000..a4f816a
 +static void stackleak_check_alloca(gimple_stmt_iterator *gsi)
 +{
 +	gimple check_alloca;
-+	tree fntype, fndecl, alloca_size;
-+
-+	fntype = build_function_type_list(void_type_node, long_unsigned_type_node, NULL_TREE);
-+	fndecl = build_fn_decl(check_function, fntype);
-+	DECL_ASSEMBLER_NAME(fndecl); // for LTO
++	tree alloca_size;
 +
 +	// insert call to void pax_check_alloca(unsigned long size)
 +	alloca_size = gimple_call_arg(gsi_stmt(*gsi), 0);
-+	check_alloca = gimple_build_call(fndecl, 1, alloca_size);
++	check_alloca = gimple_build_call(check_function_decl, 1, alloca_size);
 +	gsi_insert_before(gsi, check_alloca, GSI_SAME_STMT);
 +}
 +
 +static void stackleak_add_instrumentation(gimple_stmt_iterator *gsi)
 +{
 +	gimple track_stack;
-+	tree fntype, fndecl;
-+
-+	fntype = build_function_type_list(void_type_node, NULL_TREE);
-+	fndecl = build_fn_decl(track_function, fntype);
-+	DECL_ASSEMBLER_NAME(fndecl); // for LTO
 +
 +	// insert call to void pax_track_stack(void)
-+	track_stack = gimple_build_call(fndecl, 0);
++	track_stack = gimple_build_call(track_function_decl, 0);
 +	gsi_insert_after(gsi, track_stack, GSI_CONTINUE_LINKING);
 +}
 +
@@ -120578,6 +120423,27 @@ index 0000000..a4f816a
 +	return track_frame_size >= 0;
 +}
 +
++static void stackleak_start_unit(void *gcc_data, void *user_data)
++{
++	tree fntype;
++
++	// void pax_track_stack(void)
++	fntype = build_function_type_list(void_type_node, NULL_TREE);
++	track_function_decl = build_fn_decl(track_function, fntype);
++	DECL_ASSEMBLER_NAME(track_function_decl); // for LTO
++	TREE_PUBLIC(track_function_decl) = 1;
++	DECL_EXTERNAL(track_function_decl) = 1;
++	DECL_ARTIFICIAL(track_function_decl) = 1;
++
++	// void pax_check_alloca(unsigned long)
++	fntype = build_function_type_list(void_type_node, long_unsigned_type_node, NULL_TREE);
++	check_function_decl = build_fn_decl(check_function, fntype);
++	DECL_ASSEMBLER_NAME(check_function_decl); // for LTO
++	TREE_PUBLIC(check_function_decl) = 1;
++	DECL_EXTERNAL(check_function_decl) = 1;
++	DECL_ARTIFICIAL(check_function_decl) = 1;
++}
++
 +#if BUILDING_GCC_VERSION >= 4009
 +static const struct pass_data stackleak_tree_instrument_pass_data = {
 +#else
@@ -120686,6 +120552,23 @@ index 0000000..a4f816a
 +	int i;
 +	struct register_pass_info stackleak_tree_instrument_pass_info;
 +	struct register_pass_info stackleak_final_pass_info;
++	static const struct ggc_root_tab gt_ggc_r_gt_stackleak[] = {
++		{
++			.base = &track_function_decl,
++			.nelt = 1,
++			.stride = sizeof(track_function_decl),
++			.cb = &gt_ggc_mx_tree_node,
++			.pchw = &gt_pch_nx_tree_node
++		},
++		{
++			.base = &check_function_decl,
++			.nelt = 1,
++			.stride = sizeof(check_function_decl),
++			.cb = &gt_ggc_mx_tree_node,
++			.pchw = &gt_pch_nx_tree_node
++		},
++		LAST_GGC_ROOT_TAB
++	};
 +
 +	stackleak_tree_instrument_pass_info.pass			= make_stackleak_tree_instrument_pass();
 +//	stackleak_tree_instrument_pass_info.reference_pass_name		= "tree_profile";
@@ -120727,6 +120610,8 @@ index 0000000..a4f816a
 +		error(G_("unkown option '-fplugin-arg-%s-%s'"), plugin_name, argv[i].key);
 +	}
 +
++	register_callback(plugin_name, PLUGIN_START_UNIT, &stackleak_start_unit, NULL);
++	register_callback(plugin_name, PLUGIN_REGISTER_GGC_ROOTS, NULL, (void *)&gt_ggc_r_gt_stackleak);
 +	register_callback(plugin_name, PLUGIN_PASS_MANAGER_SETUP, NULL, &stackleak_tree_instrument_pass_info);
 +	register_callback(plugin_name, PLUGIN_PASS_MANAGER_SETUP, NULL, &stackleak_final_pass_info);
 +
