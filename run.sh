@@ -171,3 +171,5 @@ echo ""
 echo "Thanks for using this script! Join us and idle on irc #mempo irc.oftc.net or irc2p or freenode"
 echo "-- Mempo team < https://wiki.debian.org/Mempo >"
 
+echo "Done at date:" ; date
+
