@@ -101,10 +101,10 @@ pwd_here=$PWD
 	echo " * Using PATH=$PATH"
 	echo " * Using overlay_dir=$overlay_dir"
 	echo " * Using FAKETIME_TIME=$FAKETIME_TIME"
-	echo " * DEB_BUILD_TIMESTAMP=$DEB_BUILD_TIMESTAMP"
-	echo " * TIMESTAMP_RFC3339=$TIMESTAMP_RFC3339"
+	echo " * Using DEB_BUILD_TIMESTAMP=$DEB_BUILD_TIMESTAMP"
+	echo " * Using TIMESTAMP_RFC3339=$TIMESTAMP_RFC3339"
 	echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo)"
-	echo " * XZ_OPT=$XZ_OPT"
+	echo " * Using XZ_OPT=$XZ_OPT"
 
 	echo ""
 	# Where to find Dpkg/Util.pm perl module:

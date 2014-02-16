@@ -1,4 +1,4 @@
-
+#!/bin/bash
 echo "This script will build the packages, twice, in your HOME folder"
 echo "It will without question REMOVE old data folder"
 echo "This is intended for our alpha-testers and developers mainly"
