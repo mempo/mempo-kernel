@@ -47,7 +47,7 @@ cp /var/lib/dpkg/status "$dpkg_status_target"
 ok=$?
 if [[ $ok != 0 ]] ; then
 	echo "Failed to copy dpkg status to $dpkg_status_target"
-	exit_error;
+	ask_quit
 else
 	file "$dpkg_status_target"
 fi

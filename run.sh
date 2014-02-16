@@ -1,6 +1,8 @@
 #!/bin/bash 
 # On deterministic-kernel
 
+pwd_normal=$PWD # save starting top-dir
+
 # set -x 
 mkdir -p kernel-sources/kernel
 
@@ -132,31 +134,40 @@ then
 fi
 
 
-#cd ..
+echo "-------------------------------------------------------------------------"
+echo "Removing any previous .deb files"
+cd $pwd_normal
+#mkdir kernel-build/linux-mempo/_previous-build/
+#mv kernel-build/linux-mempo/*.deb  kernel-build/linux-mempo/_previous-build/ # 
+rm -f kernel-build/linux-mempo/*.deb
 
+
+cd $pwd_normal
 # TODO nicer way of entering the correct one / warning if more then one
 cd kernel-build/linux-mempo || { echo "Can not enter build directory." ; exit_error; }
 echo 
 echo "Executing the build script"
 echo 
-
-pwd_normal=$PWD
-
 echo "Will now execute ./all.sh to build the kernel."
-./all.sh $@
+./all.sh $@ || { echo ; echo "WARNING: Build of kernel seem to had some problems? (exit-code)" ; }
 set +x
+echo "-------------------------------------------------------------------------"
+
 
 cd $pwd_normal
 
 echo "==========================================================================================="
 echo "Please check sha256sum checksums of the generated .deb files that you can find here below:"
 
-sha256sum kernel-build/linux-mempo/*.deb
+sha256sum kernel-build/linux-mempo/*.deb || { echo ; echo "WARNING: can not find the produced .deb files! it seems the build failed! Please report this problem to us!"; exit_error; }
 
 echo "If you see checksums line above, then please compare/publish them with other users."
-echo "If there are any errors, please consult us ( but first read https://wiki.debian.org/SameKernel#FAQ )"
 echo ""
-echo "Thanks for using this script! Please join our security-privacy-for-everyone efforts:"
-echo "why not join us and idle on irc #mempo irc.oftc.net or irc2p of freenode?"
+echo "---INSTALL---"
+echo "If the debs were created, you can now INSTALL the .deb files :) first read https://wiki.debian.org/SameKernel#FAQ or here doc-mirror/"
+echo "Run any extra scripts first, like described on page, e.g. setfattr, otherwise grsecurity might block some applications."
+echo "The setfattr script is also here in sources tree, see apps/"
+echo ""
+echo "Thanks for using this script! Join us and idle on irc #mempo irc.oftc.net or irc2p or freenode"
 echo "-- Mempo team < https://wiki.debian.org/Mempo >"
 

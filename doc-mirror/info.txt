@@ -1,0 +1,5 @@
+doc-mirror will contain copy/mirrors of some of the information/documentation.
+
+In case your internet or browser is stoped working e.g. from using new kernel, or portal problems, or censorship.
+
+This documentation here will be less complete and possibly outdated, but it's better then nothing.

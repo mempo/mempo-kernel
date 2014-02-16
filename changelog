@@ -12,6 +12,9 @@ linux-image (linux-3.2.54-mempo-0.1.26) UNRELEASED; urgency=low
   * v0.1.26-rc4
   * copy dpkg status from global to local
   * v0.1.26-rc5
+  * delete deb before, check sha after; mirror [doc]
+  * allow dpkg status copy failure to be ignored (for testing)
+  * v0.1.26-rc6
 
  -- mempo <mempo@mempo.org>  Thu, 13 Feb 2014 17:00:00 +0200
 
