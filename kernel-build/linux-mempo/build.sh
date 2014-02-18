@@ -104,7 +104,10 @@ pwd_here=$PWD
 	echo " * Using DEB_BUILD_TIMESTAMP=$DEB_BUILD_TIMESTAMP"
 	echo " * Using TIMESTAMP_RFC3339=$TIMESTAMP_RFC3339"
 	echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo)"
-	echo " * Using XZ_OPT=$XZ_OPT"
+	echo " * Using XZ_OPT=$XZ_OPT" 
+	echo " * Using MEMPO_RAND_SEED_FILE=$MEMPO_RAND_SEED_FILE"
+	echo " * Using MEMPO_RAND_SEED_SEED=$MEMPO_RAND_SEED_SEED"
+	# TODO | tee -a $MEMPO_BUILD_LOG   
 
 	echo ""
 	# Where to find Dpkg/Util.pm perl module:

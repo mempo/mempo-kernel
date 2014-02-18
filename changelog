@@ -7,6 +7,9 @@ linux-image (linux-3.2.55-mempo-0.1.27) UNRELEASED; urgency=low
   * print date at end
   * cosmetics; changelog
   * v0.1.27-rc1
+  * using mempo seed instead /dev/urandom from RANDSTRUCT in grsecurity
+  * disabled checking checksum of files temporarly!!!
+  * (wip: v0.1.27-rc2)
 
  -- mempo <mempo@mempo.org>  Thu, 17 Mon 2014 00:30:00 +0200
 

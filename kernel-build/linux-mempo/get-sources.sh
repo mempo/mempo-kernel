@@ -2,6 +2,8 @@
 
 base=../../kernel-sources
 
+. ../../support.sh || { echo "Can not load suport.sh" ; exit 1 ; }
+
 echo "Getting sources (and verifying checksums) for kernel and patches, from base=$base"
 
 function get_and_check() {
@@ -33,7 +35,10 @@ function get_and_check() {
 		echo "Expected   : $checksum_expected"
 		echo "This can be truncated download, corrupted media/file, or attempt to troyan you!"
 		echo "Back up this file here tmp/${filename} for futher analysis and report to proper IT staff"
-		exit 1
+
+		ask_quit; # XXX
+
+#		exit 1
 	fi
 	checksum_now_short="${checksum_now:0:16}"
 	echo " OK ($checksum_now_short... as expected) "
