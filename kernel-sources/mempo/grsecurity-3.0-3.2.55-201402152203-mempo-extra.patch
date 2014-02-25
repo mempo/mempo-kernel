@@ -1,0 +1,28 @@
+diff -Nuar a/tools/gcc/gen-random-seed.sh b/tools/gcc/gen-random-seed.sh
+--- a/tools/gcc/gen-random-seed.sh	2014-02-25 14:57:57.054895090 +0100
++++ b/tools/gcc/gen-random-seed.sh	2014-02-25 15:15:25.298891494 +0100
+@@ -1,7 +1,22 @@
+ #!/bin/sh
+ 
+-if [ ! -f "$1" ]; then
+-	SEED=`od -A n -t x8 -N 32 /dev/urandom | tr -d ' \n'`
++if [ ! -f "$1" ]; then 
++	echo " * Using rand seed from $GRSECURITY_RAND_SEED_FILE"
++
++	if [ -z "$GRSECURITY_RAND_SEED_FILE" ] ; then # you can provide own file name here
++		GRSECURITY_RAND_SEED_FILE="/dev/urandom/" # otherwise use (low) entropy source
++	fi
++
++	if [ ! -r "$GRSECURITY_RAND_SEED_FILE" ] ; then echo "ERROR: can not read the rand seed file." ; exit 1; fi 
++
++
++	echo "Debug - the rand seed file DATA is following:" ; cat "$GRSECURITY_RAND_SEED_FILE" ; echo
++	echo "*****************************************************************************************"
++	echo "*****************************************************************************************"
++	echo "*****************************************************************************************"
++	echo "*****************************************************************************************"
++
++	SEED=`od -A n -t x8 -N 32 $GRSECURITY_RAND_SEED_FILE | tr -d ' \n'`
+ 	echo "const char *randstruct_seed = \"$SEED\";" > "$1"
+ 	HASH=`echo -n "$SEED" | sha256sum | cut -d" " -f1 | tr -d ' \n'`
+ 	echo "#define RANDSTRUCT_HASHED_SEED \"$HASH\"" > "$2"
