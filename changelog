@@ -2,8 +2,9 @@ linux-image (linux-3.2.55-mempo-0.1.28) UNRELEASED; urgency=low
 
   * updated to grsecurity-3.0-3.2.55-201402241936.patch
   * new seed 
+  * v0.1.28-rc1 
 
- -- mempo <mempo@mempo.org>  Thu, 17 Mon 2014 00:30:00 +0200
+ -- mempo <mempo@mempo.org>  Tue, 25 Feb 2014 18:30:00 +0200
 
 linux-image (linux-3.2.55-mempo-0.1.27) UNRELEASED; urgency=low
 
@@ -20,7 +21,7 @@ linux-image (linux-3.2.55-mempo-0.1.27) UNRELEASED; urgency=low
   * new random seed (used for randstruct)
   * v0.1.27-rc2 (warning: is outdated already, new grsecurity)
 
- -- mempo <mempo@mempo.org>  Thu, 17 Mon 2014 00:30:00 +0200
+ -- mempo <mempo@mempo.org>  Thu, 17 Feb 2014 00:30:00 +0200
 
 linux-image (linux-3.2.54-mempo-0.1.26) UNRELEASED; urgency=low
 
