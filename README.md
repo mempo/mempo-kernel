@@ -54,6 +54,7 @@ When incresing Mempo (_M.M.M_)
 * changelog
 * reset _RR_=0 as written above
 * linux-mempo/configs/(every).config - write the proper version in `CONFIG_LOCALVERSION`
+* change CURRENT_SEED in env.sh
 
 When upstream grsecurity/patches change, then update:
 * changelog

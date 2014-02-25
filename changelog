@@ -1,6 +1,7 @@
 linux-image (linux-3.2.55-mempo-0.1.28) UNRELEASED; urgency=low
 
   * updated to grsecurity-3.0-3.2.55-201402241936.patch
+  * new seed 
 
  -- mempo <mempo@mempo.org>  Thu, 17 Mon 2014 00:30:00 +0200
 
