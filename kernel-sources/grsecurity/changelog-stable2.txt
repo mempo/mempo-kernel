@@ -1,3 +1,111 @@
+commit a54c7d3b74b92cd53e50d65ccf1a3103279cecbc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 24 17:16:47 2014 -0500
+
+    when IPC hardening is disabled via sysctl, we shouldn't be imposing
+    any additional restrictions
+    thanks to Mathias Krause (minipli) for the report
+
+ grsecurity/grsec_ipc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 04e245bec848573e1c83eaa4f564f429e876e86d
+Merge: adfe7d4 a26891a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 20 21:42:56 2014 -0500
+
+    Merge branch 'pax-stable2' into grsec-stable2
+    
+    Conflicts:
+    	drivers/char/random.c
+
+commit a26891a7915f8fa411d5c97b57def5d55b0cd1f5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 20 21:41:22 2014 -0500
+
+    Update to pax-linux-3.2.55-test138.patch:
+    - fixed asm goto for all gcc versions, backport from upstream (https://git.kernel.org/linus/a9f180345f5378ac87)
+    - fixed a size overflow false positive in the ELF loader (needs a non-0 based PIE to trigger), reported by spender
+    - the latent entropy plugin will now insert some entropy at compile time into the random pools
+
+ drivers/char/random.c             |    6 +-
+ fs/binfmt_elf.c                   |    2 +-
+ include/linux/compiler-gcc4.h     |    4 --
+ tools/gcc/gcc-common.h            |   10 ++++-
+ tools/gcc/latent_entropy_plugin.c |   84 +++++++++++++++++++++++++++++++++----
+ tools/gcc/stackleak_plugin.c      |    5 +-
+ 6 files changed, 90 insertions(+), 21 deletions(-)
+
+commit adfe7d47a64d54abe96f8de64c4222b6e6e4ef61
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 20 18:42:11 2014 -0500
+
+    work around pipacs' latent_entropy plugin
+
+ tools/gcc/randomize_layout_plugin.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit f66c18371cdf6b5579848acee9768e413216aa9b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 20 17:57:36 2014 -0500
+
+    .data takes the address of the ints, not their values
+    
+    Conflicts:
+    
+    	net/core/neighbour.c
+
+ net/core/neighbour.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 2804b884e0da1b9f9f901efe7dd9af66e3662616
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 20 16:59:26 2014 -0500
+
+    Fix a 16+ year old hack in Linux that exposed itself when RANDSTRUCT was
+    enabled, reported by jacekalex on the forums
+    
+    Conflicts:
+    
+    	net/core/neighbour.c
+
+ include/net/neighbour.h |    1 -
+ net/core/neighbour.c    |    9 +++++----
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 6996b07c1b542eadf9a05bbe756b2a254cbff380
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Sun Feb 16 19:29:32 2014 -0500
+
+    Upstream commit: 19ea80603715d473600cd993b9987bc97d042e02
+    
+    ext4: don't leave i_crtime.tv_sec uninitialized
+    
+    If the i_crtime field is not present in the inode, don't leave the
+    field uninitialized.
+    
+    Fixes: ef7f38359 ("ext4: Add nanosecond timestamps")
+    Reported-by: Vegard Nossum <vegard.nossum@oracle.com>
+    Tested-by: Vegard Nossum <vegard.nossum@oracle.com>
+    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
+    Cc: stable@vger.kernel.org
+
+ fs/ext4/ext4.h |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit cdfe5f0424a44c95fc48d8ecda35ee8a23ab2ea1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 19 20:39:37 2014 -0500
+
+    While a Xen dom0 is technically a guest, it's perceived as a host by many
+    and there's really no Linux "host" for Xen, so allow PARAVIRT to be
+    enabled on "host" kernels only when Xen is selected
+    
+    Thanks to gaima on the forums for the report
+
+ arch/x86/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 86d245898feca3788abd59400a6190e5d9e89439
 Merge: 9550679 08d74bb
 Author: Brad Spengler <spender@grsecurity.net>
