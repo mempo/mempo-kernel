@@ -10,7 +10,7 @@ export KERNEL_DATE='2014-02-24 19:40:00' # UTC time of mempo version. This is > 
 export CURRENT_SEED='9d94db511b3746f2122d1fc7bed00315a79e42f5773a55573d2977e23a341493' # from newest (at release, -6 blocks) http://blockchain.info/block-index/ 
 
 # debian make-kpkg related:
-export DEBIAN_REVISION="01" # see README.md how to update it on git tag, on rc and final releases
+export DEBIAN_REVISION="02" # see README.md how to update it on git tag, on rc and final releases
 
 # conversions etc (do not change this)
 export TIMESTAMP_RFC3339=$KERNEL_DATE

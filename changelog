@@ -3,6 +3,9 @@ linux-image (linux-3.2.55-mempo-0.1.28) UNRELEASED; urgency=low
   * updated to grsecurity-3.0-3.2.55-201402241936.patch
   * new seed 
   * v0.1.28-rc1 
+  * corrected kernel name in .config
+  * more debug at end of run.sh and echo nicer report
+  * v0.1.28-rc2
 
  -- mempo <mempo@mempo.org>  Tue, 25 Feb 2014 18:30:00 +0200
 

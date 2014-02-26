@@ -156,11 +156,17 @@ echo "-------------------------------------------------------------------------"
 
 cd $pwd_normal
 
-echo "==========================================================================================="
+echo "===== PUBLISH THIS ====== 8< ---cut here--- 8< --------------------------"
 echo "Please check sha256sum checksums of the generated .deb files that you can find here below:"
-
 sha256sum kernel-build/linux-mempo/*.deb || { echo ; echo "WARNING: can not find the produced .deb files! it seems the build failed! Please report this problem to us!"; exit_error; }
+echo "github version is: "
+git tag -v `git describe --tags`
+echo "----- 8< ------ 8< ------ 8< ---cut here--- 8< --------------------------"
+echo 
+echo -n "PRIVATE information FYI: This build was (completed) at date: " ; date
+echo -n "PRIVATE information FYI: This build was done on hostname=" ; hostname 
 
+echo
 echo "If you see checksums line above, then please compare/publish them with other users."
 echo ""
 echo "---INSTALL---"
@@ -171,5 +177,4 @@ echo ""
 echo "Thanks for using this script! Join us and idle on irc #mempo irc.oftc.net or irc2p or freenode"
 echo "-- Mempo team < https://wiki.debian.org/Mempo >"
 
-echo "Done at date:" ; date
 
