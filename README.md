@@ -4,7 +4,13 @@ deterministic-kernel
 Deterministic kernel build scripts, for Linux, mainly for Debian for now.
 
 This scripts will build kernel in deterministic way, and also apply our default 
-settings and patches.
+settings and patches. 
+
+
+Dependencies for build:
+```
+apt-get install faketime time git build-essential libncurses5-dev libncursesw5-dev kernel-package md5deep gcc-4.7-plugin-dev g++ make time automake pkg-config flex
+```
 
 https://wiki.debian.org/SameKernel
 https://wiki.debian.org/Mempo
