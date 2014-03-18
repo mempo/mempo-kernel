@@ -1,3 +1,273 @@
+commit c82fbb8b487f786afad13d1837affd4eeca855de
+Merge: 4d7b6e5 5bdb728
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 17 19:55:41 2014 -0400
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit 5bdb728f63eb2e8308b0a77d235ddfd06e93456b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 17 19:55:02 2014 -0400
+
+    Update to pax-linux-3.2.55-test141.patch:
+    - fixed several compilation problems on arm all*configs, by spender
+    - small update to gcc-common.h
+    - Emese fixed a compile time infinite loop in the size overflow plugin (triggered by the upcoming 3.14 kernel only)
+
+ arch/arm/include/asm/page.h      |    1 +
+ arch/arm/include/asm/pgtable.h   |    3 +
+ tools/gcc/gcc-common.h           |   12 ++++
+ tools/gcc/size_overflow_plugin.c |  116 +++++++++++++++++++++++++++-----------
+ 4 files changed, 99 insertions(+), 33 deletions(-)
+
+commit 4d7b6e5e786b011718fbcf853378bd990a2e7935
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 17 19:12:04 2014 -0400
+
+    move the location of the include to suit pipacs' OCD
+
+ arch/arm/include/asm/page.h |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit 9f9b68ce8dd5b1e8387a06067e032e893bbe162e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 17 18:00:13 2014 -0400
+
+    fix ARM compilation with constify plugin
+
+ arch/arm/include/asm/page.h |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 772976a300403f5ef01758469ee25ccfd9f1e382
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 17 17:14:12 2014 -0400
+
+    Remove use of dma_cache_sync to fix ARM allyesconfig compilation:
+    See: http://www.spinics.net/lists/linux-scsi/msg36488.html
+
+ drivers/scsi/advansys.c |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+commit b6729a8eeab2eb47d212af946dbdd2f3089e15ef
+Author: Arnd Bergmann <arnd@arndb.de>
+Date:   Fri Sep 28 22:36:00 2012 +0100
+
+    Upstream commit: 65cb587d7058441c8c910e8766ee86538c7274d8
+    
+    staging/iio/lis3l02dq: fix building without irq_to_gpio
+    
+    The driver has not been building for some time after the
+    irq_to_gpio function has been removed from the kernel.
+    
+    The only board in the upstream kernel that provides
+    this device is the "Stargate 2", which is also maintained
+    by Jonathan Cameron. Rather than working around the problem
+    by adding new platform data for this driver, this patch
+    uses the of_gpio framework to get to the gpio number.
+    
+    However, the stargate2 code does not (yet) use DT based
+    probing, so it is still broken, but at least building
+    allyesconfig works again.
+    
+    Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+    Cc: Lars-Peter Clausen <lars@metafoo.de>
+    Cc: Jonathan Cameron <jic23@kernel.org>
+    Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    Signed-off-by: Jonathan Cameron <jic23@kernel.org>
+    
+    Conflicts:
+    
+    	drivers/staging/iio/accel/lis3l02dq_core.c
+
+ drivers/staging/iio/accel/lis3l02dq.h      |    1 +
+ drivers/staging/iio/accel/lis3l02dq_core.c |    8 +++++---
+ drivers/staging/iio/accel/lis3l02dq_ring.c |    2 +-
+ 3 files changed, 7 insertions(+), 4 deletions(-)
+
+commit f6e6bd54b67bf0aa6c7bc2de942b4a4657072f15
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 17 15:05:15 2014 -0400
+
+    add ktla_ktva/ktva_ktla macros to ARM
+
+ arch/arm/include/asm/pgtable.h |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit d0056efec1a24df487171cb7c949ca0a84d499fb
+Merge: 6e0e4a2 f369295
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 14 20:22:29 2014 -0400
+
+    Merge branch 'pax-stable2' into grsec-stable2
+    
+    Conflicts:
+    	arch/mips/mm/mmap.c
+
+commit f36929517cb8dc68ac8ec01d4ded477be85d9413
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 14 20:19:29 2014 -0400
+
+    Update to pax-linux-3.2.55-test140.patch:
+    - fixed a few compilation errors on MIPS, by Hinnerk van Bruinehsen <h.v.bruinehsen@fu-berlin.de>
+
+ arch/mips/cavium-octeon/dma-octeon.c |    2 +-
+ arch/mips/include/asm/hw_irq.h       |    2 +-
+ arch/mips/kernel/i8259.c             |    2 +-
+ arch/mips/kernel/irq-gt641xx.c       |    2 +-
+ arch/mips/kernel/reset.c             |    4 ++++
+ arch/mips/mm/mmap.c                  |    8 ++++----
+ arch/mips/pci/pci-octeon.c           |    4 ++--
+ arch/mips/pci/pcie-octeon.c          |    8 ++++----
+ arch/mips/sni/rm200.c                |    2 +-
+ arch/mips/vr41xx/common/icu.c        |    2 +-
+ arch/mips/vr41xx/common/irq.c        |    4 ++--
+ drivers/staging/octeon/ethernet-rx.c |    2 +-
+ 12 files changed, 23 insertions(+), 19 deletions(-)
+
+commit 6e0e4a26033721ed98dc5fa0f5ae1a1c93610080
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Mar 14 20:12:02 2014 -0400
+
+    add /usr/share/apport/apport to the allowed userland exec paths --
+    because apparently some distros have no problem just throwing
+    critical binaries around anywhere.
+
+ kernel/kmod.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 0a6f9ab046be3c00d4ddbd0471432884e7f7327a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 12 22:54:32 2014 -0400
+
+    add support for PAX_EMUTRAMP by default in the autoconfig
+
+ security/Kconfig |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 467ec4a97de57f5c2f2112c19eba759f89ae5667
+Author: Matthew Leach <matthew.leach@arm.com>
+Date:   Tue Mar 11 11:58:27 2014 +0000
+
+    Upstream commit: dbb490b96584d4e958533fb637f08b557f505657
+    
+    net: socket: error on a negative msg_namelen
+    
+    When copying in a struct msghdr from the user, if the user has set the
+    msg_namelen parameter to a negative value it gets clamped to a valid
+    size due to a comparison between signed and unsigned values.
+    
+    Ensure the syscall errors when the user passes in a negative value.
+    
+    Signed-off-by: Matthew Leach <matthew.leach@arm.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/socket.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 8f1e1f746120187e085ac3daa5dc6fda7ecf9d11
+Author: Florian Westphal <fw@strlen.de>
+Date:   Fri Sep 20 22:32:55 2013 +0200
+
+    Upstream commit: 8c27bd75f04fb9cb70c69c3cfe24f4e6d8e15906
+    
+    tcp: syncookies: reduce cookie lifetime to 128 seconds
+    
+    We currently accept cookies that were created less than 4 minutes ago
+    (ie, cookies with counter delta 0-3).  Combined with the 8 mss table
+    values, this yields 32 possible values (out of 2**32) that will be valid.
+    
+    Reducing the lifetime to < 2 minutes halves the guessing chance while
+    still providing a large enough period.
+    
+    While at it, get rid of jiffies value -- they overflow too quickly on
+    32 bit platforms.
+    
+    getnstimeofday is used to create a counter that increments every 64s.
+    perf shows getnstimeofday cost is negible compared to sha_transform;
+    normal tcp initial sequence number generation uses getnstimeofday, too.
+    
+    Reported-by: Jakob Lell <jakob@jakoblell.com>
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	include/net/tcp.h
+
+ include/net/tcp.h     |   18 ++++++++++++++++++
+ net/ipv4/syncookies.c |   31 ++++++++++---------------------
+ net/ipv6/syncookies.c |   24 +++++++-----------------
+ 3 files changed, 35 insertions(+), 38 deletions(-)
+
+commit ddb0025bc2ebf8210d8bb7ddde2c0276e867706c
+Author: Florian Westphal <fw@strlen.de>
+Date:   Fri Sep 20 22:32:56 2013 +0200
+
+    Upstream commit: 086293542b991fb88a2e41ae7b4f82ac65a20e1a
+    
+    tcp: syncookies: reduce mss table to four values
+    
+    Halve mss table size to make blind cookie guessing more difficult.
+    This is sad since the tables were already small, but there
+    is little alternative except perhaps adding more precise mss information
+    in the tcp timestamp.  Timestamps are unfortunately not ubiquitous.
+    
+    Guessing all possible cookie values still has 8-in 2**32 chance.
+    
+    Reported-by: Jakob Lell <jakob@jakoblell.com>
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/syncookies.c |   22 +++++++++++-----------
+ net/ipv6/syncookies.c |   15 +++++++++------
+ 2 files changed, 20 insertions(+), 17 deletions(-)
+
+commit 3d3f10f578c0b06d1e5db054f77de4fa5e9bf6d3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 12 19:21:43 2014 -0400
+
+    Improve GRKERNSEC_JIT_HARDEN against a theoretical attack I dreamed up --
+    if an attacker had an arbitrary read vuln and ability to redirect control flow,
+    he could, in ~2,000,000,000 attempts have a 50% chance of pre-selecting a
+    32bit random key which the attacker has XORed with his desired immediates to
+    cause the constant blinding to produce a potentially useful instruction stream
+    (which he could verify by abusing the infoleak).  Instead of using one key
+    per instruction stream, generate a new key for each instruction using prandom_u32().
+    
+    The downside is some performance impact during JIT compilation, though this
+    shouldn't be so common an event for anyone to notice.
+    
+    Conflicts:
+    
+    	arch/x86/net/bpf_jit_comp.c
+
+ arch/x86/net/bpf_jit_comp.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit b5e68c162e96b387b1b55e7af4cf8081c758e9be
+Author: Sabrina Dubroca <sd@queasysnail.net>
+Date:   Thu Mar 6 17:51:57 2014 +0100
+
+    Upstream commit: c88507fbad8055297c1d1e21e599f46960cbee39
+    
+    ipv6: don't set DST_NOCOUNT for remotely added routes
+    
+    DST_NOCOUNT should only be used if an authorized user adds routes
+    locally. In case of routes which are added on behalf of router
+    advertisments this flag must not get used as it allows an unlimited
+    number of routes getting added remotely.
+    
+    Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+    Acked-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/ipv6/route.c
+
+ net/ipv6/route.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit c06bf0f41727850ef4d9e28e382307d4c057115f
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Mar 4 18:26:06 2014 -0500

@@ -1,8 +1,18 @@
+linux-image (linux-3.2.55-mempo-0.1.32) UNRELEASED; urgency=low
+
+  * updated to grsecurity-3.0-3.2.55-201403041936.patch
+  * v0.1.32-rc0
+  * new seed 
+
+ -- mempo <mempo@mempo.org>  Tue, 17 Mar 2014 13:51:04 +0200
+
+
 linux-image (linux-3.2.55-mempo-0.1.31) UNRELEASED; urgency=low
 
   * dpkg 0.1.24.6 is required for this version. 
   * Fixed the #bug1 described on https://wiki.debian.org/SameKernel#bug1  
   * v0.1.31-01-rc
+
  -- mempo <mempo@mempo.org>  Fri, 07 Mar 2014 15:41:04 +0200
 
 linux-image (linux-3.2.55-mempo-0.1.30) UNRELEASED; urgency=low
