@@ -31,7 +31,7 @@ export tools_dpkg_which
 export tools_dpkg_ver
 export tools_dpkg_vermempo
 
-ver_have=$tools_dpkg_vermempo ; ver_need="0.1.24.6"
+ver_have=$tools_dpkg_vermempo ; ver_need="0.1.24.7"
 vercomp $ver_have $ver_need
 case $? in
   2) echo ; echo "ERROR: dpkg mempo version is bad (too old?)"
@@ -44,16 +44,22 @@ case $? in
 esac
 echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo) needed=$ver_need" ; echo ;
 
-echo "Copy dpkg status"
+echo "Link dpkg status"
 dpkg_status_target="$HOME/.local/var/lib/dpkg/status"
-cp /var/lib/dpkg/status "$dpkg_status_target"
-ok=$?
-if [[ $ok != 0 ]] ; then
-	echo "Failed to copy dpkg status to $dpkg_status_target"
-	ask_quit
-else
-	file "$dpkg_status_target"
+[ -e "$dpkg_status_target" ] && rm "$dpkg_status_target"
+if ! ln -s /var/lib/dpkg/status "$dpkg_status_target"; then
+	echo "ERROR: Could not link dpkg status"
+	exit 2
 fi
+ls -ld "$dpkg_status_target"
+echo "Link dpkg info"
+dpkg_info_target="$HOME/.local/var/lib/dpkg/info"
+[ -e "$dpkg_info_target" ] && rm -r "$dpkg_info_target"
+if ! ln -s /var/lib/dpkg/info "$dpkg_info_target"; then
+	echo "ERROR: Could not link dpkg info"
+	exit 2
+fi
+ls -ld "$dpkg_info_target"
 
 echo "-----------------------------"
 echo "Version of gcc and C libraries (embed in binaries - affecting build-id)"
