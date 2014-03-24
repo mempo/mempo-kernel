@@ -16,12 +16,30 @@ echo "Building linuxdir=$linuxdir"
 
 echo "Loading env"
 . env.sh
-export CONCURRENCY_LEVEL=8 
 export BUILD_NICENESS=0
 
 echo "Starting build in $linuxdir"
 
 pwd_here=$PWD
+
+        cores_max_autodetect=32 # TODO configure this? e.g. from amount of RAM available
+	if [[ -z $CONCURRENCY_LEVEL ]] ; then
+                echo "Will try to auto-detect proper CONCURENCY_LEVEL since none was set in variable"
+		cores=2
+		exists=$(command -v nproc 2>/dev/null)
+		if [ -n exists ]
+                then
+                        cores=$(nproc 2>&1)
+                        if (( $cores > $cores_max_autodetect )) ; then
+                                cores=$cores_max_autodetect
+                                echo "Limied to cores=$cores (because free RAM limitation) you can override by setting CONCURENCY_LEVEL env"
+                        fi
+                else
+                        echo "Warning: can not detect number of CPUs to optimize build speed, please configure CONCURENCY_LEVEL variable if you want"
+                fi
+		export CONCURRENCY_LEVEL=$cores
+        fi
+
 
 	echo "CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
 	echo "Will faketime: $TIMESTAMP_RFC3339"
@@ -51,24 +69,6 @@ pwd_here=$PWD
 	echo $PWD
 	echo ""
 	echo "=== BUILD MAIN ================================="
-
-	cores_max_autodetect=32 # TODO configure this? e.g. from amount of RAM available
-
-	if [[ -z $CONCURENCY_LEVEL ]] ; then
-		echo "Will try to auto-detect proper CONCURENCY_LEVEL since none was set in variable"
-		cores=2
-		if command -v nproc 2>/dev/null 
-		then
-			cores=$(nproc 2>&1)	
-			if (( $cores > $cores_max_autodetect )) ; then
-				cores=$cores_max_autodetect
-				echo "Limied to cores=$cores (because free RAM limitation) you can override by setting CONCURENCY_LEVEL env"
-			fi
-		else 
-			echo "Warning: can not detect number of CPUs to optimize build speed, please configure CONCURENCY_LEVEL variable if you want"
-		fi
-		CONCURENCY_LEVEL=$cores
-	fi
 
 	ccache_path_dir="/usr/lib/ccache"
 	if [ -d "$ccache_path_dir" ] ; then

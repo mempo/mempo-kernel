@@ -1,6 +1,16 @@
+linux-image (linux-3.2.55-mempo-0.1.33) UNRELEASED; urgency=low
+
+  * updated to grsecurity-3.0-3.2.55-201403202347.patch
+  * new seed
+  * Linking dpkg status and info SameKernel #bug5 fix (by benbrown)
+  * Increased version of required dpkg to 0.1.24.7 - zlib only compression, same compression strategy
+  * v0.1.33-rc0
+
+ -- mempo <mempo@mempo.org>  Mon, 24 Mar 2014 13:46:02 +0200
+
 linux-image (linux-3.2.55-mempo-0.1.32) UNRELEASED; urgency=low
 
-  * updated to grsecurity-3.0-3.2.55-201403041936.patch
+  * updated to grsecurity-3.0-3.2.55-201403172027.patch
   * v0.1.32-rc0
   * new seed 
 

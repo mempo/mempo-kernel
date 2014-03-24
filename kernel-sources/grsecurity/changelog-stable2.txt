@@ -1,3 +1,205 @@
+commit 2bb7f15b77583841e2474dcd2a5488624c63109e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 20 22:53:31 2014 -0400
+
+    add local_unchecked_t accessors to fix ppc64 compilation
+
+ arch/powerpc/include/asm/local.h |   15 +++++++++++++++
+ 1 files changed, 15 insertions(+), 0 deletions(-)
+
+commit 3ac2b53a0ac70c9912c4ea451e8314c5e66fd8ee
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 20 22:34:36 2014 -0400
+
+    Backport addition of access_ok_noprefault() to fix ppc64+kvm compilation
+
+ arch/arm/include/asm/uaccess.h     |    1 +
+ arch/ia64/include/asm/uaccess.h    |    1 +
+ arch/mips/include/asm/uaccess.h    |    1 +
+ arch/powerpc/include/asm/uaccess.h |    1 +
+ arch/s390/include/asm/uaccess.h    |    1 +
+ arch/x86/include/asm/uaccess.h     |    2 +-
+ arch/x86/include/asm/uaccess_64.h  |   12 ++++++------
+ arch/x86/mm/gup.c                  |    4 ++--
+ virt/kvm/kvm_main.c                |    2 +-
+ 9 files changed, 15 insertions(+), 10 deletions(-)
+
+commit c247bdf26ed9eaa4f15802d77501f7649ded746b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 20 21:53:32 2014 -0400
+
+    correct function definition for kvm_arch_init() to fix compilation on ppc64
+    
+    Conflicts:
+    
+    	arch/powerpc/kvm/powerpc.c
+
+ arch/powerpc/kvm/powerpc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 9363de8ee4955fda333ae0c1fc44f8bc2dd15ee5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 20 21:47:35 2014 -0400
+
+    fix ppc64 allyesconfig compilation with RANDSTRUCT
+
+ arch/powerpc/platforms/cell/celleb_scc_pciex.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 85bd970b782af453919deddf34abbacdcf432677
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 20 21:36:39 2014 -0400
+
+    use $(LATENT_ENTROPY_PLUGIN_CFLAGS)
+
+ arch/powerpc/kernel/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 7d2471aa1d26823a3c771e29a74b8cf7217072b9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 20 21:24:01 2014 -0400
+
+    move REMOVE_CFLAGS
+
+ arch/powerpc/kernel/Makefile |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit feb2f7c4c43e22cae4bed82f1fa30a39890eaa4f
+Author: Jiri Slaby <jslaby@suse.cz>
+Date:   Thu Apr 26 20:13:00 2012 +0200
+
+    Upstream commit: 3fa10cc83fb92750af11fab81e11ad96dc75d656
+    
+    TTY: n_tty, do not dereference user buffer
+    
+    copy_from_read_buf currently copies data to a user buffer and then
+    checks if the data is single EOF. But it checks it by accessing the
+    user buffer. First, the buffer may be changed by other threads of the
+    user program already. Second, it accesses the buffer without any
+    checks. It might be write-only for example.
+    
+    Fix this by inspecting contents of the tty (kernel) buffer instead.
+    Note that "n == 1" is necessary, but not sufficient. But we check
+    later that there is nothing left by "!tty->read_cnt" condition.
+    
+    There is still an issue with the current code that EOF being wrapped
+    to the start of the circular buffer will result in an inappropriate
+    losing of the EOF character. But this is not intended to be fixed by
+    this patch.
+    
+    Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+    Reported-by: Emil Goode <emilgoode@gmail.com>
+    Cc: Howard Chu <hyc@symas.com>
+    Cc: Alan Cox <alan@lxorguk.ukuu.org.uk>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/tty/n_tty.c |    9 +++++----
+ 1 files changed, 5 insertions(+), 4 deletions(-)
+
+commit ed00c53dd1d944beb8e4ddc16995b8aa347d1d49
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 20 20:45:17 2014 -0400
+
+    use correct args to set_task_comm()
+
+ arch/powerpc/platforms/pseries/eeh_event.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ecbb706d65834b62e31749432ab95863a0d62ed1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 20 20:41:08 2014 -0400
+
+    another ppc64 fix for upstream compile failure
+
+ arch/powerpc/mm/numa.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 948f3c653b20e1e955c648eb7ab0dbee2a98ec79
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 20 20:37:24 2014 -0400
+
+    eliminate use of daemonize in eeh_event.c:
+    http://linuxppc.10917.n7.nabble.com/patch-1-2-powerpc-eeh-remove-eeh-event-handler-gt-daemonize-td9403.html
+    Patch from Oleg Nesterov
+
+ arch/powerpc/platforms/pseries/eeh_event.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit a56c2c4a9b7884b2bfdc169081095d24850e7b6b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 20 20:33:21 2014 -0400
+
+    export LATENT_ENTROPY_PLUGIN_CFLAGS so we can remove it from prom_init.c on ppc64
+
+ Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit def660628f288d9328a8b32893ad707c76c63e4a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Mar 20 20:30:35 2014 -0400
+
+    fix compilation by removing the latent entropy plugin from prom_init.c -- there's
+    a script for ppc64 that checks the object file for a whitelisted set of
+    exported symbols, code is very fragile
+
+ arch/powerpc/kernel/Makefile |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit fcab911b30166093d24e64cad30b54adb871afeb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 19 21:53:12 2014 -0400
+
+    add ktla_ktva/ktva_ktla to sparc to fix compilation
+
+ arch/sparc/include/asm/pgtable.h |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit a4cc0b1f96cd70448c08c00398a470072dc22c24
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 19 21:01:40 2014 -0400
+
+    add ktla_ktva/ktva_ktla macros to MIPS
+
+ arch/mips/include/asm/pgtable.h |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 600c2114235c825e36e9b85714e8be3d8bd24539
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 19 20:42:35 2014 -0400
+
+    include linux/prefetch.h to fix mips64 compilation
+
+ grsecurity/gracl.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit cd45e08e934be6363832ca553719a367b94f5736
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 19 19:48:31 2014 -0400
+
+    convert back to check_heap_stack_gap in hugetlbfs code
+
+ fs/hugetlbfs/inode.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit 61875786196a3d6275e41b5d78ca7b1a6d09b62e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 19 19:42:20 2014 -0400
+
+    fix more mips compilation failures/warnings
+
+ arch/mips/cavium-octeon/dma-octeon.c |    2 +-
+ fs/hugetlbfs/inode.c                 |    3 ++-
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 1218f040385d88ee78fe77471d1e579c32b2d3df
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 19 19:29:56 2014 -0400
+
+    fix mips64 octeon compilation due to missing local_*_unchecked() functions
+
+ arch/mips/include/asm/local.h |   14 ++++++++++++++
+ 1 files changed, 14 insertions(+), 0 deletions(-)
+
 commit c82fbb8b487f786afad13d1837affd4eeca855de
 Merge: 4d7b6e5 5bdb728
 Author: Brad Spengler <spender@grsecurity.net>
