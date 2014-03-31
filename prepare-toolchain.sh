@@ -46,15 +46,24 @@ echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $to
 
 echo "Link dpkg status"
 dpkg_status_target="$HOME/.local/var/lib/dpkg/status"
-[ -e "$dpkg_status_target" ] && rm "$dpkg_status_target"
+[ -e "$dpkg_status_target" ] && rm -rf "$dpkg_status_target"
+if [ -e "$dpkg_status_target" ] ; then 
+	echo "ERROR: failed to remove old dpkg status $dpkg_status_target"
+	exit 2
+fi
 if ! ln -s /var/lib/dpkg/status "$dpkg_status_target"; then
 	echo "ERROR: Could not link dpkg status"
 	exit 2
 fi
 ls -ld "$dpkg_status_target"
+
 echo "Link dpkg info"
-dpkg_info_target="$HOME/.local/var/lib/dpkg/info"
-[ -e "$dpkg_info_target" ] && rm -r "$dpkg_info_target"
+dpkg_info_target="$HOME/.local/var/lib/dpkg/info" 
+[ -e "$dpkg_info_target" ] && rm -rf "$dpkg_info_target" # (is a file, but still -rf)
+if [ -e "$dpkg_info_target" ] ; then
+	echo "ERROR: failed to remove old dpkg info $dpkg_info_target"
+	exit 2
+fi
 if ! ln -s /var/lib/dpkg/info "$dpkg_info_target"; then
 	echo "ERROR: Could not link dpkg info"
 	exit 2
