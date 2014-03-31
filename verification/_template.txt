@@ -1,0 +1,43 @@
+; https://wiki.debian.org/SameKernel#Help_in_verification
+
+software=mempo/deterministic-kernel
+sources-url=https://github.com/mempo/deterministic-kernel.git
+sources-sha1=..........
+sources-tag=..........
+sources-sign-by-fpr=..........
+my-name-or-pseudonym=..........
+my-code-review=.......... (see below)
+my-grsecurity-sigchecked=.......... (see below)
+my-checksum=.......... ..........
+my-checksum=.......... ..........
+my-computer-system=..........
+my-computer-kernel=..........
+my-computer-arch=..........
+my-computer-type=..........
+my-computer-trust=.......... (see below)
+my-tools-sha1-mempo-deb-dpkg=..........
+[details]
+<human>
+--Following "cannary" lines scan be deleted, but it's preferred to have it. Also DELETE THIS comment line please.--
+<cannary>I hereby freely say that I am not, and I never was, and I do not suspect to be in foreseeable future, under ANY form of NDA or gag order 
+(nor ANY influence) that could in any way affect this verification testimony. (I am in law jurisdiction: <j>.........</j>).</cannary>
+
+I, ...... (known from/related to project:  ......) can confirm, 
+that I downloaded the source code with git sha1 sum as in line sources-sha1= above, and I built it 
+on my system as described above, and that these sources did in fact produced the files with checksums as listed above in my-checksum= lines, 
+and that the said build was done under following conditions:
+* value of line my-computer-trust= means security of computer used by me for this: 0-50 is regular, 
+  50-100 is hardened, 100-200 is +always airgap, 200-300 is +openhardware computer, best self-build
+* value of my-code-review= means how I reviewed the primary source code 
+  (the sources that have checksum sources-sha1=) as follows:
+  0=no check; 2=glanced over the code; 4=reviewed by comparing to previously
+  reviewed versions; 8=reviewed from scratch. 10=did deep review.
+  (for all this values, the review applies to files as downloaded from git, with EXCLUSION of the grsecurity*patch file).
+  WARNING: all extra code (e.g. downloaded by running this script) should be 
+  checksummed on download by primary source code, otherwise the compilation
+  outcome is not guaranteed to be meaningful.
+* my-tools-sha1... list sha1sums (e.g. git name) of other sources that I build in order to build this code (e.g. the mempo-deb dpkg).
+* as in my-grsecurity-sigchecked I did[/not] verified grsecurity*path files as correctly signed by the Spender's pubkey from http://grsecurity.net
+</human>
+
+
