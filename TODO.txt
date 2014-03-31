@@ -1,5 +1,22 @@
 
 
+=== REVIEW TODO (by mempo) ===
+
+
+47d5cb24945c52122a51f8b4837728498b604cf1
+TODO:
+kernel-sources/grsecurity/grsecurity-3.0-3.2.55-201403202347.patch
+kernel-sources/grsecurity/grsecurity-3.0-3.2.55-201403202347.patch.sig
+
+
+062e2d1512474eb913fffd2f046e20eaa1451acb
+TODO:
+kernel-sources/grsecurity/grsecurity-3.0-3.2.55-201403252026.patch
+kernel-sources/grsecurity/grsecurity-3.0-3.2.55-201403252026.patch.sig
+KERNEL'S CHANGELOG - TODO UPDATE!!!
+
+
+
 === THINGS TODO ===
 (newest added on top)
 
