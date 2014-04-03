@@ -1,3 +1,13 @@
+linux-image (linux-3.2.55-mempo-0.1.35) UNRELEASED; urgency=low
+
+  * updating to kernel-sources/grsecurity/grsecurity-3.0-3.2.56-201404012135.patch
+  * (updated also grsecurity's changelog, it was not updated last time)
+  * TODO update checksums
+  * TODO seed
+  * TODO v0.1.35-01-rc
+
+ -- mempo <mempo@mempo.org>  Thu, 03 Apr 2014 14:50:00 +0100
+
 linux-image (linux-3.2.55-mempo-0.1.34) UNRELEASED; urgency=low
 
   * updated to grsecurity-3.0-3.2.55-201403252026.patch
