@@ -19,6 +19,8 @@ https://wiki.debian.org/Mempo
 Security
 ====================
 
+_READ FILE security.txt here for list of known existing and past problems._
+
 You should verify data with both github.com by https/SSL or SSH downloads
 and you should check git tag -v _tagname_ e.g.:   git tag -v v0.1.26-rc3
 to see if tag is signed by: pgp key 45953F23 rfree-mempo, pubkey here in doc/

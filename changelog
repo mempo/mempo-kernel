@@ -4,8 +4,8 @@ linux-image (linux-3.2.55-mempo-0.1.35) UNRELEASED; urgency=low
   * (updated also grsecurity's changelog, it was not updated last time)
   * updated checksums
   * new seed
-  * TODO v0.1.35-01-rc
-  * TODO enable UDEREF or KERNEXEC (bug#7)
+  * v0.1.35-01-rc
+  * TODO enable UDEREF or KERNEXEC (bug#7) this will be separated release
 
  -- mempo <mempo@mempo.org>  Thu, 03 Apr 2014 14:50:00 +0100
 
