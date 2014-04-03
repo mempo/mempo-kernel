@@ -44,6 +44,9 @@ case $? in
 esac
 echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo) needed=$ver_need" ; echo ;
 
+mkdir -p "$HOME/.local/var/lib/dpkg/" # normally should be done by local instalation of dpkg; this allows to run without local dpkg (just a quick test run, which will
+# NOT work correctly probably - e.g. will not be a SameKernel giving same binary build)
+
 echo "Link dpkg status"
 dpkg_status_target="$HOME/.local/var/lib/dpkg/status"
 [ -e "$dpkg_status_target" ] && rm -rf "$dpkg_status_target"
@@ -55,7 +58,6 @@ if ! ln -s /var/lib/dpkg/status "$dpkg_status_target"; then
 	echo "ERROR: Could not link dpkg status"
 	exit 2
 fi
-ls -ld "$dpkg_status_target"
 
 echo "Link dpkg info"
 dpkg_info_target="$HOME/.local/var/lib/dpkg/info" 

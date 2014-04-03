@@ -16,3 +16,6 @@
 *.exe
 *.out
 *.app
+
+# temporary files
+mempo-generated-seed.txt
