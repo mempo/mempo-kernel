@@ -7,9 +7,9 @@ export kernel_general_version="3.2.55" # script uses this setting
 # deterministic build:
 export KERNEL_DATE='2014-04-03 13:13:00' # UTC time of mempo version. This is > then max(kernel,grsec,patches) times
 # Nothing up my sleeve number, unknown in advance even to me in a provable way - e.g. bitcoin markel root of recent block. 
-export CURRENT_SEED='06da05889f6879d1b416cb742cf01a88f6891977b792c7a7872febff309174e5' # from newest (at release, -6 blocks) http://blockchain.info/block-index/ or http://blockexplorer.com/
+export CURRENT_SEED='1afd6552007d4168a92c41489d6c00beab49515461d60362297c29d1acba2366' # from newest (at release, -6 blocks) http://blockchain.info/block-index/ or http://blockexplorer.com/
 # debian make-kpkg related:
-export DEBIAN_REVISION="01" # see README.md how to update it on git tag, on rc and final releases
+export DEBIAN_REVISION="02" # see README.md how to update it on git tag, on rc and final releases
 
 # conversions etc (do not change this)
 export TIMESTAMP_RFC3339=$KERNEL_DATE
