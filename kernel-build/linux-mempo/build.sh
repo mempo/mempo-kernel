@@ -112,10 +112,6 @@ pwd_here=$PWD
 	echo ""
 	# Where to find Dpkg/Util.pm perl module:
 	
-	echo "TESTING - starting a bash in the prepared environment"
-	make menuconfig 
-	bash
-
 	set -x
 	# kernel_debug  kernel_doc kernel_manual
 	faketime "$TIMESTAMP_RFC3339"	nice -n "$BUILD_NICENESS" time make-kpkg --rootcmd fakeroot kernel_image kernel_headers --initrd --revision "$DEBIAN_REVISION" --overlay-dir "$overlay_dir" 2>&1 | tee ../buildlog/build.result
