@@ -1,18 +1,29 @@
 
 Known security problems in this software(*)
 
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 * security#1 (bug#7) https://wiki.debian.org/SameKernel#bug7
-Our provided configuration should have higher secuirty even in desktop config (-good)
-We should turn on UDEREF / KERNEXEC - lack of them probably is what
-allowed a possible problem/vulnerability (that someone claims he
-was able to exploit).
-Impact: security was lowered then it probably could be (no reason to not activeate this options even for desktop?) though higher then vanilla kernel
+Our default configuration was with enabled XEN support (default from Debian), 
+this option has high security cost as it disables UDEREF and KERNEXEC 
+protections of grsecurity/pax. 
+
+In versions up to and including linux-3.2.55-mempo-0.1.35 XEN is enabled and 
+security is not so good. Versions above and including 
+linux-3.2.55-mempo-0.1.36 will disalbe XEN even for desktop (config-good). 
+Still this is not as excellent as full grsecurity, we on purpose disable 
+iomem/kmem untill we have gfx drivers packaged that deal with this options.
+
+Impact: protection was not as strong as it could be (cost of XEN support) 
+  though still higher then vanilla kernel, but lower then recommended (maximum)
+	grsecurity settings.
+Evaluation: all mempo kernels still had better security then default debian
 Reported: by [hidden] 2014-04-03 13:16
 Acknowledged: by rfree 2014-04-03 14:10 https://wiki.debian.org/SameKernel
-Versions: probably all past versions
-Fix: in progress
-Workaround: change config to enable all grsecurity protections
+Versions: all <= linux-3.2.55-mempo-0.1.35
+Fix: (almost) will be >= linux-3.2.55-mempo-0.1.36
+Workaround: change config to enable more grsecurity protections, remove CONFIG_XEN, then enable UDEREF and KERNEXEC
 Status: wip
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 (*) when using the default settings as delivered here,
 targeting amd64 (and building also on amd64 no crossbuild),
