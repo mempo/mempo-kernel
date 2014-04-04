@@ -1,0 +1,12 @@
+diff -Nuar a/ruleset/targets/common.mk b/ruleset/targets/common.mk
+--- a/ruleset/targets/common.mk	2014-04-04 16:30:49.324863618 +0200
++++ b/ruleset/targets/common.mk	2014-04-04 18:10:05.397985638 +0200
+@@ -171,8 +171,6 @@
+ 	@$(MAKE) --no-print-directory -sf $(DEBDIR)/ruleset/kernel_version.mk  \
+ 	  ARCH=$(KERNEL_ARCH) $(CROSS_ARG) debian_conf_var >> debian/stamp/conf/mak
+ endif
+-	@echo "do_parallel	= $(do_parallel)"   >> debian/stamp/conf/mak
+-	@echo "fast_dep		= $(fast_dep)"	    >> debian/stamp/conf/mak
+ #	@sed -e 's%$(TOPDIR)%$$(TOPDIR)%g' debian/stamp/conf/mak	    > debian/stamp/conf/vars
+ # Use the kernel's Makefile to calculate the TOPDIR.
+ # TOPDIR is obsolete in 2.6 kernels, so the kernel_version.mk
