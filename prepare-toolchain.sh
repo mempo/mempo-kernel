@@ -31,7 +31,7 @@ export tools_dpkg_which
 export tools_dpkg_ver
 export tools_dpkg_vermempo
 
-ver_have=$tools_dpkg_vermempo ; ver_need="0.1.24.7"
+ver_have=$tools_dpkg_vermempo ; ver_need="0.1.24.10"
 vercomp $ver_have $ver_need
 case $? in
   2) echo ; echo "ERROR: dpkg mempo version is bad (too old?)"

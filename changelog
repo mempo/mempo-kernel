@@ -7,6 +7,9 @@ linux-image (linux-3.2.55-mempo-0.1.36) UNRELEASED; urgency=low
   * enable UDEREF or KERNEXEC (bug#7)
   * seed
   * v0.1.36-01-rc
+  * requiring new dpkg 0.1.24.10 that fixed libz, strategy etc
+  * seed
+  * v0.1.36-04-rc
 
  -- mempo <mempo@mempo.org>  Thu, 03 Apr 2014 14:50:00 +0200
 
