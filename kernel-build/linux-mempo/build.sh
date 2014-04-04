@@ -111,6 +111,10 @@ pwd_here=$PWD
 
 	echo ""
 	# Where to find Dpkg/Util.pm perl module:
+	
+	echo "TESTING - starting a bash in the prepared environment"
+	make menuconfig 
+	bash
 
 	set -x
 	# kernel_debug  kernel_doc kernel_manual
