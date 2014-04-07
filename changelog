@@ -6,8 +6,10 @@ linux-image (linux-3.2.56-mempo-0.1.37) UNRELEASED; urgency=low
   * updated checksums
   * new seed
   * v0.1.37-01-rc
+  * Added missing grsecurity patch
+  * v0.1.37-02-rc
 
- -- mempo <mempo@mempo.org>  Mon, 07 Apr 2014 9:12:00 +0200
+ -- mempo <mempo@mempo.org>  Mon, 07 Apr 2014 11:40:00 +0200
 
 linux-image (linux-3.2.55-mempo-0.1.36) UNRELEASED; urgency=low
 
