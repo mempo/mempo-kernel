@@ -1,3 +1,292 @@
+commit 936f7cbd75a811dc46bee8b6edde793398c1a090
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 6 18:59:00 2014 -0400
+
+    add compiler.h to path.h
+
+ include/linux/path.h |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 01256430ba03319966146dcd8eea67521770ec5e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 6 18:38:42 2014 -0400
+
+    fix tomoyo compilation
+
+ security/tomoyo/tomoyo.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 4468372984e9faa4f3ccda3f6190a5b8341368ab
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 6 17:58:39 2014 -0400
+
+    fix tomoyo compilation with RANDSTRUCT
+
+ security/tomoyo/tomoyo.c |   22 +++++++++++-----------
+ 1 files changed, 11 insertions(+), 11 deletions(-)
+
+commit 9380e23fd600b64d5d1fb6920b4cf29c197075c0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 6 17:50:38 2014 -0400
+
+    fix tomoyo compilation with RANDSTRUCT
+
+ security/tomoyo/file.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit d711e2f0ef5392b6a555411d92fd662d0f0647d9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 6 17:43:47 2014 -0400
+
+    Fix tomoyo compilation with RANDSTRUCT
+
+ security/tomoyo/file.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit d4886c92a23273e0362c0660a987745410460d55
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 6 17:23:09 2014 -0400
+
+    fix apparmor compilation with RANDSTRUCT
+
+ security/apparmor/file.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit dbfdaec0a04221391d22ad10651d2a31bfe38c0c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 6 17:11:40 2014 -0400
+
+    fix apparmor compilation with RANDSTRUCT
+
+ security/apparmor/lsm.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 3b6b32eafd2f773f971c777174328b98198d6ca2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 6 16:58:35 2014 -0400
+
+    add __randomize_layout to more important structures
+
+ include/linux/binfmts.h    |    4 ++--
+ include/linux/filter.h     |    2 +-
+ include/linux/path.h       |    2 +-
+ include/linux/security.h   |    2 +-
+ include/linux/tty_driver.h |    2 +-
+ include/net/af_unix.h      |    2 +-
+ include/net/sock.h         |    4 ++--
+ 7 files changed, 9 insertions(+), 9 deletions(-)
+
+commit d563f80fb8783c3fb4d571dd9e72f35497ac3db1
+Merge: 63680ac d46def7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 6 09:30:06 2014 -0400
+
+    Merge branch 'pax-stable2' into grsec-stable2
+    
+    Conflicts:
+    	arch/x86/boot/compressed/misc.c
+    	tools/gcc/Makefile
+
+commit d46def7c02984f06b0a9479b186569763afd4613
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 6 09:26:52 2014 -0400
+
+    Update to pax-linux-3.2.56-test147.patch:
+    - actually applied the changes meant for test146 :P
+    - updated the hash database for external modules, by Emese
+    - fixed regression in gcc plugin compilation when compiling with ccache, reported by ncopa
+    - proper fix for 309944be296efbb3ca4737d12ef49d2ba97cbecc upstream
+    - fixed plugin compilation under gcc 4.5, reported by Emese Revfy
+    - Emese added support for out-of-tree modules for the size overflow plugin, fixes https://bugs.gentoo.org/show_bug.cgi?id=505594
+
+ arch/x86/boot/compressed/misc.c          |    7 ++-
+ scripts/gcc-plugin.sh                    |    4 +-
+ tools/gcc/Makefile                       |   12 +++-
+ tools/gcc/gcc-common.h                   |    1 +
+ tools/gcc/generate_size_overflow_hash.sh |    5 ++-
+ tools/gcc/size_overflow_hash.data        |    1 +
+ tools/gcc/size_overflow_hash_aux.data    |   83 ++++++++++++++++++++++++++++++
+ tools/gcc/size_overflow_plugin.c         |   25 ++++++---
+ 8 files changed, 122 insertions(+), 16 deletions(-)
+
+commit 63680ac0edd9a72295df07b792096d4f84570e78
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 6 08:34:08 2014 -0400
+
+    This reverts commit 31dee23268ac47eaaafacb186229bc14fb84fa9b.
+
+ net/socket.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit d20a625ed406f6bb5c9be627993798b0e259284d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 3 16:42:54 2014 -0400
+
+    change clearing char to 0xff
+
+ arch/x86/boot/compressed/misc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 9f64dbb310f8d4e1f893b0d85e3d50c077cfdb86
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 3 16:33:52 2014 -0400
+
+    Zero out the difference between file size and mapped size for kernel
+    elf sections mapped by the loader -- proper fix by pipacs for:
+    http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=309944be296efbb3ca4737d12ef49d2ba97cbecc
+
+ arch/x86/boot/compressed/misc.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 3f69f5d8d98b1641e897c09b88bd86f07843ba0d
+Author: Pablo Neira <pablo@netfilter.org>
+Date:   Tue Apr 1 19:38:44 2014 +0200
+
+    Upstream commit: 8b7b932434f5eee495b91a2804f5b64ebb2bc835
+    
+    netlink: don't compare the nul-termination in nla_strcmp
+    
+    nla_strcmp compares the string length plus one, so it's implicitly
+    including the nul-termination in the comparison.
+    
+     int nla_strcmp(const struct nlattr *nla, const char *str)
+     {
+            int len = strlen(str) + 1;
+            ...
+                    d = memcmp(nla_data(nla), str, len);
+    
+    However, if NLA_STRING is used, userspace can send us a string without
+    the nul-termination. This is a problem since the string
+    comparison will not match as the last byte may be not the
+    nul-termination.
+    
+    Fix this by skipping the comparison of the nul-termination if the
+    attribute data is nul-terminated. Suggested by Thomas Graf.
+    
+    Cc: Florian Westphal <fw@strlen.de>
+    Cc: Thomas Graf <tgraf@suug.ch>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ lib/nlattr.c |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
+
+commit 06d25eda5d0c46184e9454900a2b6fd3fde8e5a3
+Author: YOSHIFUJI Hideaki / 吉藤英明 <yoshfuji@linux-ipv6.org>
+Date:   Wed Apr 2 12:48:42 2014 +0900
+
+    Upstream commit: 77bc6bed7121936bb2e019a8c336075f4c8eef62
+    
+    isdnloop: Validate NUL-terminated strings from user.
+    
+    Return -EINVAL unless all of user-given strings are correctly
+    NUL-terminated.
+    
+    Signed-off-by: YOSHIFUJI Hideaki <yoshfuji@linux-ipv6.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/isdn/isdnloop/isdnloop.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 0857ee882e7f5b2218917237e8d05d9ea52232c0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 3 11:34:13 2014 -0400
+
+    revert last change
+    
+    Conflicts:
+    
+    	net/core/filter.c
+
+ net/core/filter.c |    5 -----
+ 1 files changed, 0 insertions(+), 5 deletions(-)
+
+commit b8c5f11b66edabec0d652bf0a8c79ed8fbee71e4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 3 11:01:13 2014 -0400
+
+    add additional checking, convert WARN to a BUG since we should be able to filter
+    out any invalid ops at filter install time -- finding them during runtime is
+    a sign of memory corruption
+
+ net/core/filter.c |    8 +++++++-
+ 1 files changed, 7 insertions(+), 1 deletions(-)
+
+commit c57bdff374931d151bdc31758b21a7355d9889c9
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Fri Dec 28 10:50:17 2012 +0000
+
+    net: filter: return -EINVAL if BPF_S_ANC* operation is not supported
+    
+    Currently, we return -EINVAL for malformed or wrong BPF filters.
+    However, this is not done for BPF_S_ANC* operations, which makes it
+    more difficult to detect if it's actually supported or not by the
+    BPF machine. Therefore, we should also return -EINVAL if K is within
+    the SKF_AD_OFF universe and the ancillary operation did not match.
+    
+    Why exactly is it needed? If tools such as libpcap/tcpdump want to
+    make use of new ancillary operations (like filtering VLAN in kernel
+    space), there is currently no sane way to test if this feature /
+    BPF_S_ANC* op is present or not, since no error is returned. This
+    patch will make life easier for that and allow for a proper usage
+    for user space applications.
+    
+    There was concern, if this patch will break userland. Short answer: Yes
+    and no. Long answer: It will "break" only for code that calls ...
+    
+      { BPF_LD | BPF_(W|H|B) | BPF_ABS, 0, 0, <K> },
+    
+    ... where <K> is in [0xfffff000, 0xffffffff] _and_ <K> is *not* an
+    ancillary. And here comes the BUT: assuming some *old* code will have
+    such an instruction where <K> is between [0xfffff000, 0xffffffff] and
+    it doesn't know ancillary operations, then this will give a
+    non-expected / unwanted behavior as well (since we do not return the
+    BPF machine with 0 after a failed load_pointer(), which was the case
+    before introducing ancillary operations, but load sth. into the
+    accumulator instead, and continue with the next instruction, for
+    instance). Thus, user space code would already have been broken by
+    introducing ancillary operations into the BPF machine per se. Code
+    that does such a direct load, e.g. "load word at packet offset
+    0xffffffff into accumulator" ("ld [0xffffffff]") is quite broken,
+    isn't it? The whole assumption of ancillary operations is that no-one
+    intentionally calls things like "ld [0xffffffff]" and expect this
+    word to be loaded from such a packet offset. Hence, we can also safely
+    make use of this feature testing patch and facilitate application
+    development. Therefore, at least from this patch onwards, we have
+    *for sure* a check whether current or in future implemented BPF_S_ANC*
+    ops are supported in the kernel. Patch was tested on x86_64.
+    
+    (Thanks to Eric for the previous review.)
+    
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Reported-by: Ani Sinha <ani@aristanetworks.com>
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/filter.c |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
+
+commit 624e48d1690d1445df3e5d9f45fd65bd8db10d03
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 3 10:38:55 2014 -0400
+
+    harden non-JIT socket filters against memory corruption occuring after
+    check time
+
+ net/core/filter.c |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
+
+commit 00dd52f2bd219d4769ce3570b9ad7936a953e175
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 3 07:39:34 2014 -0400
+
+    Update documentation on chroot to notify users that chrooting to
+    a bind mount of the root filesystem provides no security benefits
+    and will not trigger the chroot protections.
+
+ grsecurity/Kconfig |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
 commit 07ed3feb4141ee0441d60b31d4771f6e7f651a55
 Merge: 0630786 0f43a2c
 Author: Brad Spengler <spender@grsecurity.net>
