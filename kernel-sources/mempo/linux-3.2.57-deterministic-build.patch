@@ -1,0 +1,151 @@
+diff -Nuar a/arch/x86/math-emu/errors.c b/arch/x86/math-emu/errors.c
+--- a/arch/x86/math-emu/errors.c	2014-04-09 03:20:47.000000000 +0200
++++ b/arch/x86/math-emu/errors.c	2014-04-15 00:45:43.415617402 +0200
+@@ -332,7 +332,7 @@
+ 	if ((~control_word & n & CW_Exceptions) || (n == EX_INTERNAL)) {
+ #ifdef PRINT_MESSAGES
+ 		/* My message from the sponsor */
+-		printk(FPU_VERSION " " __DATE__ " (C) W. Metzenthen.\n");
++		printk(FPU_VERSION " " _MY_BUILD__DATE__ " (C) W. Metzenthen.\n");
+ #endif /* PRINT_MESSAGES */
+ 
+ 		/* Get a name string for error reporting */
+diff -Nuar a/drivers/net/wireless/brcm80211/brcmfmac/dhd_common.c b/drivers/net/wireless/brcm80211/brcmfmac/dhd_common.c
+--- a/drivers/net/wireless/brcm80211/brcmfmac/dhd_common.c	2014-04-09 03:20:47.000000000 +0200
++++ b/drivers/net/wireless/brcm80211/brcmfmac/dhd_common.c	2014-04-15 00:45:43.416617402 +0200
+@@ -43,7 +43,7 @@
+ #ifdef BCMDBG
+ static const char brcmf_version[] =
+ 	"Dongle Host Driver, version " BRCMF_VERSION_STR "\nCompiled on "
+-	__DATE__ " at " __TIME__;
++	_MY_BUILD__TIME__ " at " _MY_BUILD__DATE__;
+ #else
+ static const char brcmf_version[] =
+ 	"Dongle Host Driver, version " BRCMF_VERSION_STR;
+diff -Nuar a/drivers/staging/rts5139/rts51x_scsi.c b/drivers/staging/rts5139/rts51x_scsi.c
+--- a/drivers/staging/rts5139/rts51x_scsi.c	2014-04-09 03:20:47.000000000 +0200
++++ b/drivers/staging/rts5139/rts51x_scsi.c	2014-04-15 00:45:43.419617402 +0200
+@@ -2067,7 +2067,7 @@
+ 	SPRINTF("       Vendor: Realtek Corp.\n");
+ 	SPRINTF("      Product: RTS51xx USB Card Reader\n");
+ 	SPRINTF("      Version: %s\n", DRIVER_VERSION);
+-	SPRINTF("        Build: %s\n", __TIME__);
++	SPRINTF("        Build: %s\n", _MY_BUILD__TIME__);
+ 
+ 	/*
+ 	 * Calculate start of next buffer, and return value.
+diff -Nuar a/drivers/staging/wlags49_h2/wl_version.h b/drivers/staging/wlags49_h2/wl_version.h
+--- a/drivers/staging/wlags49_h2/wl_version.h	2014-04-09 03:20:47.000000000 +0200
++++ b/drivers/staging/wlags49_h2/wl_version.h	2014-04-15 00:45:43.421617402 +0200
+@@ -130,7 +130,7 @@
+ #endif  /* BUS_XXX */
+ 
+ #ifdef DBG
+-#define MODULE_DATE         __DATE__ " " __TIME__
++#define MODULE_DATE         _MY_BUILD__DATE__ " " _MY_BUILD__TIME__
+ #else
+ #define MODULE_DATE         "07/18/2004 13:30:00"
+ #endif // DBG
+diff -Nuar a/fs/ubifs/super.c b/fs/ubifs/super.c
+--- a/fs/ubifs/super.c	2014-04-09 03:20:47.000000000 +0200
++++ b/fs/ubifs/super.c	2014-04-15 00:45:43.422617402 +0200
+@@ -1435,7 +1435,7 @@
+ 	ubifs_msg("reserved for root:  %llu bytes (%llu KiB)",
+ 		c->report_rp_size, c->report_rp_size >> 10);
+ 
+-	dbg_msg("compiled on:         " __DATE__ " at " __TIME__);
++	dbg_msg("compiled on:         " _MY_BUILD__DATE__ " at " _MY_BUILD__TIME__);
+ 	dbg_msg("min. I/O unit size:  %d bytes", c->min_io_size);
+ 	dbg_msg("max. write size:     %d bytes", c->max_write_size);
+ 	dbg_msg("LEB size:            %d bytes (%d KiB)",
+diff -Nuar a/Makefile b/Makefile
+--- a/Makefile	2014-04-09 03:20:47.000000000 +0200
++++ b/Makefile	2014-04-15 00:45:43.425617403 +0200
+@@ -376,6 +376,17 @@
+ KBUILD_CFLAGS_MODULE  := -DMODULE
+ KBUILD_LDFLAGS_MODULE := -T $(srctree)/scripts/module-common.lds
+ 
++# create _MY_BUILD__TIME__ for deterministic build, patch source and 
++# set env. BUILD_BUILD_TIMESTAMP to override
++ifndef KBUILD_BUILD_TIMESTAMP
++	TIMESTAMP := $(shell date)
++else
++	TIMESTAMP := $(KBUILD_BUILD_TIMESTAMP)
++endif
++KBUILD_CFLAGS += -D_MY_BUILD__TIME__='"removed"' 
++KBUILD_CFLAGS += -D_MY_BUILD__DATE__='"removed"'
++
++
+ # Read KERNELRELEASE from include/config/kernel.release (if it exists)
+ KERNELRELEASE = $(shell cat include/config/kernel.release 2> /dev/null)
+ KERNELVERSION = $(VERSION)$(if $(PATCHLEVEL),.$(PATCHLEVEL)$(if $(SUBLEVEL),.$(SUBLEVEL)))$(EXTRAVERSION)
+diff -Nuar a/scripts/Makefile b/scripts/Makefile
+--- a/scripts/Makefile	2014-04-09 03:20:47.000000000 +0200
++++ b/scripts/Makefile	2014-04-15 00:45:43.426617403 +0200
+@@ -9,6 +9,7 @@
+ # docproc:       Used in Documentation/DocBook
+ 
+ HOST_EXTRACFLAGS += -I$(srctree)/tools/include
++# HOST_EXTRACFLAGS += -Wl,--build-id=sha1 # This line doing nothing (only for testing purposes). 1) sha1 is default anyway, and option =none should be NOT needed. 2) this affects some of the binary tools-programs in headers but not all
+ 
+ hostprogs-$(CONFIG_KALLSYMS)     += kallsyms
+ hostprogs-$(CONFIG_LOGO)         += pnmtologo
+diff -Nuar a/scripts/mkcompile_h b/scripts/mkcompile_h
+--- a/scripts/mkcompile_h	2014-04-09 03:20:47.000000000 +0200
++++ b/scripts/mkcompile_h	2014-04-15 00:45:43.426617403 +0200
+@@ -42,6 +42,11 @@
+ else
+ 	TIMESTAMP=$KBUILD_BUILD_TIMESTAMP
+ fi
++
++# create _MY_BUILD__TIME__ instead __TIME__ (and DATE) deterministic build
++_MY_BUILD__TIME__=`date  -d "$TIMESTAMP"  "+%H:%M:%S"`
++_MY_BUILD__DATE__=`date  -d "$TIMESTAMP"  "+%b %d %Y"`
++
+ if test -z "$KBUILD_BUILD_USER"; then
+ 	LINUX_COMPILE_BY=$(whoami | sed 's/\\/\\\\/')
+ else
+diff -Nuar a/scripts/package/builddeb b/scripts/package/builddeb
+--- a/scripts/package/builddeb	2014-04-09 03:20:47.000000000 +0200
++++ b/scripts/package/builddeb	2014-04-15 00:45:43.427617403 +0200
+@@ -17,7 +17,7 @@
+ 
+ 	cp debian/copyright "$pdir/usr/share/doc/$pname/"
+ 	cp debian/changelog "$pdir/usr/share/doc/$pname/changelog.Debian"
+-	gzip -9 "$pdir/usr/share/doc/$pname/changelog.Debian"
++	gzip -n -9 "$pdir/usr/share/doc/$pname/changelog.Debian"
+ 	sh -c "cd '$pdir'; find . -type f ! -path './DEBIAN/*' -printf '%P\0' \
+ 		| xargs -r0 md5sum > DEBIAN/md5sums"
+ 
+@@ -106,7 +106,7 @@
+ 	$MAKE linux
+ 	cp System.map "$tmpdir/usr/lib/uml/modules/$version/System.map"
+ 	cp $KCONFIG_CONFIG "$tmpdir/usr/share/doc/$packagename/config"
+-	gzip "$tmpdir/usr/share/doc/$packagename/config"
++	gzip -n "$tmpdir/usr/share/doc/$packagename/config"
+ 	cp $KBUILD_IMAGE "$tmpdir/usr/bin/linux-$version"
+ else 
+ 	cp System.map "$tmpdir/boot/System.map-$version"
+diff -Nuar a/scripts/package/buildtar b/scripts/package/buildtar
+--- a/scripts/package/buildtar	2014-04-09 03:20:47.000000000 +0200
++++ b/scripts/package/buildtar	2014-04-15 00:45:43.427617403 +0200
+@@ -28,16 +28,18 @@
+ 		file_ext=""
+ 		;;
+ 	targz-pkg)
+-		compress="gzip -c9"
++		compress="gzip -n -c9"
+ 		file_ext=".gz"
+ 		;;
+ 	tarbz2-pkg)
+ 		compress="bzip2 -c9"
+ 		file_ext=".bz2"
++		# does not store file name / date during compression, should be safe for SameKernel
+ 		;;
+ 	tarxz-pkg)
+ 		compress="xz -c9"
+ 		file_ext=".xz"
++		# does not store file name / date during compression, should be safe for SameKernel
+ 		;;
+ 	*)
+ 		echo "Unknown tarball target \"${1}\" requested, please add it to ${0}." >&2
