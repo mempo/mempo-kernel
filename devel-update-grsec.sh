@@ -1,3 +1,4 @@
+#!/bin/bash
 # using rss to get newest version of gr, rsstail must be installed!
 new_grsec=$(rsstail -u http://grsecurity.net/stable2_rss.php -1 | awk  '{print $2}')
 url="http://grsecurity.net/stable/"$new_grsec
@@ -35,16 +36,14 @@ function download() {
 
 #all line gr in sources.list
 function sources_list() { 
-	new_grsec=$(rsstail -u http://grsecurity.net/stable2_rss.php -1 | awk  '{print $2}')
-	sha256=$(sha256deep  -q  grsecurity-3.0-3.2.56-201404062126.patch)
+	echo "Debug in sources_list, new_grsec=$new_grsec" 1>&2
+	exit ;
+	# new_grsec=$(rsstail -u http://grsecurity.net/stable2_rss.php -1 | awk  '{print $2}')
+	sha256=$(sha256deep  -q  grsecurity-3.0-3.2.56-201404062126.patch)  # TODO FIX XXX other file
 	all=P,x,x,grsecurity,$new_grsec,sha256,$sha256,./tmp-path/  
 	all2=$(echo $all | sed -e 's/\ //g')
-
-
 	echo "P,x,x,grsecurity,grsecurity-3.0-3.2.56-201404062126.patch,sha256,a00fefeba886f4f8d7958553ab23fa1df144106ed4c4755e76c1cf56a051a85e,./tmp-path/"
-
 	echo $all2
-
 }
 
 echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" ; mywait 
