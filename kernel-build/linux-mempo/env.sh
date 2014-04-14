@@ -2,14 +2,14 @@
 # place for extra settings that could change between releases, and with updates of code and versions
 
 # general:
-export kernel_general_version="3.2.56" # script uses this setting
+export kernel_general_version="3.2.57" # script uses this setting
 
 # deterministic build:
-export KERNEL_DATE='2014-04-07 11:39:00' # UTC time of mempo version. This is > then max(kernel,grsec,patches) times
+export KERNEL_DATE='2014-04-14 10:00:00' # UTC time of mempo version. This is > then max(kernel,grsec,patches) times
 # Nothing up my sleeve number, unknown in advance even to me in a provable way - e.g. bitcoin markel root of recent block. 
-export CURRENT_SEED='22754a6863bdc4dcf10f2b58c9472c1594b818fbe3fb7f92310db57c67a2abd5' # from newest (at release, -6 blocks) http://blockchain.info/block-index/ or http://blockexplorer.com/
+export CURRENT_SEED='fefe238f3e7f908d4943ba08f667da9400891c660d4cf219e96eced9ae077c17' # from newest (at release, -6 blocks) http://blockchain.info/block-index/ or http://blockexplorer.com/
 # debian make-kpkg related:
-export DEBIAN_REVISION="02" # see README.md how to update it on git tag, on rc and final releases
+export DEBIAN_REVISION="01" # see README.md how to update it on git tag, on rc and final releases
 
 # conversions etc (do not change this)
 export TIMESTAMP_RFC3339=$KERNEL_DATE

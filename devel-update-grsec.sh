@@ -13,6 +13,9 @@ echo ""
 echo "This is an UPDATE after grsecurity changed"
 echo "Newest vesrion grsecurity is $new_grsec"
 echo ""
+
+echo " *** this script is not finished yet, you will need to do some work manually! *** "
+
 echo "When ready press ENTER." ; read _
 
 function mywait() {
@@ -36,6 +39,8 @@ function download() {
 
 #all line gr in sources.list
 function sources_list() { 
+	# TODO finish and use this
+
 	echo "Debug in sources_list, new_grsec=$new_grsec" 1>&2
 	exit ;
 	# new_grsec=$(rsstail -u http://grsecurity.net/stable2_rss.php -1 | awk  '{print $2}')

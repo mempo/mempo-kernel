@@ -1,4 +1,13 @@
 
+linux-image (linux-3.2.57-mempo-0.1.38) UNRELEASED; urgency=low
+  * update kernel to linux-3.2.57
+  * update grsecurity to grsecurity-3.0-3.2.57-201404131252.patch
+  * ...grsecurity changelog updated
+  * ...updated checksums
+  * ...new seed
+
+ -- mempo <mempo@mempo.org>  Mon, 14 Apr 2014 13:00:00 +0200
+
 linux-image (linux-3.2.56-mempo-0.1.37) UNRELEASED; urgency=low
   * update kernel to linux-3.2.56
   * update grsecurity to grsecurity-3.0-3.2.56-201404062126
