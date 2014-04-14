@@ -20,10 +20,7 @@ KERNEL'S CHANGELOG - TODO UPDATE!!!
 === THINGS TODO ===
 (newest added on top)
 
-* test if we have correct reproducible dpkg
-* support other architectures building
 * support make kpkg instead of deprecated make-kpkg
-* in run.sh check version of other tools then just the dpkg
 * record version of cruciall tools like dpkg, gcc, etc in the generated build log
 * are we using gcc plugins?
 * are we using all proper compiler options of fortify-source type?
