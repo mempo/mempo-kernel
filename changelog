@@ -10,6 +10,8 @@ linux-image (linux-3.2.57-mempo-0.1.38) UNRELEASED; urgency=low
   * provided correct linux-3.2.57 link/checksum
   * fix mempo's patch to fit new source
   * v0.1.38-02-rc
+  * now the good config variant is offically called "desk"
+  * v0.1.38-03-rc
 
  -- mempo <mempo@mempo.org>  Mon, 14 Apr 2014 13:00:00 +0200
 
