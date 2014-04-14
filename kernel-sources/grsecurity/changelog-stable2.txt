@@ -1,3 +1,211 @@
+commit 1c930d360ce624a56b857812faa6d577209fdc9c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 13 12:47:57 2014 -0400
+
+    From: Mathias Krause <minipli@googlemail.com>
+    [PATCH net] filter: prevent nla extensions to peek beyond the end of
+            the message
+    
+    The BPF_S_ANC_NLATTR and BPF_S_ANC_NLATTR_NEST extensions fail to check
+    for a minimal message length before testing the supplied offset to be
+    within the bounds of the message. This allows the subtraction of the nla
+    header to underflow and therefore -- as the data type is unsigned --
+    allowing far to big offset and length values for the search of the
+    netlink attribute.
+    
+    The remainder calculation for the BPF_S_ANC_NLATTR_NEST extension is
+    also wrong. It has the minuend und subtrahend mixed up, therefore
+    calculates a huge length value, allowing to overrun the end of the
+    message while looking for the netlink attribute.
+    
+    The following three BPF snippets will trigger the bugs when attached to
+    a UNIX datagram socket and parsing a message with length 1, 2 or 3.
+    
+     ,-[ PoC for missing size check in BPF_S_ANC_NLATTR ]--
+     | ld   #0x87654321
+     | ldx  #42
+     | ld   #nla
+     | ret  a
+     `---
+    
+     ,-[ PoC for the same bug in BPF_S_ANC_NLATTR_NEST ]--
+     | ld   #0x87654321
+     | ldx  #42
+     | ld   #nlan
+     | ret  a
+     `---
+    
+     ,-[ PoC for wrong remainder calculation in BPF_S_ANC_NLATTR_NEST ]--
+     | ; (needs a fake netlink header at offset 0)
+     | ld   #0
+     | ldx  #42
+     | ld   #nlan
+     | ret  a
+     `---
+    
+    Fix the first issue by ensuring the message length fulfills the minimal
+    size constrains of a nla header. Fix the second bug by getting the math
+    for the remainder calculation right.
+    
+    Fixes: 4738c1db15 ("[SKFILTER]: Add SKF_ADF_NLATTR instruction")
+    Fixes: d214c7537b ("filter: add SKF_AD_NLATTR_NEST to look for nested..")
+    Cc: Patrick McHardy <kaber@trash.net>
+    Cc: Pablo Neira Ayuso <pablo@netfilter.org>
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+
+ net/core/filter.c |   10 +++++++++-
+ 1 files changed, 9 insertions(+), 1 deletions(-)
+
+commit 3970fc037238549eb27d4e9b85ce987c6980c54c
+Author: Andrey Vagin <avagin@openvz.org>
+Date:   Fri Mar 28 13:54:32 2014 +0400
+
+    Upstream commit: 223b02d923ecd7c84cf9780bb3686f455d279279
+    
+    netfilter: nf_conntrack: reserve two bytes for nf_ct_ext->len
+    
+    "len" contains sizeof(nf_ct_ext) and size of extensions. In a worst
+    case it can contain all extensions. Bellow you can find sizes for all
+    types of extensions. Their sum is definitely bigger than 256.
+    
+    nf_ct_ext_types[0]->len = 24
+    nf_ct_ext_types[1]->len = 32
+    nf_ct_ext_types[2]->len = 24
+    nf_ct_ext_types[3]->len = 32
+    nf_ct_ext_types[4]->len = 152
+    nf_ct_ext_types[5]->len = 2
+    nf_ct_ext_types[6]->len = 16
+    nf_ct_ext_types[7]->len = 8
+    
+    I have seen "len" up to 280 and my host has crashes w/o this patch.
+    
+    The right way to fix this problem is reducing the size of the ecache
+    extension (4) and Florian is going to do this, but these changes will
+    be quite large to be appropriate for a stable tree.
+    
+    Fixes: 5b423f6a40a0 (netfilter: nf_conntrack: fix racy timer handling with reliable)
+    Cc: Pablo Neira Ayuso <pablo@netfilter.org>
+    Cc: Patrick McHardy <kaber@trash.net>
+    Cc: Jozsef Kadlecsik <kadlec@blackhole.kfki.hu>
+    Cc: "David S. Miller" <davem@davemloft.net>
+    Signed-off-by: Andrey Vagin <avagin@openvz.org>
+    Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
+
+ include/net/netfilter/nf_conntrack_extend.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 90cdd94d118ebd1be0383b0e56cb7467f6dc99c8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 11 17:19:35 2014 -0400
+
+    Upstream commit: 7563487cbf865284dcd35e9ef5a95380da046737
+    
+    isdnloop: several buffer overflows
+    There are three buffer overflows addressed in this patch.
+    
+    1) In isdnloop_fake_err() we add an 'E' to a 60 character string and
+    then copy it into a 60 character buffer.  I have made the destination
+    buffer 64 characters and I'm changed the sprintf() to a snprintf().
+    
+    2) In isdnloop_parse_cmd(), p points to a 6 characters into a 60
+    character buffer so we have 54 characters.  The ->eazlist[] is 11
+    characters long.  I have modified the code to return if the source
+    buffer is too long.
+    
+    3) In isdnloop_command() the cbuf[] array was 60 characters long but the
+    max length of the string then can be up to 79 characters.  I made the
+    cbuf array 80 characters long and changed the sprintf() to snprintf().
+    I also removed the temporary "dial" buffer and changed it to use "p"
+    directly.
+    
+    Unfortunately, we pass the "cbuf" string from isdnloop_command() to
+    isdnloop_writecmd() which truncates anything over 60 characters to make
+    it fit in card->omsg[].  (It can accept values up to 255 characters so
+    long as there is a '\n' character every 60 characters).  For now I have
+    just fixed the memory corruption bug and left the other problems in this
+    driver alone.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/isdn/isdnloop/isdnloop.c |   17 +++++++++--------
+ 1 files changed, 9 insertions(+), 8 deletions(-)
+
+commit acd45ebd8972ce66191c2005f59c25da91b439fc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Apr 11 16:57:17 2014 -0400
+
+    Apply: https://lkml.org/lkml/2014/4/10/736
+    
+    PAX_REFCOUNT makes this unexploitable, turning it into a harmless memleak
+    
+    Conflicts:
+    
+    	net/ipv4/ping.c
+
+ net/ipv4/ping.c |   11 ++++++++---
+ 1 files changed, 8 insertions(+), 3 deletions(-)
+
+commit 46314ee3485b6d11360e51b1a89fc8cdcc45da9c
+Author: H. Peter Anvin <hpa@linux.intel.com>
+Date:   Sun Mar 16 15:31:54 2014 -0700
+
+    Upstream commit: b3b42ac2cbae1f3cecbb6229964a4d48af31d382
+    
+    x86-64, modify_ldt: Ban 16-bit segments on 64-bit kernels
+    
+    The IRET instruction, when returning to a 16-bit segment, only
+    restores the bottom 16 bits of the user space stack pointer.  We have
+    a software workaround for that ("espfix") for the 32-bit kernel, but
+    it relies on a nonzero stack segment base which is not available in
+    32-bit mode.
+    
+    Since 16-bit support is somewhat crippled anyway on a 64-bit kernel
+    (no V86 mode), and most (if not quite all) 64-bit processors support
+    virtualization for the users who really need it, simply reject
+    attempts at creating a 16-bit segment when running on top of a 64-bit
+    kernel.
+    
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
+    Link: http://lkml.kernel.org/n/tip-kicdm89kzw9lldryb1br9od0@git.kernel.org
+    Cc: <stable@vger.kernel.org>
+    
+    Conflicts:
+    
+    	arch/x86/kernel/ldt.c
+
+ arch/x86/kernel/ldt.c |   11 +++++++++++
+ 1 files changed, 11 insertions(+), 0 deletions(-)
+
+commit 96e52f165fa1db9241275603db6bfa12f1409caf
+Merge: c325dfd 986375e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 9 17:16:27 2014 -0400
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit 986375eaf9ddfb549dee39703b5a7afd6f4fe733
+Merge: d46def7 a2601fc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 9 17:15:51 2014 -0400
+
+    Update to pax-linux-3.2.57-test147.patch
+    
+    Merge branch 'linux-3.2.y' into pax-stable2
+    
+    Conflicts:
+    	scripts/package/builddeb
+
+commit c325dfd10e11e8f3d12fa7ead45b5ffaa7fba4b6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 7 18:41:45 2014 -0400
+
+    Update GRKERNSEC_IO documentation
+
+ grsecurity/Kconfig |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
 commit 936f7cbd75a811dc46bee8b6edde793398c1a090
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Apr 6 18:59:00 2014 -0400
