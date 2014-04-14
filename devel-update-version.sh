@@ -19,7 +19,7 @@ echo ""
 echo ""
 cat changelog  | grep -B 1 -A 4 linux-image | head -n 4
 echo "Update version CONFIG_LOCALVERSION to mempo version" ; mywait_e
-vim kernel-build/linux-mempo/configs/config-good.config 
+vim kernel-build/linux-mempo/configs/config-desk.config 
 
 vim changelog
 
