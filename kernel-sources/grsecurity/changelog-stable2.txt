@@ -1,3 +1,52 @@
+commit e0ce59a56f1e59eaab4f2aec82461a442e1d740d
+Merge: f669ea3 0980044
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 17 18:56:30 2014 -0400
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit 0980044f49cfc2eeb3cc4ef226ec228a4c0bf5e7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 17 18:56:10 2014 -0400
+
+    fix compilation
+
+ tools/gcc/size_overflow_hash_aux.data |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit f669ea3f27b8efa83d91315b79508f6b1c1151b4
+Merge: b3ca5e6 4dc7a2c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 17 17:57:25 2014 -0400
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit 4dc7a2cafe7bc6c0cc025c2bfa0990c051c345aa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 17 17:56:59 2014 -0400
+
+    Update to pax-linux-3.2.57-test148.patch:
+    - Emese fixed a size overflow false positive due to intentional overflow, reported by 7LL (https://forums.grsecurity.net/viewtopic.php?f=3&t=3940)
+
+ tools/gcc/size_overflow_hash_aux.data |    9 +++++
+ tools/gcc/size_overflow_plugin.c      |   58 ++++++++++++++++++++++++++++++++-
+ 2 files changed, 66 insertions(+), 1 deletions(-)
+
+commit b3ca5e6b6f1919adebd5f0f224973d00e207a8a5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 17 17:12:50 2014 -0400
+
+    fix an off-by-one triggerable on 32bit kernels with PAX_USERCOPY on
+    specific shmemfs reads that end up copying from empty_zero_page,
+    which on 32bit x86 has the same address as _etext.  Fix up some
+    other harmless instances of this error as well
+    
+    Thanks to 'jy' from IRC for reporting this
+
+ arch/x86/mm/init_32.c |    6 +++---
+ fs/exec.c             |    4 ++--
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
 commit 1c930d360ce624a56b857812faa6d577209fdc9c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Apr 13 12:47:57 2014 -0400
