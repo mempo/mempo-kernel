@@ -1,3 +1,83 @@
+commit 2be3acc4be4e2f1aa47d1d73104cc29668b022ba
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 24 00:02:59 2014 -0400
+
+    Update size_overflow hash table
+
+ tools/gcc/size_overflow_hash.data |  777 ++++++++++++++++++++++++++++++++++---
+ 1 files changed, 726 insertions(+), 51 deletions(-)
+
+commit 0191ef479be656defb1a7c54e36dea0a7745edff
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Tue Apr 22 13:49:40 2014 -0700
+
+    Upstream commit: 1b17844b29ae042576bea588164f2f1e9590a8bc
+    
+    mm: make fixup_user_fault() check the vma access rights too
+    
+    fixup_user_fault() is used by the futex code when the direct user access
+    fails, and the futex code wants it to either map in the page in a usable
+    form or return an error.  It relied on handle_mm_fault() to map the
+    page, and correctly checked the error return from that, but while that
+    does map the page, it doesn't actually guarantee that the page will be
+    mapped with sufficient permissions to be then accessed.
+    
+    So do the appropriate tests of the vma access rights by hand.
+    
+    [ Side note: arguably handle_mm_fault() could just do that itself, but
+      we have traditionally done it in the caller, because some callers -
+      notably get_user_pages() - have been able to access pages even when
+      they are mapped with PROT_NONE.  Maybe we should re-visit that design
+      decision, but in the meantime this is the minimal patch. ]
+    
+    Found by Dave Jones running his trinity tool.
+    
+    Reported-by: Dave Jones <davej@redhat.com>
+    Acked-by: Hugh Dickins <hughd@google.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/memory.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit f2d509f7f0c1ef9b59e2ff990225a5afe58118cc
+Merge: 2013ce2 76178e3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 23 19:11:10 2014 -0400
+
+    Merge branch 'pax-stable2' into grsec-stable2
+    
+    Conflicts:
+    	tools/gcc/size_overflow_hash.data
+
+commit 76178e36bfd7964195812cc79c8f49bbacb248cd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 23 19:09:00 2014 -0400
+
+    Update to pax-linux-3.2.57-test150.patch:
+    - changed the colorize plugin to be similar to -fdiagnostics-color in gcc 4.9
+      - http://gcc.gnu.org/onlinedocs/gcc-4.9.0/gcc/Language-Independent-Options.html
+      - by default colorization is off
+      - if GCC_COLORS exists in the environment then stderr will be colored if it's a terminal
+      - -fplugin-arg-colorize_plugin-color= takes the same arguments as -fdiagnostics-color=
+        - e.g., the old behaviour is equivalent to EXTRA_CFLAGS=-fplugin-arg-colorize_plugin-color=always
+      - the value of GCC_COLORS isn't parsed yet, the existing colors (red/yellow/blue) are used instead
+    - fixed all warnings on the gcc plugins reported by clang
+    - Emese regenerated the size overflow hash table from scratch
+
+ Makefile                          |    2 +-
+ arch/x86/kernel/traps.c           |    4 +-
+ tools/gcc/colorize_plugin.c       |   77 +-
+ tools/gcc/constify_plugin.c       |   13 +-
+ tools/gcc/kallocstat_plugin.c     |    9 +-
+ tools/gcc/kernexec_plugin.c       |   27 +-
+ tools/gcc/latent_entropy_plugin.c |   13 +-
+ tools/gcc/size_overflow_hash.data | 2347 ++++++-------------------------------
+ tools/gcc/size_overflow_plugin.c  |   27 +-
+ tools/gcc/stackleak_plugin.c      |   18 +-
+ tools/gcc/structleak_plugin.c     |    9 +-
+ 11 files changed, 519 insertions(+), 2027 deletions(-)
+
 commit 2013ce2b93ee8217b2e2133d1a5ef60034ebda47
 Merge: e0ce59a 3187a79
 Author: Brad Spengler <spender@grsecurity.net>
