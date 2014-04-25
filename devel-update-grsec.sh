@@ -15,6 +15,7 @@ echo "Newest vesrion grsecurity is $new_grsec"
 echo ""
 
 echo " *** this script is not finished yet, you will need to do some work manually! *** "
+echo "Read README and info how to update on https://github.com/mempo/deterministic-kernel/ (or local file README.md here)" 
 
 echo "When ready press ENTER." ; read _
 
@@ -69,24 +70,20 @@ function sources_list() {
 
 echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" ; mywait 
 
-echo "Read README and info how to update on https://github.com/mempo/deterministic-kernel/ (or local file README.md here)" 
+#mywait
+
+echo "[AUTO] I will download new grsec (to kernel-sources/grsecurity/) and I will update sources.list" ; mywait_d ;
+download
+sources_list
+echo "Commiting the new grsec ($new_grsec) files to git in one commit:"
+git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt
+git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt -m "[grsec] $new_grsec"
+echo "Added to grsec as:"
+git log HEAD^1..HEAD
 mywait
 
-echo "[AUTO] Downloadng new grsec (to kernel-sources/grsecurity/) and updating sources.list" ; mywait_d ; download
-sources_list
-# echo ""
-# ls -rtl "kernel-sources/grsecurity/"
-# echo "What is the file name of new grsec .patch? (copy/type the filename and press enter)"; echo -n "> " ; read gr_patch_file
-# gr_patch="kernel-sources/grsecurity/$gr_patch_file"
-# echo ""
 
-# echo "Add new textblock for new mempo version (increase with new grsec), you said grsec is $gr_patch_file" ; mywait_e
-# vim changelog
 
-# sha256sum $gr_patch || { echo "Can not checksum $gr_patch" ; exit 1; }
-# echo "Copy the above CHECKSUM and FILENAME to replace both in line with grsecurity in the file..."
-# mywait_e
-# vim kernel-build/linux-mempo/sources.list
 echo "Now we will increase mempo version"
 mywait
 . devel-update-version.sh
