@@ -9,7 +9,7 @@ export KERNEL_DATE='2014-04-30 00:10:00' # UTC time of mempo version. This is > 
 # Nothing up my sleeve number, unknown in advance even to me in a provable way - e.g. bitcoin markel root of recent block. 
 export CURRENT_SEED='82dae93f14e0690fee46108ce74e47263dae4e0a025f0885f9b9c196c69bd3b0' # from newest (at release, -6 blocks) http://blockchain.info/block-index/ or http://blockexplorer.com/
 # debian make-kpkg related:
-export DEBIAN_REVISION="01" # see README.md how to update it on git tag, on rc and final releases
+export DEBIAN_REVISION="02" # see README.md how to update it on git tag, on rc and final releases
 
 # conversions etc (do not change this)
 export TIMESTAMP_RFC3339=$KERNEL_DATE
