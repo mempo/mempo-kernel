@@ -1,3 +1,28 @@
+commit 21f5c3f135f6387d594f583853919d32455b9f3c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 29 20:20:28 2014 -0400
+
+    update size_overflow hash table
+
+ tools/gcc/size_overflow_hash.data |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 16c404220e8f5c1970cdbb94a1ec8501bb837ce7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 29 18:55:26 2014 -0400
+
+    Include backported virtio SCSI driver from Debian, thanks to Ben Hutchings
+
+ drivers/scsi/Kconfig         |    8 +
+ drivers/scsi/Makefile        |    1 +
+ drivers/scsi/virtio_scsi.c   |  838 ++++++++++++++++++++++++++++++++++++++++++
+ drivers/virtio/virtio.c      |    5 +-
+ drivers/virtio/virtio_ring.c |   60 +++-
+ include/linux/virtio.h       |    5 +
+ include/linux/virtio_ids.h   |    1 +
+ include/linux/virtio_scsi.h  |  125 +++++++
+ 8 files changed, 1035 insertions(+), 8 deletions(-)
+
 commit 2be3acc4be4e2f1aa47d1d73104cc29668b022ba
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Apr 24 00:02:59 2014 -0400
