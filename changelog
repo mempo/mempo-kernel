@@ -1,6 +1,8 @@
 
 linux-image (linux-3.2.58-mempo-0.1.43) UNRELEASED; urgency=low
   * updating to linux linux-3.2.58
+  * updated grsecurity grsecurity-3.0-3.2.58-201405041242.patch RC, seed
+  * v0.1.43-01-rc
 
  -- mempo <mempo@mempo.org>  Mon, 5 May 2014 02:00:00 +0200
 
