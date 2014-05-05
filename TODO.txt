@@ -21,6 +21,7 @@ KERNEL'S CHANGELOG - TODO UPDATE!!!
 (newest added on top)
 
 * check PGP signature on kernel vanilla
+* flavours of config
 * support make kpkg instead of deprecated make-kpkg
 * record version of cruciall tools like dpkg, gcc, etc in the generated build log
 * are we using gcc plugins?
