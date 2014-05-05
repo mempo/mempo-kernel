@@ -1,3 +1,147 @@
+commit f06aa00fbffaf0d80f041e6b25fad80f6e6ac0ab
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 4 12:03:07 2014 -0400
+
+    restrict rt_cache
+
+ net/ipv4/route.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit bf1dd6158696947c5bc8d84df33574c4d21d44e3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 4 11:41:02 2014 -0400
+
+    use ERR_PTR
+
+ fs/proc/generic.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 6e84b936802845f9e27020b45e5dfadd90cdb033
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 4 10:50:33 2014 -0400
+
+    fix warnings
+
+ net/core/dev.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 4d9e583020590b209f4aad6fa4c2cf4e2bcb3e0b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 4 10:47:36 2014 -0400
+
+    reuse the format string to preserve padding
+
+ net/core/dev.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 4be476f6b229508e218e4942c4ff16ba9dce933f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 4 10:41:45 2014 -0400
+
+    compile fix
+
+ fs/proc/generic.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit d46294dd750ab1ec8621c0f978315f6c42398059
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 4 10:35:58 2014 -0400
+
+    refactor the code for the previous commit and sanitize /proc/net/dev output
+
+ fs/proc/generic.c          |   21 ++-------------------
+ fs/proc/proc_net.c         |   21 +++------------------
+ fs/seq_file.c              |   23 +++--------------------
+ grsecurity/Makefile        |    2 +-
+ grsecurity/grsec_proc.c    |   20 ++++++++++++++++++++
+ include/linux/grsecurity.h |    2 ++
+ net/core/dev.c             |    5 ++++-
+ 7 files changed, 35 insertions(+), 59 deletions(-)
+
+commit 1e13912f8215757a9d42d6b9e915ceb3072968a6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 4 10:00:07 2014 -0400
+
+    Previously all of /proc/net was inaccessible under GRKERNSEC_PROC except
+    for a special group (under GRKERNSEC_PROC_USERGROUP) but which also required
+    that that process be able to see all other processes in /proc.  Several
+    programs need to access /proc/net/dev and /proc/net/dev only.  Matlab for
+    instance needs it and will crash if it can't open it.  The interface list in
+    /proc/net/dev is not sensitive (we will zero out packet counts in the
+    next commit) and the same information can be obtained via netlink.  So now we
+    will allow /proc/net/dev to anyone and restrict access to all other entries in
+    /proc/net.
+    
+    Requested by a commercial support customer.
+
+ fs/proc/generic.c                  |   82 +++++++++++++++++++++++++++++++++++-
+ fs/proc/internal.h                 |    2 +
+ fs/proc/proc_net.c                 |   35 ++++++++++-----
+ fs/seq_file.c                      |   39 +++++++++++++++++
+ include/linux/proc_fs.h            |    2 +
+ include/linux/seq_file.h           |    2 +
+ net/appletalk/atalk_proc.c         |    2 +-
+ net/can/bcm.c                      |    2 +-
+ net/can/proc.c                     |    2 +-
+ net/core/dev.c                     |    4 +-
+ net/core/pktgen.c                  |    2 +-
+ net/ipv4/netfilter/ipt_CLUSTERIP.c |    2 +-
+ net/ipv6/proc.c                    |    2 +-
+ net/ipx/ipx_proc.c                 |    2 +-
+ net/irda/irproc.c                  |    2 +-
+ net/llc/llc_proc.c                 |    2 +-
+ net/netfilter/core.c               |    2 +-
+ net/netfilter/xt_hashlimit.c       |    4 +-
+ net/netfilter/xt_recent.c          |    2 +-
+ net/sctp/protocol.c                |    2 +-
+ net/sunrpc/cache.c                 |    2 +-
+ net/sunrpc/stats.c                 |    2 +-
+ net/wanrouter/wanproc.c            |    2 +-
+ net/x25/x25_proc.c                 |    2 +-
+ 24 files changed, 169 insertions(+), 33 deletions(-)
+
+commit 4a458454aa859a2715e11d0db51e5226c152d8e5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 1 17:46:13 2014 -0400
+
+    Fix CVE-2014-1739, upstream vuln in media_enum_entities()
+    Author Salva Peiró
+    Date April 2014 - Discovery of the vulnerability.
+    Impact The vulnerability discloses 200 bytes of kernel process stack.
+    Affected Version From linux-2.6.38 to linux-3.15-rc3
+    Bug Timespan 3 years: 2011-03-23 to 2014-04-29 commit 1651333b
+    
+    (Deleted) blog post at: http://speirofr.appspot.com/cve-2014-1739-kernel-infoleak-vulnerability-in-media_enum_entities.html
+
+ drivers/media/media-device.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 000428a7bbab546333e4c42222846c91e3be0a22
+Merge: b8f4923 6fed70a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 30 19:00:04 2014 -0400
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit 6fed70ad4afb6a9b3f8b45b375da62c0ec554410
+Merge: 76178e3 f453538
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 30 18:59:36 2014 -0400
+
+    Merge branch 'linux-3.2.y' into pax-stable2
+    
+    Conflicts:
+    	arch/x86/kernel/ldt.c
+
+commit b8f492389e6c99083e043ace700dfeed56879043
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 29 20:23:46 2014 -0400
+
+    update gitignore
+
+ tools/gcc/.gitignore |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
 commit 21f5c3f135f6387d594f583853919d32455b9f3c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Apr 29 20:20:28 2014 -0400
