@@ -13,7 +13,7 @@ function mywait_e() {
 echo ""
 echo ""
 echo "Change date and seed (from -6 block on bitcoin)" ; mywait_e
-vim kernel-build/linux-mempo/env.sh 
+vim kernel-build/linux-mempo/env-data.sh 
 
 echo ""
 echo ""
