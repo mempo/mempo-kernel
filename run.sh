@@ -1,19 +1,24 @@
 #!/bin/bash 
 # On deterministic-kernel
 
+echo "Welcome to SameKernel"
+
 pwd_normal=$PWD # save starting top-dir
 
 # set -x 
 mkdir -p kernel-sources/kernel
 
-. kernel-build/linux-mempo/env.sh
+echo "Loading ENV"
+source kernel-build/linux-mempo/env-data.sh # just the static data 
 
 kernel_version="$kernel_general_version" # from env.sh
 kernel_file="linux-${kernel_version}.tar"
 kernel_file_download="${kernel_file}.xz" # the compressed for download version of file
 user_download_folder="${HOME}/Downloads/" # where user stores downloads, use this as download cache (read it, write ther)
 
-. support.sh
+echo "Will work on kernel $kernel_version"
+
+source support.sh
 
 export LC_ALL="C"
 
