@@ -4,6 +4,8 @@ linux-image (linux-3.2.58-mempo-0.1.44) UNRELEASED; urgency=low
   * v0.1.44-01-rc
   * doc (changelog fix)
   * v0.1.44-02-rc
+  * seed,rc (forgotten previously)
+  * v0.1.44-03-rc
 
  -- mempo <mempo@mempo.org>  Mon, 7 May 2014 01:30:00 +0200
 
