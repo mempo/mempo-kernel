@@ -1,3 +1,31 @@
+commit fba8cb418be22f02333b5fe4d7ddfdbba3f1f82a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue May 6 17:04:33 2014 -0400
+
+    fix compilation with older gcc (redefinition of pid_alive)
+
+ include/linux/sched.h |   26 ++++++++++++--------------
+ 1 files changed, 12 insertions(+), 14 deletions(-)
+
+commit ee26ef6fe974459d501d2583a7d3d605f1073934
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 5 18:21:03 2014 -0400
+
+    backport fix (there is no n_tty_data in 3.2)
+
+ drivers/tty/n_tty.c |    9 ++++-----
+ 1 files changed, 4 insertions(+), 5 deletions(-)
+
+commit e74da1fee4e283ea2b847a5176bb97453e661e11
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 5 18:12:30 2014 -0400
+
+    Backport fix for heap overflow in the tty layer, CVE-2014-0196
+    http://bugzillafiles.novell.org/attachment.cgi?id=588355
+
+ drivers/tty/n_tty.c |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
+
 commit f06aa00fbffaf0d80f041e6b25fad80f6e6ac0ab
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun May 4 12:03:07 2014 -0400
