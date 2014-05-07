@@ -1,4 +1,6 @@
 45e5c19a73b640c5ae78b70b3bd4e1865f89024a2aaf382e2df017014c6acbbd  linux-headers-3.2.57-grsec-mempo.desk.0.1.42_02_amd64.deb
 29c572ec55f4ba8026485f4ce204b3ee48885a38484129e1a6ed9f4beabbe46c  linux-headers-3.2.58-grsec-mempo.desk.0.1.43_01_amd64.deb
+6a0f97eeac7be8732269e09315cd4729bfe909df5c47701cb103ba62cd9820ab  linux-headers-3.2.58-grsec-mempo.desk.0.1.44_03_amd64.deb
 734d818ee24186cc67d80b3912be9680b44815d15f89043fde17ecfbec4ea033  linux-image-3.2.57-grsec-mempo.desk.0.1.42_02_amd64.deb
 cbde04660f7e5549643e94708842338e5de95c133254eecadf7e549f62f95b40  linux-image-3.2.58-grsec-mempo.desk.0.1.43_01_amd64.deb
+14ee00fb90fc81cff5a6820d17981d59ac3ad2bb4c067a8210d621ba48c47583  linux-image-3.2.58-grsec-mempo.desk.0.1.44_03_amd64.deb
