@@ -1,8 +1,47 @@
 #!/bin/bash
 # using rss to get newest version of gr, rsstail must be installed!
-new_grsec=$(rsstail -u http://grsecurity.net/stable2_rss.php -1 | awk  '{print $2}')
+
+skip_intro=false
+assume_yes=false
+
 url="http://grsecurity.net/stable/"$new_grsec
 gr_path='kernel-sources/grsecurity/'
+
+function help() {
+	echo "Help and usage:"
+	echo "This script increases kernel version in Mempo project git hub - to be used by developers"
+	echo "Read all about the project on mempo.org (and mempo.i2p) or ask us on irc #mempo on irc.oftc.net"
+	echo "Options:"
+	echo "  -A Automatic build, e.g. for build bot, sets the needed options like -s -y"
+	echo "  -s Skips introduction and pauses"
+	echo "  -y assume Yes in normal questions"
+	echo ""
+}
+
+while getopts "hAsy" opt; do
+  case $opt in
+    h)
+			help
+			exit 1
+      ;;
+    A)
+      echo "using automatic mode" >&2
+			skip_intro=true
+			assume_yes=true
+      ;;
+    s)
+			skip_intro=true
+      ;;
+    y)
+			assume_yes=true
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG script will exit. Use option -h to see help." >&2
+			exit 100
+      ;;
+  esac
+done
+
 
 echo ""
 echo "==============================================================="
@@ -17,26 +56,28 @@ echo ""
 echo " *** this script is not finished yet, you will need to do some work manually! *** "
 echo "Read README and info how to update on https://github.com/mempo/deterministic-kernel/ (or local file README.md here)" 
 
-echo "When ready press ENTER." ; read _
-
 function mywait() {
+	if [[ "$skip_intro" == true ]]; then return; fi
 	echo "Press ENTER when you done the above instructions"
 	read _ 
 }
 function mywait_e() {
+	if [[ "$skip_intro" == true ]]; then return; fi
 	echo "Press ENTER when ready, I will open editor"
 	read _ 
 } 
 function mywait_d() {
-        echo "Press ENTER to download files"
-        read _ 
+	if [[ "$skip_intro" == true ]]; then return; fi
+			echo "Press ENTER to download files"
+			read _ 
 }
+
 function download() { 
 	echo "Downloading $new_grec from $url " 
 	set -x  
-	cd $gr_path ; rm changelog-stable2.txt ; wget -q  http://grsecurity.net/changelog-stable2.txt  $url $url.sig 
+	cd $gr_path ; rm changelog-stable2.txt 
+	wget  http://grsecurity.net/changelog-stable2.txt  $url $url.sig 
 	sha256=$(sha256deep  -q  $new_grsec)  ;  cd ../..
-
 	set +x
 } 
 
@@ -68,6 +109,10 @@ function sources_list() {
 	cd ../..
 }
 
+echo "Checking new version of grsecurity from network"
+new_grsec=$(rsstail -u http://grsecurity.net/stable2_rss.php -1 | awk  '{print $2}')
+echo "new_grsec=$new_grsec is the current version"
+
 echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" ; mywait 
 
 #mywait
@@ -75,9 +120,11 @@ echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or
 echo "[AUTO] I will download new grsec (to kernel-sources/grsecurity/) and I will update sources.list" ; mywait_d ;
 download
 sources_list
+
 echo "Commiting the new grsec ($new_grsec) files to git in one commit:"
 git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt
 git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt -m "[grsec] $new_grsec"
+
 echo "Added to grsec as:"
 git log HEAD^1..HEAD
 mywait
