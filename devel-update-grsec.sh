@@ -4,8 +4,7 @@
 skip_intro=false
 assume_yes=false
 
-url="http://grsecurity.net/stable/"$new_grsec
-gr_path='kernel-sources/grsecurity/'
+url_base_stable="http://grsecurity.net/stable/"
 
 function help() {
 	echo "Help and usage:"
@@ -111,6 +110,8 @@ function sources_list() {
 
 echo "Checking new version of grsecurity from network"
 new_grsec=$(rsstail -u http://grsecurity.net/stable2_rss.php -1 | awk  '{print $2}')
+url="${url_base_stable}${new_grsec}"
+gr_path='kernel-sources/grsecurity/'
 echo "new_grsec=$new_grsec is the current version"
 
 echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" ; mywait 
