@@ -4,7 +4,6 @@
 skip_intro=false
 assume_yes=false
 as_bot=false
-
 url_base_stable="http://grsecurity.net/stable/"
 
 function help() {
@@ -24,21 +23,22 @@ while getopts "hABsy" opt; do
     h)
 			help
 			exit 1
-      ;;
+      ;;&
     B)
       echo "running as bot" >&2
 			as_bot=true
+			;;&
     A)
       echo "using automatic mode" >&2
 			skip_intro=true
 			assume_yes=true
-      ;;
+      ;;&
     s)
 			skip_intro=true
-      ;;
+      ;;&
     y)
 			assume_yes=true
-      ;;
+      ;;&
     \?)
       echo "Invalid option: -$OPTARG script will exit. Use option -h to see help." >&2
 			exit 100
@@ -112,11 +112,55 @@ function sources_list() {
 	cd ../..
 }
 
+echo "Loading (current/old) env data"
+. kernel-build/linux-mempo/env-data.sh
+
+
 echo "Checking new version of grsecurity from network"
 new_grsec=$(rsstail -u http://grsecurity.net/stable2_rss.php -1 | awk  '{print $2}')
 url="${url_base_stable}${new_grsec}"
 gr_path='kernel-sources/grsecurity/'
 echo "new_grsec=$new_grsec is the current version"
+kernel_ver=$( printf '%s\n' "$new_grsec" | sed -e 's/grsecurity-3.0-\(3\.2\.[0-9]*\).*patch/\1/g' )
+
+# echo 'grsecurity-3.0-3.2.58-201405112002.patch' | sed -e 's/grsecurity-3.0-\(3\.2\.[0-9]*\).*patch/\1/g'
+echo "kernel_ver=${kernel_ver} from new (online) grsecurity version"
+
+if [[ "$kernel_ver" != "$kernel_general_version" ]] ; then
+	echo "The version of kernel from new (online) grsecurity version differs from the version for which this SameKernel was yet configured."
+	echo "You need to manually increase the (vanilla) KERNEL VERSION following instructions from the readme file."
+	echo "Commit version for next kernel, and then run this script again."
+	echo "Bad kernel version $kernel_general_version vs $kernel_ver from $new_grsec" >&2 
+	exit 101
+fi
+echo "Main kernel version is OK"
+
+echo "### Preparing new env"
+url_provable_entropy="http://mempo.org/random/blockchain/default/get/"
+echo "Getting provable entropy from $url_provable_entropy"
+entropy_data=$( wget -q "$url_provable_entropy" --output-document - ) 
+entropy_seed=$( printf '%s\n' "$entropy_data" | head -n 1 | tail -n 1 )
+entropy_index=$( printf '%s\n' "$entropy_data" | head -n 2 | tail -n 1 )
+entropy_name=$( printf '%s\n' "$entropy_data" | head -n 3 | tail -n 1 )
+echo "Got entropy seed from $entropy_name index $entropy_index:"
+echo "$entropy_seed"
+
+newenv_date=$(date +'%Y-%m-%s %H:%M:%S')
+newenv_rev='01'
+
+f_olden="kernel-build/linux-mempo/env-data.sh" # this will be updated
+f_newenv_dir="var.update" # temp dir
+mkdir -p "$f_newenv_dir"
+
+f_newenv="$f_newenv_dir/env-data.sh"
+
+printf "# place for STATIC settings that could change between releases\n" > $f_newenv
+printf "export kernel_general_version=\"${$kernel_ver}\" # base version (should match the one is sources.list)" > $f_newenv
+printf "export KERNEL_DATE='$newenv_date' # UTC time of mempo version. This is > then max(kernel,grsec,patches) times" > $f_newenv
+printf "export CURRENT_SEED='$entropy_seed' # $entropy_name block $entropy_index (*)" > $f_newenv
+printf "export DEBIAN_REVISION='$newenv_rev' # see README.md how to update it on git tag, on rc and final releases" > $f_newenv
+
+cp $f_newenv $_oldenv
 
 echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" ; mywait 
 
@@ -141,5 +185,22 @@ mywait
 
 echo "Now we will increase mempo version"
 mywait
-. devel-update-version.sh
+
+# . devel-update-version.sh "$@" 
+
+echo ""
+echo ""
+echo "Change date and seed (from -6 block on bitcoin)" ; mywait_e
+vim kernel-build/linux-mempo/env-data.sh 
+
+echo ""
+echo ""
+cat changelog  | grep -B 1 -A 4 linux-image | head -n 4
+echo "Update version CONFIG_LOCALVERSION to mempo version" ; mywait_e
+vim kernel-build/linux-mempo/configs/config-desk.config 
+
+vim changelog
+
+echo "Ok, increased mempo minor version (small change)"
+
 
