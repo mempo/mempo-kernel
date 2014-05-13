@@ -1,4 +1,6 @@
 
+echo " ### THIS SCRIPT will be deprecated soon, merged with the grsecurity updater ### " ; echo "enter to continue"
+read _
 
 function mywait() {
 	echo "Press ENTER when you done the above instructions"
