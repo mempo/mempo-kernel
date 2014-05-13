@@ -148,19 +148,20 @@ echo "$entropy_seed"
 newenv_date=$(date +'%Y-%m-%s %H:%M:%S')
 newenv_rev='01'
 
-f_olden="kernel-build/linux-mempo/env-data.sh" # this will be updated
+f_oldenv="kernel-build/linux-mempo/env-data.sh" # this will be updated
 f_newenv_dir="var.update" # temp dir
 mkdir -p "$f_newenv_dir"
 
 f_newenv="$f_newenv_dir/env-data.sh"
 
-printf "# place for STATIC settings that could change between releases\n" > $f_newenv
-printf "export kernel_general_version=\"${$kernel_ver}\" # base version (should match the one is sources.list)" > $f_newenv
-printf "export KERNEL_DATE='$newenv_date' # UTC time of mempo version. This is > then max(kernel,grsec,patches) times" > $f_newenv
-printf "export CURRENT_SEED='$entropy_seed' # $entropy_name block $entropy_index (*)" > $f_newenv
-printf "export DEBIAN_REVISION='$newenv_rev' # see README.md how to update it on git tag, on rc and final releases" > $f_newenv
+printf '' > $f_newenv
+printf '%s\n' "# place for STATIC settings that could change between releases" > $f_newenv
+printf '%s\n' "export kernel_general_version=\"$kernel_ver\" # base version (should match the one is sources.list)" > $f_newenv
+printf '%s\n' "export KERNEL_DATE='$newenv_date' # UTC time of mempo version. This is > then max(kernel,grsec,patches) times" > $f_newenv
+printf '%s\n' "export CURRENT_SEED='$entropy_seed' # $entropy_name block $entropy_index (*)" > $f_newenv
+printf '%s\n' "export DEBIAN_REVISION='$newenv_rev' # see README.md how to update it on git tag, on rc and final releases" > $f_newenv
 
-cp $f_newenv $_oldenv
+cp "$f_newenv" "$f_oldenv"
 
 echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" ; mywait 
 
