@@ -1,3 +1,155 @@
+commit 5249b288c860d8ad83335db0bd44a0529782c3a8
+Author: David S. Miller <davem@davemloft.net>
+Date:   Mon Apr 28 23:50:08 2014 -0700
+
+    Upstream commit: d037d16372bbe4d580342bebbb8826821ad9edf0
+    
+    sparc64: Handle 32-bit tasks properly in compute_effective_address().
+    
+    If we have a 32-bit task we must chop off the top 32-bits of the
+    64-bit value just as the cpu would.
+    
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ arch/sparc/kernel/unaligned_64.c |   12 +++++++++---
+ 1 files changed, 9 insertions(+), 3 deletions(-)
+
+commit 1bd029b6a18a5f97ee1284a61bef4cd3381e0d35
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 11 12:40:46 2014 -0400
+
+    fix compilation, reported by mcp
+
+ fs/proc/stat.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 578116be14bf158bc2e340952bd8a28afa5cc0f9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 10 17:31:17 2014 -0400
+
+    fix compilation
+
+ include/linux/thread_info.h |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit e62d30699e81b93e65213ee3275e7c8e855ad7ed
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 10 17:24:47 2014 -0400
+
+    force DEBUG_STACKOVERFLOW on on grsec kernels and make it
+    trigger the bruteforce logic
+    
+    Conflicts:
+    
+    	arch/powerpc/kernel/irq.c
+    	arch/x86/kernel/irq_32.c
+    	arch/x86/kernel/irq_64.c
+
+ arch/mips/kernel/irq.c    |    4 ++++
+ arch/powerpc/kernel/irq.c |    3 +++
+ arch/x86/kernel/irq_32.c  |    4 ++++
+ arch/x86/kernel/irq_64.c  |    3 +++
+ security/Kconfig          |    1 +
+ 5 files changed, 15 insertions(+), 0 deletions(-)
+
+commit 495a3bb3c5488519188cf3da926aff5ea0eac2eb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 10 16:46:48 2014 -0400
+
+    always perform the stack overflow check, not just for non-fixed size copies
+
+ fs/exec.c                   |   16 +---------------
+ include/linux/thread_info.h |    8 ++++++++
+ 2 files changed, 9 insertions(+), 15 deletions(-)
+
+commit 434193e5563a158139ecdb479865728af57f048a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 10 16:26:25 2014 -0400
+
+    compile fix
+
+ fs/proc/stat.c |   12 ++++++++++++
+ 1 files changed, 12 insertions(+), 0 deletions(-)
+
+commit d44fc35cea3e921ce6c0e6de16b539dafbb1e99b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 10 15:52:44 2014 -0400
+
+    improve PAX_USERCOPY on x86 to detect attempted copies when the current
+    stack has overflowed
+
+ arch/x86/kernel/dumpstack_32.c |    2 +-
+ arch/x86/kernel/dumpstack_64.c |    2 +-
+ fs/exec.c                      |   17 ++++++++++++++++-
+ 3 files changed, 18 insertions(+), 3 deletions(-)
+
+commit 7997ac44201621628c670827226bb393ed4b0187
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat May 10 15:29:13 2014 -0400
+
+    relax /proc/stat restrictions
+    
+    Conflicts:
+    
+    	fs/proc/stat.c
+
+ fs/proc/stat.c |   49 +++++++++++++++++++++++++++----------------------
+ 1 files changed, 27 insertions(+), 22 deletions(-)
+
+commit df5c216e9ab4541d08dd7a45ea5701d75b78df9b
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Sat May 3 23:27:00 2014 +0300
+
+    Upstream commit: 3cf0b0311e746a26dcc7c0b5ba0756f61d636a33
+    
+    agp: info leak in agpioc_info_wrap()
+    
+    On 64 bit systems the agp_info struct has a 4 byte hole between
+    ->agp_mode and ->aper_base.  We need to clear it to avoid disclosing
+    stack information to userspace.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+
+ drivers/char/agp/frontend.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 02a5d53352be8c02a37d4b533dc9b57a6434fa68
+Author: Matthew Daley <mattd@bugfuzz.com>
+Date:   Mon Apr 28 19:05:20 2014 +1200
+
+    Upstream commit: ef87dbe7614341c2e7bfe8d32fcb7028cc97442c
+    
+    floppy: ignore kernel-only members in FDRAWCMD ioctl input
+    
+    Always clear out these floppy_raw_cmd struct members after copying the
+    entire structure from userspace so that the in-kernel version is always
+    valid and never left in an interdeterminate state.
+    
+    Signed-off-by: Matthew Daley <mattd@bugfuzz.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/block/floppy.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 0b505d92305c57ad572115a67665b530c449496b
+Author: Matthew Daley <mattd@bugfuzz.com>
+Date:   Mon Apr 28 19:05:21 2014 +1200
+
+    Upstream commit: 2145e15e0557a01b9195d1c7199a1b92cb9be81f
+    
+    floppy: don't write kernel-only members to FDRAWCMD ioctl output
+    
+    Do not leak kernel-only floppy_raw_cmd structure members to userspace.
+    This includes the linked-list pointer and the pointer to the allocated
+    DMA space.
+    
+    Signed-off-by: Matthew Daley <mattd@bugfuzz.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/block/floppy.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
 commit fba8cb418be22f02333b5fe4d7ddfdbba3f1f82a
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue May 6 17:04:33 2014 -0400
