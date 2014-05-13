@@ -124,7 +124,7 @@ sources_list
 
 echo "Commiting the new grsec ($new_grsec) files to git in one commit:"
 git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt
-git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt -m "[grsec] $new_grsec"
+git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt -m "[grsec]auto $new_grsec"
 
 echo "Added to grsec as:"
 git log HEAD^1..HEAD
