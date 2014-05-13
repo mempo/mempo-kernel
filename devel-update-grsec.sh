@@ -149,7 +149,7 @@ entropy_name=$( printf '%s\n' "$entropy_data" | head -n 3 | tail -n 1 )
 echo "Got entropy seed from $entropy_name index $entropy_index:"
 echo "$entropy_seed"
 
-newenv_date=$(date +'%Y-%m-%s %H:%M:%S')
+newenv_date=$(date +'%Y-%m-%d %H:%M:%S')
 newenv_rev='01'
 
 f_oldenv="kernel-build/linux-mempo/env-data.sh" # this will be updated
@@ -179,8 +179,9 @@ download
 sources_list
 
 echo "Commiting the new grsec ($new_grsec) files to git in one commit:"
-git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt
-git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt -m $'[grsec] ${commit_msg_extra1}${commit_msg_extra2}'
+git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt # XXX
+git_msg="[grsec] $new_grsec ${commit_msg_extra1}${commit_msg_extra2}"
+git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt -m "$git_msg"
 
 echo "Added to grsec as:"
 git log HEAD^1..HEAD
@@ -196,16 +197,32 @@ mywait
 echo ""
 echo ""
 echo "Change date and seed (from -6 block on bitcoin)" ; mywait_e
-vim kernel-build/linux-mempo/env-data.sh 
+# vim kernel-build/linux-mempo/env-data.sh 
+
+# TODO: find out next mempo version
 
 echo ""
 echo ""
 cat changelog  | grep -B 1 -A 4 linux-image | head -n 4
 echo "Update version CONFIG_LOCALVERSION to mempo version" ; mywait_e
+# TODO: find update version name in .config
 vim kernel-build/linux-mempo/configs/config-desk.config 
 
+# TODO generate new block for new mempo version,
+# TODO ...and put there new grsecurity info
 vim changelog
 
-echo "Ok, increased mempo minor version (small change)"
+#       modified:   changelog
+#       #       modified:   devel-update-grsec.sh
+#       #       modified:   kernel-build/linux-mempo/configs/config-desk.config
+#       #       modified:   kernel-build/linux-mempo/env-data.sh
+#       #       modified:   kernel-build/linux-mempo/sources.list
+#
+
+# TODO commit
+# TODO tag -s 
+# TODO git push
+
+
 
 
