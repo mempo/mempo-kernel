@@ -3,6 +3,7 @@
 
 skip_intro=false
 assume_yes=false
+as_bot=false
 
 url_base_stable="http://grsecurity.net/stable/"
 
@@ -11,18 +12,22 @@ function help() {
 	echo "This script increases kernel version in Mempo project git hub - to be used by developers"
 	echo "Read all about the project on mempo.org (and mempo.i2p) or ask us on irc #mempo on irc.oftc.net"
 	echo "Options:"
+	echo "  -B use when you run this from build Bot, implies -A"
 	echo "  -A Automatic build, e.g. for build bot, sets the needed options like -s -y"
 	echo "  -s Skips introduction and pauses"
 	echo "  -y assume Yes in normal questions"
 	echo ""
 }
 
-while getopts "hAsy" opt; do
+while getopts "hABsy" opt; do
   case $opt in
     h)
 			help
 			exit 1
       ;;
+    B)
+      echo "running as bot" >&2
+			as_bot=true
     A)
       echo "using automatic mode" >&2
 			skip_intro=true
@@ -40,7 +45,6 @@ while getopts "hAsy" opt; do
       ;;
   esac
 done
-
 
 echo ""
 echo "==============================================================="
@@ -124,7 +128,10 @@ sources_list
 
 echo "Commiting the new grsec ($new_grsec) files to git in one commit:"
 git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt
-git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt -m "[grsec]auto $new_grsec"
+commit_msg_extra1=''
+commit_msg_extra2=''
+if [[ "$as_bot" == true ]]; then commit_msg_extra1='[bot]'; commit_msg_extra2=$'\n\n[bot] - commit done by automatic bot'
+git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt -m $'[grsec] ${commit_msg_extra1}${commit_msg_extra2}'
 
 echo "Added to grsec as:"
 git log HEAD^1..HEAD
