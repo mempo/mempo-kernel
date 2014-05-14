@@ -149,7 +149,7 @@ entropy_name=$( printf '%s\n' "$entropy_data" | head -n 3 | tail -n 1 )
 echo "Got entropy seed from $entropy_name index $entropy_index:"
 echo "$entropy_seed"
 
-newenv_date=$(date +'%Y-%m-%s %H:%M:%S')
+newenv_date=$(date +'%Y-%m-%d %H:%M:%S')
 newenv_rev='01'
 
 f_oldenv="kernel-build/linux-mempo/env-data.sh" # this will be updated
