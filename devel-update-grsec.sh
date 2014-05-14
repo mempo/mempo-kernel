@@ -179,9 +179,9 @@ download
 sources_list
 
 echo "Commiting the new grsec ($new_grsec) files to git in one commit:"
-git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt ./devel-update-grsec.sh # XXX
-git_msg="[grsec] ${commit_msg_extra1}${commit_msg_extra2}"
-git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt ./devel-update-grsec.sh -e -m "$git_msg"
+git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt # XXX
+git_msg="[grsec] $new_grsec ${commit_msg_extra1}${commit_msg_extra2}"
+git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt -m "$git_msg"
 
 echo "Added to grsec as:"
 git log HEAD^1..HEAD
@@ -211,6 +211,13 @@ vim kernel-build/linux-mempo/configs/config-desk.config
 # TODO generate new block for new mempo version,
 # TODO ...and put there new grsecurity info
 vim changelog
+
+#       modified:   changelog
+#       #       modified:   devel-update-grsec.sh
+#       #       modified:   kernel-build/linux-mempo/configs/config-desk.config
+#       #       modified:   kernel-build/linux-mempo/env-data.sh
+#       #       modified:   kernel-build/linux-mempo/sources.list
+#
 
 # TODO commit
 # TODO tag -s 
