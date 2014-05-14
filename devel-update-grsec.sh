@@ -196,16 +196,25 @@ mywait
 echo ""
 echo ""
 echo "Change date and seed (from -6 block on bitcoin)" ; mywait_e
-vim kernel-build/linux-mempo/env-data.sh 
+# vim kernel-build/linux-mempo/env-data.sh 
+
+# TODO: find out next mempo version
 
 echo ""
 echo ""
 cat changelog  | grep -B 1 -A 4 linux-image | head -n 4
 echo "Update version CONFIG_LOCALVERSION to mempo version" ; mywait_e
+# TODO: find update version name in .config
 vim kernel-build/linux-mempo/configs/config-desk.config 
 
+# TODO generate new block for new mempo version,
+# TODO ...and put there new grsecurity info
 vim changelog
 
-echo "Ok, increased mempo minor version (small change)"
+# TODO commit
+# TODO tag -s 
+# TODO git push
+
+
 
 
