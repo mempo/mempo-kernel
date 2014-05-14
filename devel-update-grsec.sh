@@ -179,9 +179,9 @@ download
 sources_list
 
 echo "Commiting the new grsec ($new_grsec) files to git in one commit:"
-git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt
-title=$''
-git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt -m $'[grsec] ${commit_msg_extra1}${commit_msg_extra2}'
+git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt ./devel-update-grsec.sh # XXX
+git_msg="[grsec] ${commit_msg_extra1}${commit_msg_extra2}"
+git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt ./devel-update-grsec.sh -e -m "$git_msg"
 
 echo "Added to grsec as:"
 git log HEAD^1..HEAD
