@@ -154,7 +154,9 @@ echo
 echo "Executing the build script"
 echo 
 echo "Will now execute ./all.sh to build the kernel."
-bash ./all.sh $@ || { echo ; echo "WARNING: Build of kernel seem to had some problems? (exit-code)" ; }
+bash ./all.sh $@ || { echo ; echo "WARNING: Build of kernel seem to had some problems? (exit-code)" ; 
+	exit_error;
+}
 set +x
 echo "-------------------------------------------------------------------------"
 
