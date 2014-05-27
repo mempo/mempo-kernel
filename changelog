@@ -2,6 +2,8 @@
 linux-image (linux-3.2.58-mempo-0.1.46) UNRELEASED; urgency=low
   * updated grsecurity
   * updated linux
+  * run.sh breaks on error
+  * v0.1.46-02-rc
 
  -- mempo <mempo@mempo.org>  Mon, 14 May 2014 02:00:00 +0200
 
