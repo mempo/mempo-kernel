@@ -1,3 +1,121 @@
+commit 61685e688b41d0d914736e99750ff034af9f8a60
+Author: Anthony Iliopoulos <anthony.iliopoulos@huawei.com>
+Date:   Wed May 14 11:29:48 2014 +0200
+
+    Upstream commit: 9844f5462392b53824e8b86726e7c33b5ecbb676
+    
+    x86, mm, hugetlb: Add missing TLB page invalidation for hugetlb_cow()
+    
+    The invalidation is required in order to maintain proper semantics
+    under CoW conditions. In scenarios where a process clones several
+    threads, a thread operating on a core whose DTLB entry for a
+    particular hugepage has not been invalidated, will be reading from
+    the hugepage that belongs to the forked child process, even after
+    hugetlb_cow().
+    
+    The thread will not see the updated page as long as the stale DTLB
+    entry remains cached, the thread attempts to write into the page,
+    the child process exits, or the thread gets migrated to a different
+    processor.
+    
+    Signed-off-by: Anthony Iliopoulos <anthony.iliopoulos@huawei.com>
+    Link: http://lkml.kernel.org/r/20140514092948.GA17391@server-36.huawei.corp
+    Suggested-by: Shay Goikhman <shay.goikhman@huawei.com>
+    Acked-by: Dave Hansen <dave.hansen@intel.com>
+    Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
+    Cc: <stable@vger.kernel.org> # v2.6.16+ (!)
+
+ arch/x86/include/asm/hugetlb.h |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 9386cb913f41ad5fddc2782a3245a70c6cb74d50
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Wed May 14 16:33:54 2014 -0700
+
+    Upstream commit: fa81511bb0bbb2b1aace3695ce869da9762624ff
+    
+    x86-64, modify_ldt: Make support for 16-bit segments a runtime option
+    
+    Checkin:
+    
+    b3b42ac2cbae x86-64, modify_ldt: Ban 16-bit segments on 64-bit kernels
+    
+    disabled 16-bit segments on 64-bit kernels due to an information
+    leak.  However, it does seem that people are genuinely using Wine to
+    run old 16-bit Windows programs on Linux.
+    
+    A proper fix for this ("espfix64") is coming in the upcoming merge
+    window, but as a temporary fix, create a sysctl to allow the
+    administrator to re-enable support for 16-bit segments.
+    
+    It adds a "/proc/sys/abi/ldt16" sysctl that defaults to zero (off). If
+    you hit this issue and care about your old Windows program more than
+    you care about a kernel stack address information leak, you can do
+    
+       echo 1 > /proc/sys/abi/ldt16
+    
+    as root (add it to your startup scripts), and you should be ok.
+    
+    The sysctl table is only added if you have COMPAT support enabled on
+    x86-64, but I assume anybody who runs old windows binaries very much
+    does that ;)
+    
+    Signed-off-by: H. Peter Anvin <hpa@linux.intel.com>
+    Link: http://lkml.kernel.org/r/CA%2B55aFw9BPoD10U1LfHbOMpHWZkvJTkMcfCs9s3urPr1YyWBxw@mail.gmail.com
+    Cc: <stable@vger.kernel.org>
+
+ arch/x86/kernel/ldt.c        |    4 +++-
+ arch/x86/vdso/vdso32-setup.c |    8 ++++++++
+ 2 files changed, 11 insertions(+), 1 deletions(-)
+
+commit 58edf59a3ee94bbbe27c3967db6a5d283f4e01fa
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Fri May 16 21:40:41 2014 -0400
+
+    Upstream commit: f9c6d4987b23e0a514464bae6771933a48e4cd01
+    
+    random: fix BUG_ON caused by accounting simplification
+    
+    Commit ee1de406ba6eb1 ("random: simplify accounting logic") simplified
+    things too much, in that it allows the following to trigger an
+    overflow that results in a BUG_ON crash:
+    
+    dd if=/dev/urandom of=/dev/zero bs=67108707 count=1
+    
+    Thanks to Peter Zihlstra for discovering the crash, and Hannes
+    Frederic for analyizing the root cause.
+    
+    Signed-off-by: "Theodore Ts'o" <tytso@mit.edu>
+    Reported-by: Peter Zijlstra <peterz@infradead.org>
+    Reported-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Cc: Greg Price <price@mit.edu>
+
+ drivers/char/random.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+commit bd1f060663648057d1a1662c7d788058b8ac417a
+Merge: 5249b28 abe5854
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 25 11:56:37 2014 -0400
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit abe585404d0fe8c70e29ad4296ea21b698a610ec
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 25 11:56:10 2014 -0400
+
+    Update to pax-linux-3.2.59-test150.patch
+
+ arch/x86/kernel/paravirt.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c6e6e2ee5f4722da22512eac57077dafad9da608
+Merge: 6fed70a 382ae9d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 25 11:45:58 2014 -0400
+
+    Merge branch 'linux-3.2.y' into pax-stable2
+
 commit 5249b288c860d8ad83335db0bd44a0529782c3a8
 Author: David S. Miller <davem@davemloft.net>
 Date:   Mon Apr 28 23:50:08 2014 -0700
