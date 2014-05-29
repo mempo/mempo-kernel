@@ -1,3 +1,34 @@
+commit 44f972e59e9d10b9a249977ae066949f2c2180ce
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 28 18:16:00 2014 -0400
+
+    don't force on DEBUG_STACKOVERFLOW as we now have the better STACKLEAK
+    improvements and KSTACKOVERFLOW
+
+ security/Kconfig |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit c66753f04e015df79161be0daab7b7a7cea145b6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 28 17:04:39 2014 -0400
+
+    fix bad WARN_ON and triggering of kernel bruteforce logic in the
+    x64 DEBUG_STACKOVERFLOW case, reported by jeff on IRC
+
+ arch/x86/kernel/irq_64.c |   13 ++++++-------
+ 1 files changed, 6 insertions(+), 7 deletions(-)
+
+commit 47be0d85ed13e8cfeec42f612c08319ca27c8e6d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue May 27 12:54:48 2014 -0400
+
+    make pax_track_stack BUG() immediately if it notices the stack getting
+    too deep -- this will happen separately to its later check that we're
+    clearing too much stack on syscall exit
+
+ fs/exec.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
 commit 61685e688b41d0d914736e99750ff034af9f8a60
 Author: Anthony Iliopoulos <anthony.iliopoulos@huawei.com>
 Date:   Wed May 14 11:29:48 2014 +0200
