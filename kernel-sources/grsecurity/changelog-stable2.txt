@@ -1,3 +1,12 @@
+commit 63466f8f452573994ad1373c54de36ff73b711f3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri May 30 21:38:31 2014 -0400
+
+    fix DEBUG_STACKOVERFLOW properly, reported by jeff on IRC
+
+ arch/x86/kernel/irq_64.c |   15 ++++++++-------
+ 1 files changed, 8 insertions(+), 7 deletions(-)
+
 commit 44f972e59e9d10b9a249977ae066949f2c2180ce
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed May 28 18:16:00 2014 -0400
