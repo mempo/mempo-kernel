@@ -13,6 +13,7 @@ source kernel-build/linux-mempo/env-data.sh # just the static data
 
 kernel_version="$kernel_general_version" # from env.sh
 kernel_file="linux-${kernel_version}.tar"
+kernel_file_sig="linux-${kernel_version}.tar.sign"
 kernel_file_download="${kernel_file}.xz" # the compressed for download version of file
 user_download_folder="${HOME}/Downloads/" # where user stores downloads, use this as download cache (read it, write ther)
 
@@ -138,6 +139,16 @@ then
 #cd ..
 fi
 
+if [ ! -r "kernel-sources/kernel/${kernel_file_sig}" ]
+then
+	echo "Kernel signature is not ready (${kernel_file_sig})"
+	echo "Need to download signature from the Internet."
+	download_wget "https://www.kernel.org/pub/linux/kernel/v3.x/${kernel_file_sig}" -O "kernel-sources/kernel/${kernel_file_sig}"
+fi
+
+echo "-------------------------------------------------------------------------"
+echo "Checking PGP signature on internet-downloaded file of linux kernel (in addition to later checking the expected checksum that we have stored here)"
+gpg --verify "kernel-sources/kernel/${kernel_file_sig}" || { echo "Invalid signature! If you're developer of this kernel-packaging (e.g. of Mempo or Debian kernel) then tripple-check what is going on, this is very strange!" ; exit 1 ; }
 
 echo "-------------------------------------------------------------------------"
 echo "Removing any previous .deb files"

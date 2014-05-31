@@ -1,4 +1,12 @@
 
+linux-image (linux-3.2.59-mempo-0.1.48) UNRELEASED; urgency=low
+  * updated grsecurity
+  * verification of grsecurity sig (on download by developer - update script)
+  * verification of kernel.org sources sig in build process (additionaly to checksum check)
+  * v0.1.48-01-rc
+
+ -- mempo <mempo@mempo.org>  Sat, 31 May 2014 13:00:00 +0200
+
 linux-image (linux-3.2.59-mempo-0.1.47) UNRELEASED; urgency=low
   * updated grsecurity
   * v0.1.47-01-rc

@@ -149,6 +149,12 @@ echo "[AUTO] I will download new grsec (to kernel-sources/grsecurity/) and I wil
 download
 sources_list
 
+echo "-------------"
+echo "[CHECK] Now we will check the GPG signature on grsecurity:"
+gpg --verify $gr_path/$new_grsec.sig || { echo "Invalid signature! If you're developer of this kernel-packaging (e.g. of Mempo or Debian kernel) then tripple-check what is going on, this is very strange!" ; exit 1 ; }
+echo "Press ENTER to continue if all is OK with signature (ctrl-c to abort)"
+read _
+
 echo "Commiting the new grsec ($new_grsec) files to git in one commit:"
 git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt # XXX
 git_msg="[grsec] $new_grsec ${commit_msg_extra1}${commit_msg_extra2}"
