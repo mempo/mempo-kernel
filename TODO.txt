@@ -20,6 +20,11 @@ KERNEL'S CHANGELOG - TODO UPDATE!!!
 === THINGS TODO ===
 (newest added on top)
 
+finish devel-update-grsec
+* auto increase mempo version like "47" (as in mempo 0.1.47, 0.1.48,..)
+* save the increased mempo version to kernel .config name
+* generate the new changelog entry, with increased mempo version, and with correct date - SEE should we use existing tool for debian developers
+
 * check PGP signature on kernel vanilla
 * flavours of config
 * support make kpkg instead of deprecated make-kpkg
