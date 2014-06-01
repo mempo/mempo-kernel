@@ -1,3 +1,14 @@
+commit d123ba06b839092349c0e774e857f1ab1e8fc6b6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 1 11:14:01 2014 -0400
+
+    remove my backport of the pty fix as it's now fixed upstream
+    
+    reported by rfree/mempo
+
+ drivers/tty/n_tty.c |    9 ---------
+ 1 files changed, 0 insertions(+), 9 deletions(-)
+
 commit 63466f8f452573994ad1373c54de36ff73b711f3
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Fri May 30 21:38:31 2014 -0400
