@@ -2,8 +2,10 @@
 linux-image (linux-3.2.59-mempo-0.1.50) UNRELEASED; urgency=low
   * updated grsecurity
   * v0.1.50-01-rc
+  * added option +CONFIG_GRKERNSEC_KSTACKOVERFLOW=y
+  * v0.1.50-02-rc
 
- -- mempo <mempo@mempo.org>  Tue, 02 Jun 2014 01:20:00 +0200
+ -- mempo <mempo@mempo.org>  Tue, 02 Jun 2014 01:38:00 +0200
 
 linux-image (linux-3.2.59-mempo-0.1.49) UNRELEASED; urgency=low
   * updated grsecurity
