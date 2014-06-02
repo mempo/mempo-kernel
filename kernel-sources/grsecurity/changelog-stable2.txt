@@ -1,3 +1,157 @@
+commit e684d267aa65130a25bb0355bf08f15d748e8971
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 2 16:50:02 2014 -0400
+
+    update hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit dec01c65a1c17bba1c39964df0b8acbf40ed5af5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 2 16:18:35 2014 -0400
+
+    compile fix
+
+ kernel/fork.c |   41 ++++++++++++++++++++++++++---------------
+ mm/vmalloc.c  |    4 ++--
+ 2 files changed, 28 insertions(+), 17 deletions(-)
+
+commit 409239ea3d7a8e95dccb66a1732bd995c48626e0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 2 15:36:59 2014 -0400
+
+    compile fix
+
+ mm/vmalloc.c |    8 +++++++-
+ 1 files changed, 7 insertions(+), 1 deletions(-)
+
+commit b9bdbdf615bc879205c4e8e9d8c6c3bc40a330d4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 2 15:29:48 2014 -0400
+
+    Add a new feature for 64-bit kernels to defend against stack overflows
+    GRKERNSEC_KSTACKOVERFLOW
+    
+    Contrary to some naive suggestions on Twitter, it's not just a simple
+    process of "adding guard pages" due to how kernel stacks are allocated
+    on Linux and the fact that just adding guard pages to that existing
+    allocation mechanism would require breaking up large pages, adding a
+    large maintenance and performance cost.  Instead we allocate the kernel
+    process stacks using vmalloc which provides us with the "guard pages"
+    for free, though we only do this on 64-bit architectures (other than Itanium)
+    due to the limited space for vmalloc allocations on 32-bit.
+    
+    We've been working on some other approaches for solving this problem,
+    including one that required several advances in GCC plugin analysis, but
+    this will exist for now as a stopgap until another approach replaces it.
+
+ arch/x86/kernel/traps.c |    5 +++++
+ fs/exec.c               |    1 +
+ grsecurity/Kconfig      |   13 +++++++++++++
+ include/linux/sched.h   |   19 +++++++++++++++++++
+ include/linux/vmalloc.h |    1 +
+ kernel/fork.c           |   15 +++++++++++++++
+ kernel/sched.c          |    8 ++++++--
+ mm/vmalloc.c            |    6 ++++++
+ 8 files changed, 66 insertions(+), 2 deletions(-)
+
+commit 7f9eb5130b5ca75efc0cdbd5090d1bed9bbeeb16
+Merge: 265e351 9aa785b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 2 15:11:37 2014 -0400
+
+    Merge branch 'pax-stable2' into grsec-stable2
+    
+    Conflicts:
+    	Makefile
+    	tools/gcc/Makefile
+
+commit 9aa785b03e380493c4c8ca31af2c49b2e276fb40
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 2 15:06:29 2014 -0400
+
+    Update to pax-linux-3.2.59-test151.patch:
+    - Emese refactored the size overflow plugin and also fixed several integer constant related false positives
+      - https://forums.grsecurity.net/viewtopic.php?f=3&t=3940
+      - https://forums.grsecurity.net/viewtopic.php?f=3&t=3942
+      - https://forums.grsecurity.net/viewtopic.php?f=3&t=3943
+      - https://forums.grsecurity.net/viewtopic.php?f=3&t=3949
+      - https://forums.grsecurity.net/viewtopic.php?f=3&t=3950
+    - Emese fixed an assert in the size overflow plugin that could trigger while compiling on 32 bit archs, reported by spender
+    - Emese fixed the handling of more intentional overflows in unsigned/signed casts, reported by minipli
+    - updated the mrproper target for the new location of the overflow plugin headers, by minipli
+    - fixed an off-by-one in the prefault code in access_ok on x86, reported by Roy Li <rongqing.li@windriver.com>
+      it'd cause a prefault attempt on address 0 and other unmapped addresses and fail the current syscall
+    - updated gcc-common.h
+
+ Makefile                                           |    6 +-
+ arch/x86/include/asm/uaccess.h                     |   34 +-
+ tools/gcc/.gitignore                               |    1 -
+ tools/gcc/Makefile                                 |   29 +-
+ tools/gcc/gcc-common.h                             |   10 +-
+ tools/gcc/generate_size_overflow_hash.sh           |   97 -
+ tools/gcc/size_overflow_hash.data                  | 4429 --------------------
+ tools/gcc/size_overflow_hash_aux.data              |   91 -
+ tools/gcc/size_overflow_plugin.c                   | 4169 ------------------
+ tools/gcc/size_overflow_plugin/.gitignore          |    1 +
+ tools/gcc/size_overflow_plugin/Makefile            |   20 +
+ .../generate_size_overflow_hash.sh                 |  102 +
+ .../insert_size_overflow_asm.c                     |  790 ++++
+ .../insert_size_overflow_check_core.c              |  902 ++++
+ .../insert_size_overflow_check_ipa.c               | 1133 +++++
+ .../size_overflow_plugin/intentional_overflow.c    |  733 ++++
+ tools/gcc/size_overflow_plugin/misc.c              |  203 +
+ .../size_overflow_plugin/remove_unnecessary_dup.c  |  138 +
+ tools/gcc/size_overflow_plugin/size_overflow.h     |  127 +
+ .../gcc/size_overflow_plugin/size_overflow_debug.c |  116 +
+ .../size_overflow_plugin/size_overflow_hash.data   | 4429 ++++++++++++++++++++
+ .../size_overflow_hash_aux.data                    |   91 +
+ .../size_overflow_plugin/size_overflow_plugin.c    |  259 ++
+ .../size_overflow_plugin_hash.c                    |  364 ++
+ 24 files changed, 9448 insertions(+), 8826 deletions(-)
+
+commit 265e3519eb88d6eee96d14afe7bdb26691fd471b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 2 14:35:00 2014 -0400
+
+    backport ntpd fix for GRKERNSEC_SETXID
+
+ include/linux/cred.h |    1 +
+ kernel/cred.c        |    8 +++++++-
+ 2 files changed, 8 insertions(+), 1 deletions(-)
+
+commit f7a7ffb4dd3c028442edee5ad7405aa9fc3bb974
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 2 06:51:24 2014 -0400
+
+    avoid include hell by moving the stack check to fs/exec.c and passing
+    in an extra bool to the function specifying whether the length is const
+    or not.  we'll also perform this check regardless of USERCOPY status
+    
+    Conflicts:
+    
+    	include/linux/thread_info.h
+
+ fs/exec.c                   |   17 +++++++++++++++--
+ include/linux/thread_info.h |   16 +++-------------
+ 2 files changed, 18 insertions(+), 15 deletions(-)
+
+commit 58fe3a791c09108f829e729952aff4fcbaf4f3a6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 1 12:43:42 2014 -0400
+
+    We can use an even stricter check on the stack for copy*user as it should
+    only ever be called in process context -- this allows us not only to check
+    for potential future overflow but actual overflow
+    
+    Conflicts:
+    
+    	include/linux/thread_info.h
+
+ include/linux/thread_info.h |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
+
 commit d123ba06b839092349c0e774e857f1ab1e8fc6b6
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jun 1 11:14:01 2014 -0400
