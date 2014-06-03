@@ -1,3 +1,22 @@
+commit 6bbd3978f194a25e2317f229cdf3985e9daee35c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 3 07:13:32 2014 -0400
+
+    mark KSTACKOVERFLOW as broken on 3.2 until it is fixed.  Wasn't caught by
+    my automated testing due to a bug in my build scripts
+
+ grsecurity/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit f0006cb4e64a5083cd3def0718c3cf9522a81102
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 3 06:29:37 2014 -0400
+
+    add another populate_stack under switch_mm()
+
+ mm/mmu_context.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
 commit e684d267aa65130a25bb0355bf08f15d748e8971
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jun 2 16:50:02 2014 -0400
