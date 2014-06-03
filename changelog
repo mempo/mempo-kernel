@@ -1,4 +1,11 @@
 
+
+linux-image (linux-3.2.59-mempo-0.1.51) UNRELEASED; urgency=low
+  * updated grsecurity (fixed the boot failure, and more)
+  * v0.1.51-01-rc
+
+ -- mempo <mempo@mempo.org>  Thu, 04 Jun 2014 01:00:00 +0200
+
 linux-image (linux-3.2.59-mempo-0.1.50) UNRELEASED; urgency=low
   * updated grsecurity
   * v0.1.50-01-rc
