@@ -1,10 +1,15 @@
 
+linux-image (linux-3.2.59-mempo-0.1.52) UNRELEASED; urgency=low
+  * updated grsecurity
+  * v0.1.52-01-rc
+
+ -- mempo <mempo@mempo.org>  Thu, 05 Jun 2014 01:00:00 +0200
 
 linux-image (linux-3.2.59-mempo-0.1.51) UNRELEASED; urgency=low
   * updated grsecurity (fixed the boot failure, and more)
   * v0.1.51-01-rc
 
- -- mempo <mempo@mempo.org>  Thu, 04 Jun 2014 01:00:00 +0200
+ -- mempo <mempo@mempo.org>  Wed, 04 Jun 2014 01:00:00 +0200
 
 linux-image (linux-3.2.59-mempo-0.1.50) UNRELEASED; urgency=low
   * updated grsecurity
@@ -12,7 +17,7 @@ linux-image (linux-3.2.59-mempo-0.1.50) UNRELEASED; urgency=low
   * added option +CONFIG_GRKERNSEC_KSTACKOVERFLOW=y
   * v0.1.50-02-rc
 
- -- mempo <mempo@mempo.org>  Tue, 02 Jun 2014 01:38:00 +0200
+ -- mempo <mempo@mempo.org>  Mon, 02 Jun 2014 01:38:00 +0200
 
 linux-image (linux-3.2.59-mempo-0.1.49) UNRELEASED; urgency=low
   * updated grsecurity
