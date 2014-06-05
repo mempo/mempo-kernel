@@ -1,3 +1,61 @@
+commit 8798a53cd1e84e1b2c0ecee1afed25a08648041d
+Author: Oleg Nesterov <oleg@redhat.com>
+Date:   Mon Jul 8 16:00:08 2013 -0700
+
+    vfree: don't schedule free_work() if llist_add() returns false
+    
+    vfree() only needs schedule_work(&p->wq) if p->list was empty, otherwise
+    vfree_deferred->wq is already pending or it is running and didn't do
+    llist_del_all() yet.
+    
+    Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+    Cc: Al Viro <viro@zeniv.linux.org.uk>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	mm/vmalloc.c
+
+ mm/vmalloc.c |    7 ++++---
+ 1 files changed, 4 insertions(+), 3 deletions(-)
+
+commit 8a62a7ce273800b19fb3626a7c6b3005dd7b5577
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Sun Mar 10 20:14:08 2013 -0400
+
+    make vfree() safe to call from interrupt contexts
+    
+    A bunch of RCU callbacks want to be able to do vfree() and end up with
+    rather kludgy schemes.  Just let vfree() do the right thing - put the
+    victim on llist and schedule actual __vunmap() via schedule_work(), so
+    that it runs from non-interrupt context.
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ mm/vmalloc.c |   45 ++++++++++++++++++++++++++++++++++++++++-----
+ 1 files changed, 40 insertions(+), 5 deletions(-)
+
+commit 966a25b66eefc148cb927aae1bb9551a576b82e3
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 3 09:49:01 2014 -0400
+
+    fix compiler warning
+
+ fs/exec.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ba92b6c35509ac0b667d9ba1d425de47a65ee7a7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 3 07:23:49 2014 -0400
+
+    Revert "mark KSTACKOVERFLOW as broken on 3.2 until it is fixed.  Wasn't caught by"
+    
+    This reverts commit 6bbd3978f194a25e2317f229cdf3985e9daee35c.
+
+ grsecurity/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 6bbd3978f194a25e2317f229cdf3985e9daee35c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jun 3 07:13:32 2014 -0400
