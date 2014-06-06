@@ -23,3 +23,5 @@ mempo-generated-seed.txt
 # script updater files
 var.update/
 
+# Deb files
+*.deb

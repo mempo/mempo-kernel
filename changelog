@@ -1,3 +1,8 @@
+linux-image (linux-3.2.59-mempo-0.1.54) UNRELEASED; urgency=low
+  * updated grsecurity
+  * v0.1.54-01-rc
+
+ -- mempo <mempo@mempo.org>  Fri, 06 Jun 2014 10:38:48 +0100
 
 linux-image (linux-3.2.59-mempo-0.1.53) UNRELEASED; urgency=low
   * updated grsecurity
