@@ -1,3 +1,77 @@
+commit 96f72e4c712c55b8ea0011994c7139f5026c62f7
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Wed May 28 23:09:58 2014 -0400
+
+    Upstream commit: a3c54931199565930d6d84f4c3456f6440aefd41
+    
+    auditsc: audit_krule mask accesses need bounds checking
+    
+    Fixes an easy DoS and possible information disclosure.
+    
+    This does nothing about the broken state of x32 auditing.
+    
+    eparis: If the admin has enabled auditd and has specifically loaded
+    audit rules.  This bug has been around since before git.  Wow...
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Signed-off-by: Eric Paris <eparis@redhat.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	kernel/auditsc.c
+
+ kernel/auditsc.c |   25 ++++++++++++++++++-------
+ 1 files changed, 18 insertions(+), 7 deletions(-)
+
+commit d20f2736b8c185c0dccb03d2c600a51c7131ee8d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 10 12:25:17 2014 -0400
+
+    update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 4b4e8eb16b000f63b26b530d442ca4566336d015
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 10 10:01:00 2014 -0400
+
+    fix !x86 compilation, reported by Blake Self
+
+ fs/exec.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit b17ed609e4b3ee5244faf36a2f5d4b802baf626d
+Merge: bc7622c 3ceecde
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 10 09:43:02 2014 -0400
+
+    Merge branch 'pax-stable2' into grsec-stable2
+    
+    Conflicts:
+    	net/core/filter.c
+    	net/ipv4/ping.c
+    	security/Kconfig
+
+commit 3ceecde1a9ba0b5d3d250561445b279b11d87a5c
+Merge: 9aa785b 6b3965a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 10 09:33:31 2014 -0400
+
+    Update to pax-linux-3.2.60-test152.patch:
+    - backported 'x86_64: expand kernel stack to 16K', commit 6538b8ea886e472f4431db8ca1d60478f838d14b upstream
+    - backported 'mm: rmap: fix use-after-free in __put_anon_vma', commit 624483f3ea82598ab0f62f1bdb9177f531ab1892 upstream
+    - CPUs are switched to the percpu pgd earlier to support early vmalloc faults (needed for grsecurity's KSTACKOVERFLOW)
+    - cleaned up some unnecessary hunks
+    - folded RANDUSTACK into RANDMMAP as supporting them separately isn't worth it, reported by Roy Li <rongqing.li@windriver.com>
+    
+    Merge branch 'linux-3.2.y' into pax-stable2
+    
+    Conflicts:
+    	mm/memory-failure.c
+
 commit bc7622c3ee8df64e72a925fcb1973701e14e3dc8
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Jun 5 21:57:02 2014 -0400
