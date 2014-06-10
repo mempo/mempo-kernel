@@ -134,7 +134,22 @@ if [[ "$kernel_ver" != "$kernel_general_version" ]] ; then
 	echo "The version of kernel from new (online) grsecurity version differs from the version for which this SameKernel was yet configured."
 	echo "You need to manually increase the (vanilla) KERNEL VERSION following instructions from the readme file."
 	echo "Commit version for next kernel, and then run this script again."
+	echo ""
+	ver_a=$kernel_general_version
+	ver_b=$kernel_ver
+	file_env="kernel-build/linux-mempo/env-data.sh"
+	file_source="kernel-build/linux-mempo/sources.list"
+
+	# TODO do the below automatically (after informing what will be done)
 	echo "Bad kernel version $kernel_general_version vs $kernel_ver from $new_grsec" >&2 
+	echo "To do this, for example you can take such steps:"
+	echo ""
+	echo "  1) in $file_source change $ver_a to $ver_b (leave the checksum or edit it rigth away)"
+	echo "  2) in $file_env change $var_a to $var_b"
+	echo "  3) start build with ./run.sh - it will stop after complaining about wrong checksum, write the actuall checksum into $file_source if you didn't previously"
+	echo "  3b) double check the checksum (e.g. various ISP connections etc)"
+	echo ""
+	
 	exit 101
 fi
 echo "Main kernel version is OK"
