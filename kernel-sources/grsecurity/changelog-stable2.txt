@@ -1,3 +1,146 @@
+commit 5fc86e48c1652e5cb320f0e45d03532403588cfb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 19 13:43:33 2014 -0400
+
+        Add _TIF_SECCOMP flag to _TIF_WORK_SYSCALL_ENTRY to indicate
+        that the system call needs to be checked against a seccomp filter.
+    
+        Signed-off-by: Markos Chandras <markos.chandras@imgtec.com>
+        Reviewed-by: Paul Burton <paul.burton@imgtec.com>
+        Reviewed-by: James Hogan <james.hogan@imgtec.com>
+        Cc: linux-mips@linux-mips.org
+        Patchwork: https://patchwork.linux-mips.org/patch/6405/
+        Signed-off-by: Ralf Baechle <ralf@linux-mips.org>
+        Cc: Ben Hutchings <ben@decadent.org.uk>
+        Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ arch/mips/include/asm/thread_info.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit cb15c793e2be50234c292ef81bfb65b36c12d5b4
+Merge: 9e9978f 9a2f790
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 19 12:20:34 2014 -0400
+
+    Merge branch 'pax-stable2' into grsec-stable2
+
+commit 9a2f7909dafce8ab50c0c78b11f2b12fd832ebc2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 19 12:19:44 2014 -0400
+
+    Update to pax-linux-3.2.60-test153.patch:
+    - fixed wrong asm constraint in __range_not_ok, reported by klimo (http://forums.grsecurity.net/viewtopic.php?f=3&t=3979)
+    - added detection for more broken CC/HOSTCC combinations, reported by GBit (http://forums.grsecurity.net/viewtopic.php?f=3&t=3973)
+
+ arch/x86/include/asm/uaccess.h |    2 +-
+ scripts/gcc-plugin.sh          |   35 +++++++++++++++++++++++++++++++----
+ 2 files changed, 32 insertions(+), 5 deletions(-)
+
+commit 9e9978fb35dea4711690cb540ea250efe8adb923
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 19 11:57:30 2014 -0400
+
+    fix infoleak in raid5 slab cache names reported by Philippe Ganon
+
+ drivers/md/raid5.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit 92c9055a72ac0a516df262888f0bd6ea9ce23f9c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 19 11:16:51 2014 -0400
+
+    Revert "as reported by Mathias Krause, perf needs to use copy_to/from_user in"
+    
+    We don't need this for 3.2, as the copy_from_user_nmi will never reach check_object_size
+    
+    This reverts commit 9509274ffaeabd8053b3aface3ea8c77d8c1b3a1.
+
+ fs/exec.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 9509274ffaeabd8053b3aface3ea8c77d8c1b3a1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 19 10:34:21 2014 -0400
+
+    as reported by Mathias Krause, perf needs to use copy_to/from_user in
+    NMI context, using the appropriate _nmi versions of the routines.  Only
+    BUG() if we're not in NMI context
+
+ fs/exec.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 0f248003a96710667425681f7e21f4d57c51da0a
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Sun Jun 15 21:04:32 2014 -0400
+
+    Upstream commit: e33ba5fa7afce1a9f159704121d4e4d110df8185
+    
+    (this should have already been fixed by previous commit in May:
+    f9c6d4987b23e0a514464bae6771933a48e4cd01, and the size_overflow
+    plugin should have caught the bad case)
+    
+    random: fix nasty entropy accounting bug
+    
+    Commit 0fb7a01af5b0 "random: simplify accounting code", introduced in
+    v3.15, has a very nasty accounting problem when the entropy pool has
+    has fewer bytes of entropy than the number of requested reserved
+    bytes.  In that case, "have_bytes - reserved" goes negative, and since
+    size_t is unsigned, the expression:
+    
+           ibytes = min_t(size_t, ibytes, have_bytes - reserved);
+    
+    ... does not do the right thing.  This is rather bad, because it
+    defeats the catastrophic reseeding feature in the
+    xfer_secondary_pool() path.
+    
+    It also can cause the "BUG: spinlock trylock failure on UP" for some
+    kernel configurations when prandom_reseed() calls get_random_bytes()
+    in the early init, since when the entropy count gets corrupted,
+    credit_entropy_bits() erroneously believes that the nonblocking pool
+    has been fully initialized (when in fact it is not), and so it calls
+    prandom_reseed(true) recursively leading to the spinlock BUG.
+    
+    The logic is *not* the same it was originally, but in the cases where
+    it matters, the behavior is the same, and the resulting code is
+    hopefully easier to read and understand.
+    
+    Fixes: 0fb7a01af5b0 "random: simplify accounting code"
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+    Cc: Greg Price <price@mit.edu>
+    Cc: stable@vger.kernel.org  #v3.15
+    
+    Conflicts:
+    
+    	drivers/char/random.c
+
+ drivers/char/random.c |   17 +++++++++--------
+ 1 files changed, 9 insertions(+), 8 deletions(-)
+
+commit 0e1bd8028f5abd9e28e28d322ab06ef7f1a83c0a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 19 10:01:17 2014 -0400
+
+    add missing include
+
+ fs/fhandle.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 6d168543c94235cb6669de01c1a6e686cd1b94ae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 19 09:51:38 2014 -0400
+
+    Disable access to file handles inside chroots as part of GRKERNSEC_CHROOT_FCHDIR, as
+    stealth's attack on docker containers also works against grsec chroots with uid 0 and
+    CAP_DAC_READ_SEARCH inside.  Contrary to the changelog in the test branch, the
+    stable tree was affected as well.
+
+ fs/fhandle.c               |    2 +-
+ grsecurity/Kconfig         |    8 +++++---
+ grsecurity/grsec_chroot.c  |   17 +++++++++++++++++
+ include/linux/grmsg.h      |    1 +
+ include/linux/grsecurity.h |    1 +
+ 5 files changed, 25 insertions(+), 4 deletions(-)
+
 commit 96f72e4c712c55b8ea0011994c7139f5026c62f7
 Author: Andy Lutomirski <luto@amacapital.net>
 Date:   Wed May 28 23:09:58 2014 -0400
