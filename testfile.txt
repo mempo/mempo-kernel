@@ -3,4 +3,5 @@ This is a test file to test various build scripts,
 please ignore it.
 Update2.
 Update3.
+Update4.
 
