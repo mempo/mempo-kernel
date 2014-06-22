@@ -1,3 +1,57 @@
+commit a20924dd0fb5655c3bdbbb9ced629ceb0d50e6fa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 22 00:47:05 2014 -0400
+
+    fix !GRKERNSEC_KSTACKOVERFLOW compilation
+
+ include/linux/vmalloc.h |    2 ++
+ mm/vmalloc.c            |   10 ++++++++++
+ 2 files changed, 12 insertions(+), 0 deletions(-)
+
+commit b4a3ab65850c171ca72716ad05a39d16158e45e4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jun 21 23:17:23 2014 -0400
+
+    Fix GRKERNSEC_KSTACKOVERFLOW incompatibility with virtio_net and other more
+    rare drivers.  Unfortunately to resolve the problem we had to choose between
+    invasive changes to dozens of call-sites and continued future maintenance work,
+    or rearchitecting the feature to be able to handle the uses seamlessly.  With
+    some tips from pipacs, I chose the latter.
+    
+    Various drivers including virtio_net use scatterlists derived from stack-based
+    buffers (e.g. as an argument to sg_set_buf/sg_init_one).  The scatterlist API
+    requires that these buffers be in the kernel image or in kmalloc'd buffers,
+    which caused a problem when vmalloc'd stacks were used due to
+    GRKERNSEC_KSTACKOVERFLOW.  What we do now is keep the original lowmem kstack
+    allocation and then perform a THREAD_SIZE-aligned vmapped alias of the lowmem
+    kstack's physical pages.  We also restore kernel stack accounting by using
+    this method.  The downside is the existence of the lowmem kstack mapping, but
+    the security guarantees of the feature are preserved.
+    
+    In sg_set_buf() (called by sg_init_one and directly) we now check to see if
+    the buffer is on the current kernel stack.  If it is, then we redirect the API
+    to the lowmem alias of the kernel stack, preserving its assumptions.
+    
+    Since the unmapping of the virtual alias can sleep, we need to schedule it
+    when called in interrupt context similar to before with vfree.  Unlike before
+    however, the contents of the alias depend on the lowmem physical pages, so
+    we also need to defer the execution of free_thread_info().
+    
+    We also have added a temporary debugging measure for this feature by
+    adding a BUG_ON() to virt_to_page() to ensure we're not using a vmapped kernel
+    stack address for APIs needing lowmem buffers -- this way we can be notified
+    of any other APIs that need similar redirection.
+    
+    Thanks to kocka for assisting with some initial qemu/kernel debugging.
+
+ arch/x86/include/asm/page.h |   12 ++++++-
+ include/linux/scatterlist.h |    7 ++++
+ include/linux/sched.h       |    5 ++-
+ include/linux/vmalloc.h     |    3 +-
+ kernel/fork.c               |   53 +++++++++++++++++++++++--------
+ mm/vmalloc.c                |   72 ++++++++++++++++++++++++++++++++++---------
+ 6 files changed, 120 insertions(+), 32 deletions(-)
+
 commit 5fc86e48c1652e5cb320f0e45d03532403588cfb
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Jun 19 13:43:33 2014 -0400
