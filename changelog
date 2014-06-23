@@ -1,4 +1,13 @@
 
+linux-image (linux-3.2.59-mempo-0.1.58) UNRELEASED; urgency=low
+  * the 3.2 kernel is now "stable" instead "stable2" in grsecurity
+  * build scripts to work with stable/stable2. also renamed grsec changelog to match
+  * updated kernel
+  * updated grsecurity
+  * v0.1.58-01-rc
+
+ -- mempo <mempo@mempo.org>  Mon, 23 Jun 2014 12:25:00 +0200
+
 linux-image (linux-3.2.59-mempo-0.1.57) UNRELEASED; urgency=low
   * updated kernel
   * updated grsecurity
