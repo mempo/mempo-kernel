@@ -1,3 +1,22 @@
+commit fbe6bbb49405c4f392ecaaeeb16940daf33be713
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 22 17:45:49 2014 -0400
+
+    apply patch from http://marc.info/?l=linux-fsdevel&m=140128600801771&w=2
+    to ensure "hidden" files can't be created due to get_next_ino returning an inode of 0
+
+ fs/inode.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit 801f7094c71d49b78d05f5055fd22b0b6b271f49
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 22 12:28:46 2014 -0400
+
+    move grkernsec_setxid flag on mips into the LSW to match header documentation
+
+ arch/mips/include/asm/thread_info.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit a20924dd0fb5655c3bdbbb9ced629ceb0d50e6fa
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jun 22 00:47:05 2014 -0400
