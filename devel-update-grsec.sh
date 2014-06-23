@@ -1,10 +1,12 @@
 #!/bin/bash
 # using rss to get newest version of gr, rsstail must be installed!
 
+opt_stable_version="stable" # the 3.2 kernel was "stable2" untill 2014-06-23, now it's "stable". 
+
 skip_intro=false
 assume_yes=false
 as_bot=false
-url_base_stable="http://grsecurity.net/stable/"
+url_base_stable="http://grsecurity.net/stable/" # this remains for both stable2 and stable
 
 function help() {
 	echo "Help and usage:"
@@ -82,8 +84,8 @@ function mywait_d() {
 function download() { 
 	echo "Downloading $new_grec from $url " 
 	set -x  
-	cd $gr_path ; rm changelog-stable2.txt 
-	wget  http://grsecurity.net/changelog-stable2.txt  $url $url.sig 
+	cd $gr_path ; rm changelog-${opt_stable_version}.txt 
+	wget  http://grsecurity.net/changelog-${opt_stable_version}.txt  $url $url.sig 
 	sha256=$(sha256deep  -q  $new_grsec)  ;  cd ../..
 	set +x
 } 
@@ -121,11 +123,11 @@ echo "Loading (current/old) env data"
 
 
 echo "Checking new version of grsecurity from network"
-new_grsec=$(rsstail -u http://grsecurity.net/stable2_rss.php -1 | awk  '{print $2}')
+new_grsec=$(rsstail -u http://grsecurity.net/${opt_stable_version}_rss.php -1 | awk  '{print $2}')
 url="${url_base_stable}${new_grsec}"
 gr_path='kernel-sources/grsecurity/'
 echo "new_grsec=$new_grsec is the current version"
-kernel_ver=$( printf '%s\n' "$new_grsec" | sed -e 's/grsecurity-3.0-\(3\.2\.[0-9]*\).*patch/\1/g' )
+kernel_ver=$( printf '%s\n' "$new_grsec" | sed -e 's/grsecurity-3.0-\(3\.[0-9]*\.[0-9]*\).*patch/\1/g' )
 
 # echo 'grsecurity-3.0-3.2.58-201405112002.patch' | sed -e 's/grsecurity-3.0-\(3\.2\.[0-9]*\).*patch/\1/g'
 echo "kernel_ver=${kernel_ver} from new (online) grsecurity version"
@@ -171,9 +173,9 @@ echo "Press ENTER to continue if all is OK with signature (ctrl-c to abort)"
 read _
 
 echo "Commiting the new grsec ($new_grsec) files to git in one commit:"
-git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt # XXX
+git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-${opt_stable_version}.txt # XXX
 git_msg="[grsec] $new_grsec ${commit_msg_extra1}${commit_msg_extra2}"
-git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-stable2.txt -m "$git_msg"
+git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-${opt_stable_version}.txt -m "$git_msg"
 
 echo "Added to grsec as:"
 git log HEAD^1..HEAD

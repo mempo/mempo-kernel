@@ -1,0 +1,16 @@
+
+
+* v0.1.57-01 other path
+
+In version v0.1.57-01-release = v0.1.57-01-rc there was a mistake that makes this verification different;
+You need to copy/move all the files before starting ./run.sh to a other directory this time: /home/kernelbuild/bot_to_build/mempobot/kernelbuild
+(or ideally that one should be then symlinked to ~/kernelbuild and run should be run from ~/kernelbuild/ not sure if there is a difference here).
+
+This is needed to get identical checksums, because:
+
+<Irc2PGuest80244> in the files arch/x86/kernel/asm-offsets.s scripts/.conmakehash.cmd and scripts/mod/.empty.o.cmd scripts/.kallsyms.cmd there are paths starting with /home/kernelbuild/bot_to_build/mempobot/kernelbuild
+
+Thank you anonymous report for the information.
+This is due to a bug in automatic build bot (not visible in this deterministic-kernel project's git).
+
+
