@@ -1,3 +1,194 @@
+commit 74a3bdf236caeaaf6584578ca3182ca56042f1a7
+Author: Lars-Peter Clausen <lars@metafoo.de>
+Date:   Wed Jun 18 13:32:31 2014 +0200
+
+    Upstream commit: 07f4d9d74a04aa7c72c5dae0ef97565f28f17b92
+    
+    ALSA: control: Protect user controls against concurrent access
+    
+    The user-control put and get handlers as well as the tlv do not protect against
+    concurrent access from multiple threads. Since the state of the control is not
+    updated atomically it is possible that either two write operations or a write
+    and a read operation race against each other. Both can lead to arbitrary memory
+    disclosure. This patch introduces a new lock that protects user-controls from
+    concurrent access. Since applications typically access controls sequentially
+    than in parallel a single lock per card should be fine.
+    
+    Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+    Acked-by: Jaroslav Kysela <perex@perex.cz>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ include/sound/core.h |    2 ++
+ sound/core/control.c |   31 +++++++++++++++++++++++++------
+ sound/core/init.c    |    1 +
+ 3 files changed, 28 insertions(+), 6 deletions(-)
+
+commit 507712085e5ea6cd7900444b79762ec3961faf3e
+Author: Lars-Peter Clausen <lars@metafoo.de>
+Date:   Wed Jun 18 13:32:33 2014 +0200
+
+    Upstream commit: fd9f26e4eca5d08a27d12c0933fceef76ed9663d
+    
+    ALSA: control: Don't access controls outside of protected regions
+    
+    A control that is visible on the card->controls list can be freed at any time.
+    This means we must not access any of its memory while not holding the
+    controls_rw_lock. Otherwise we risk a use after free access.
+    
+    Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+    Acked-by: Jaroslav Kysela <perex@perex.cz>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ sound/core/control.c |   15 ++++++++++-----
+ 1 files changed, 10 insertions(+), 5 deletions(-)
+
+commit 23e0b172e9dcaebbd9aa378f8bfa6a0371d43830
+Author: Lars-Peter Clausen <lars@metafoo.de>
+Date:   Wed Jun 18 13:32:32 2014 +0200
+
+    Upstream commit: 82262a46627bebb0febcc26664746c25cef08563
+    
+    ALSA: control: Fix replacing user controls
+    
+    There are two issues with the current implementation for replacing user
+    controls. The first is that the code does not check if the control is actually a
+    user control and neither does it check if the control is owned by the process
+    that tries to remove it. That allows userspace applications to remove arbitrary
+    controls, which can cause a user after free if a for example a driver does not
+    expect a control to be removed from under its feed.
+    
+    The second issue is that on one hand when a control is replaced the
+    user_ctl_count limit is not checked and on the other hand the user_ctl_count is
+    increased (even though the number of user controls does not change). This allows
+    userspace, once the user_ctl_count limit as been reached, to repeatedly replace
+    a control until user_ctl_count overflows. Once that happens new controls can be
+    added effectively bypassing the user_ctl_count limit.
+    
+    Both issues can be fixed by instead of open-coding the removal of the control
+    that is to be replaced to use snd_ctl_remove_user_ctl(). This function does
+    proper permission checks as well as decrements user_ctl_count after the control
+    has been removed.
+    
+    Note that by using snd_ctl_remove_user_ctl() the check which returns -EBUSY at
+    beginning of the function if the control already exists is removed. This is not
+    a problem though since the check is quite useless, because the lock that is
+    protecting the control list is released between the check and before adding the
+    new control to the list, which means that it is possible that a different
+    control with the same settings is added to the list after the check. Luckily
+    there is another check that is done while holding the lock in snd_ctl_add(), so
+    we'll rely on that to make sure that the same control is not added twice.
+    
+    Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+    Acked-by: Jaroslav Kysela <perex@perex.cz>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ sound/core/control.c |   25 +++++++++----------------
+ 1 files changed, 9 insertions(+), 16 deletions(-)
+
+commit 97213774257d345f19783dfee25261b24924d09c
+Author: Lars-Peter Clausen <lars@metafoo.de>
+Date:   Wed Jun 18 13:32:35 2014 +0200
+
+    Upstream commit: 883a1d49f0d77d30012f114b2e19fc141beb3e8e
+    
+    ALSA: control: Make sure that id->index does not overflow
+    
+    The ALSA control code expects that the range of assigned indices to a control is
+    continuous and does not overflow. Currently there are no checks to enforce this.
+    If a control with a overflowing index range is created that control becomes
+    effectively inaccessible and unremovable since snd_ctl_find_id() will not be
+    able to find it. This patch adds a check that makes sure that controls with a
+    overflowing index range can not be created.
+    
+    Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+    Acked-by: Jaroslav Kysela <perex@perex.cz>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ sound/core/control.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 71b51afcc4fee7852d4381360de4e6335e8b2726
+Author: Lars-Peter Clausen <lars@metafoo.de>
+Date:   Wed Jun 18 13:32:34 2014 +0200
+
+    Upstream commit: ac902c112d90a89e59916f751c2745f4dbdbb4bd
+    
+    ALSA: control: Handle numid overflow
+    
+    Each control gets automatically assigned its numids when the control is created.
+    The allocation is done by incrementing the numid by the amount of allocated
+    numids per allocation. This means that excessive creation and destruction of
+    controls (e.g. via SNDRV_CTL_IOCTL_ELEM_ADD/REMOVE) can cause the id to
+    eventually overflow. Currently when this happens for the control that caused the
+    overflow kctl->id.numid + kctl->count will also over flow causing it to be
+    smaller than kctl->id.numid. Most of the code assumes that this is something
+    that can not happen, so we need to make sure that it won't happen
+    
+    Signed-off-by: Lars-Peter Clausen <lars@metafoo.de>
+    Acked-by: Jaroslav Kysela <perex@perex.cz>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Takashi Iwai <tiwai@suse.de>
+
+ sound/core/control.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 6a8b19ad31ebc2f7522a292c6195cc5dc92ab750
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 26 18:19:44 2014 -0400
+
+    Upstream commit: 206a81c18401c0cde6e579164f752c4b147324ce
+    
+    lzo: properly check for overruns
+    
+    The lzo decompressor can, if given some really crazy data, possibly
+    overrun some variable types.  Modify the checking logic to properly
+    detect overruns before they happen.
+    
+    Reported-by: "Don A. Bailey" <donb@securitymouse.com>
+    Tested-by: "Don A. Bailey" <donb@securitymouse.com>
+    Cc: stable <stable@vger.kernel.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ lib/lzo/lzo1x_decompress.c |   62 +++++++++++++++++++++++++++++---------------
+ 1 files changed, 41 insertions(+), 21 deletions(-)
+
+commit 00767c94053d15f23871ba7d6cbc35ee5da8fddb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jun 26 18:16:38 2014 -0400
+
+    upstream commit 8b975bd3f9089f8ee5d7bbfd798537b992bbc7e7
+    Author: Markus F.X.J. Oberhumer <markus@oberhumer.com>
+    Date:   Mon Aug 13 17:25:44 2012 +0200
+    
+        lib/lzo: Update LZO compression to current upstream version
+    
+        This commit updates the kernel LZO code to the current upsteam version
+        which features a significant speed improvement - benchmarking the Calgary
+        and Silesia test corpora typically shows a doubled performance in
+        both compression and decompression on modern i386/x86_64/powerpc machines.
+    
+        Signed-off-by: Markus F.X.J. Oberhumer <markus@oberhumer.com>
+
+ include/linux/lzo.h        |   15 +-
+ lib/lzo/lzo1x_compress.c   |  335 ++++++++++++++++++++++++------------------
+ lib/lzo/lzo1x_decompress.c |  350 +++++++++++++++++++++-----------------------
+ lib/lzo/lzodefs.h          |   38 ++++--
+ 4 files changed, 395 insertions(+), 343 deletions(-)
+
+commit 742ec59022c7a0b84482c868fd7334a2b7d8c7cd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 23 21:07:10 2014 -0400
+
+    change vunmap documentation back, it was changed when I was exploring
+    a simpler approach to the KSTACKOVERFLOW problem
+
+ mm/vmalloc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit fbe6bbb49405c4f392ecaaeeb16940daf33be713
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jun 22 17:45:49 2014 -0400
