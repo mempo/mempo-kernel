@@ -1,3 +1,38 @@
+commit 0f3319928845248bff4ec7a52a8574c1eaef951d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 29 18:11:08 2014 -0400
+
+    revert PCI_ANY_ID change to fix problem with vgaswitcheroo as reported by
+    /dev/random here:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=3989
+
+ include/linux/mod_devicetable.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ac3cb18307b0e019e2d0df3e81f793ef5f128174
+Author: Zhaowei Yuan <zhaowei.yuan@samsung.com>
+Date:   Wed Jun 18 14:33:59 2014 +0800
+
+    Upstream commit: 1539fb9bd405ee32282ea0a38404f9e008ac5b7a
+    
+    drm: fix NULL pointer access by wrong ioctl
+    
+    If user uses wrong ioctl command with _IOC_NONE and argument size
+    greater than 0, it can cause NULL pointer access from memset of line
+    463. If _IOC_NONE, don't memset to 0 for kdata.
+    
+    Signed-off-by: Zhaowei Yuan <zhaowei.yuan@samsung.com>
+    Reviewed-by: David Herrmann <dh.herrmann@gmail.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Dave Airlie <airlied@redhat.com>
+    
+    Conflicts:
+    
+    	drivers/gpu/drm/drm_drv.c
+
+ drivers/gpu/drm/drm_drv.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
 commit 74a3bdf236caeaaf6584578ca3182ca56042f1a7
 Author: Lars-Peter Clausen <lars@metafoo.de>
 Date:   Wed Jun 18 13:32:31 2014 +0200
