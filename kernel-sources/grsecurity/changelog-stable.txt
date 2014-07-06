@@ -1,3 +1,39 @@
+commit fa5713f5b0214732cd02a8d155daa2077bffbfa0
+Author: Tejun Heo <tj@kernel.org>
+Date:   Thu Jul 3 15:43:15 2014 -0400
+
+    Upstream commit: b9cd18de4db3c9ffa7e17b0dc0ca99ed5aa4d43a
+    
+    ptrace,x86: force IRET path after a ptrace_stop()
+    
+    The 'sysret' fastpath does not correctly restore even all regular
+    registers, much less any segment registers or reflags values.  That is
+    very much part of why it's faster than 'iret'.
+    
+    Normally that isn't a problem, because the normal ptrace() interface
+    catches the process using the signal handler infrastructure, which
+    always returns with an iret.
+    
+    However, some paths can get caught using ptrace_event() instead of the
+    signal path, and for those we need to make sure that we aren't going to
+    return to user space using 'sysret'.  Otherwise the modifications that
+    may have been done to the register set by the tracer wouldn't
+    necessarily take effect.
+    
+    Fix it by forcing IRET path by setting TIF_NOTIFY_RESUME from
+    arch_ptrace_stop_needed() which is invoked from ptrace_stop().
+    
+    Signed-off-by: Tejun Heo <tj@kernel.org>
+    Reported-by: Andy Lutomirski <luto@amacapital.net>
+    Acked-by: Oleg Nesterov <oleg@redhat.com>
+    Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ arch/x86/include/asm/ptrace.h |   16 ++++++++++++++++
+ include/linux/ptrace.h        |    3 +++
+ 2 files changed, 19 insertions(+), 0 deletions(-)
+
 commit 0f3319928845248bff4ec7a52a8574c1eaef951d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jun 29 18:11:08 2014 -0400
