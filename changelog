@@ -1,4 +1,10 @@
 
+linux-image (linux-3.2.61-mempo-0.1.61) UNRELEASED; urgency=low
+  * updated grsecurity - strace fixes
+  * v0.1.61-01-rc
+
+ -- mempo <mempo@mempo.org>  Sun, 06 Jul 2014 04:38:00 +0200
+
 linux-image (linux-3.2.60-mempo-0.1.60) UNRELEASED; urgency=low
   * updated grsecurity - null deref in DRM; fix PCI_ANY_ID
   * v0.1.60-01-rc
