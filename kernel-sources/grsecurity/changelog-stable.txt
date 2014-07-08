@@ -1,3 +1,46 @@
+commit 4526f7c8009b81c1de66725f95122217316050e2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 7 17:22:16 2014 -0400
+
+    fix gcc warning
+
+ net/netfilter/nf_conntrack_core.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit f754fafe847590003a676629746d0b76e6b34a4f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jul 7 16:07:41 2014 -0400
+
+    Backport extra commit for safety sake:
+    commit f302b21ee907f65af6434d8618d2c1a921c02d48
+    Author: Andy Lutomirski <luto@amacapital.net>
+    Date:   Wed Jul 2 14:52:55 2014 -0700
+    
+        x86_64,ptrace: Enforce RIP <= TASK_SIZE_MAX (CVE-2014-4699)
+    
+        Don't allow ptrace to set RIP to a value that couldn't happen by
+        ordinary control flow. There are CPU bugs^Wfeatures that can have
+        interesting effects if RIP is non-canonical.
+    
+        I didn't make the corresponding x86_32 change, since x86_32 has no
+        concept of canonical addresses.
+    
+        putreg32 doesn't need this fix: value is only 32 bits, so it can't
+        be non-canonical.
+    
+        Fixes CVE-2014-4699.  There are arguably still bugs here, but this
+        fixes the major issue.
+    
+        Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+        CVE-2014-4699
+        BugLink: http://bugs.launchpad.net/bugs/1337339
+        Acked-by: Andy Whitcroft <apw@canonical.com>
+        Signed-off-by: John Johansen <john.johansen@canonical.com>
+        Signed-off-by: Luis Henriques <luis.henriques@canonical.com>
+
+ arch/x86/kernel/ptrace.c |   14 ++++++++++++++
+ 1 files changed, 14 insertions(+), 0 deletions(-)
+
 commit fa5713f5b0214732cd02a8d155daa2077bffbfa0
 Author: Tejun Heo <tj@kernel.org>
 Date:   Thu Jul 3 15:43:15 2014 -0400
