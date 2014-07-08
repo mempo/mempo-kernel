@@ -1,5 +1,12 @@
 
-linux-image (linux-3.2.61-mempo-0.1.61) UNRELEASED; urgency=low
+linux-image (linux-3.2.60-mempo-0.1.62) UNRELEASED; urgency=low
+  * updated grsecurity CVE-2014-4699 limit RIP
+  * v0.1.62-01-rc
+  * v0.1.62-02-rc
+
+ -- mempo <mempo@mempo.org>  Tue, 08 Jul 2014 03:40:00 +0200
+
+linux-image (linux-3.2.60-mempo-0.1.61) UNRELEASED; urgency=low
   * updated grsecurity - strace fixes
   * v0.1.61-01-rc
 
