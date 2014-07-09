@@ -1,4 +1,10 @@
 
+linux-image (linux-3.2.60-mempo-0.1.63) UNRELEASED; urgency=low
+  * updated grsecurity fix [vuln] bond_uninit, mdiobus
+  * v0.1.63-01-rc
+
+ -- mempo <mempo@mempo.org>  Tue, 08 Jul 2014 03:40:00 +0200
+
 linux-image (linux-3.2.60-mempo-0.1.62) UNRELEASED; urgency=low
   * updated grsecurity CVE-2014-4699 limit RIP
   * v0.1.62-01-rc
