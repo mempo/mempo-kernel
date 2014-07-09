@@ -1,3 +1,45 @@
+commit 58f7da419b21858b8f8589015e3442cfc92916b1
+Author: nikolay@redhat.com <nikolay@redhat.com>
+Date:   Sat Apr 6 00:54:37 2013 +0000
+
+    Revert "bonding: remove sysfs before removing devices"
+    
+    This reverts commit 4de79c737b200492195ebc54a887075327e1ec1d.
+    
+    This patch introduces a new bug which causes access to freed memory.
+    In bond_uninit: list_del(&bond->bond_list);
+    bond_list is linked in bond_net's dev_list which is freed by
+    unregister_pernet_subsys.
+    
+    Signed-off-by: Nikolay Aleksandrov <nikolay@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/bonding/bond_main.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit f79fb7679dacc533e16aec452ca10d181205b636
+Author: David S. Miller <davem@davemloft.net>
+Date:   Wed Nov 14 22:32:15 2012 -0500
+
+    Revert "drivers/net/phy/mdio-bitbang.c: Call mdiobus_unregister before mdiobus_free"
+    
+    This reverts commit aa731872f7d33dcb8b54dad0cfb82d4e4d195d7e.
+    
+    As pointed out by Ben Hutchings, this change is not correct.
+    
+    mdiobus_unregister() can't be called if the bus isn't registered yet,
+    however this change can result in situations which cause that to
+    happen.
+    
+    Part of the confusion here revolves around the fact that the
+    callers of this module control registration/unregistration,
+    rather than the module itself.
+    
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/phy/mdio-bitbang.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
 commit 4526f7c8009b81c1de66725f95122217316050e2
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jul 7 17:22:16 2014 -0400
