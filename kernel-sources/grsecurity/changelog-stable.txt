@@ -1,3 +1,29 @@
+commit eced417d64539e2cdd3488aa6380a868345f9bff
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 10 00:07:03 2014 -0400
+
+    compile fix
+
+ net/ipv6/addrconf.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit f36ba2a503a679875cb23d5ae46c6dabb5ea0804
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Jul 9 23:14:19 2014 -0400
+
+    Allow /proc/net/if_inet6 to be visible by non-root users -- it is needed
+    on Fedora 20 and the contents are similar to those of the already-allowed
+    /proc/net/dev
+    
+    Conflicts:
+    
+    	fs/proc/proc_net.c
+    	net/ipv6/addrconf.c
+
+ fs/proc/proc_net.c  |   22 +++++++++++++++++++++-
+ net/ipv6/addrconf.c |   11 +++++++++--
+ 2 files changed, 30 insertions(+), 3 deletions(-)
+
 commit 58f7da419b21858b8f8589015e3442cfc92916b1
 Author: nikolay@redhat.com <nikolay@redhat.com>
 Date:   Sat Apr 6 00:54:37 2013 +0000
