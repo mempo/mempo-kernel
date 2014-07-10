@@ -1,4 +1,4 @@
 V,x,x,kernel,linux-3.2.60.tar,sha256,cfb6dd4e62b785297494ac0d56b9a0ea6822f894538a21955033e4634bd9da3a,./
-P,x,x,grsecurity,grsecurity-3.0-3.2.60-201407081916.patch,sha256,41e7831ff7e2b4b446a83568129557a475be62f02b110d1305eed47f48e02221,./tmp-path/
+P,x,x,grsecurity,grsecurity-3.0-3.2.60-201407100031.patch,sha256,a4e4fcb99049a78a798d9291566c778234ce4afa36d7a2d4f55b29fd5ad6f102,./tmp-path/
 P,x,x,mempo,grsecurity-3.0-3.2.55-201402152203-mempo-extra.patch,sha256,a8e81062e44ea899af688a326aaebcfd86d759da69b39f6ed66b7a8e7bcf9a8d,./tmp-path/
 P,x,x,mempo,linux-3.2.57-grsec-deterministic-build.patch,sha256,aca4001855c4c822c78aee90acc8706a3ffb3b5e4d42f07b4ffe827190d77d59,./tmp-path/
