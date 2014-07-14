@@ -1,8 +1,10 @@
 
 linux-image (linux-3.2.61-mempo-0.1.65) UNRELEASED; urgency=low
   * new kernel 3.2.61
+  * updated grsecurity [vuln] dma off stack
+  * v0.1.65-01-rc
 
- -- mempo <mempo@mempo.org>  Thu, 10 Jul 2014 13:25:00 +0200
+ -- mempo <mempo@mempo.org>  Mon, 14 Jul 2014 09:30:00 +0200
 
 linux-image (linux-3.2.60-mempo-0.1.64) UNRELEASED; urgency=low
   * updated grsecurity [low] unhide net/if_inet6 and compile fix
