@@ -1,3 +1,83 @@
+commit 862b3b49a8fed0720d62674f5ead9bd5eec69fa0
+Merge: 0b43139 9f35dc2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 13 19:37:28 2014 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit 9f35dc281dd37d104be973ad3bd47066b4662865
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 13 19:35:52 2014 -0400
+
+    Update to pax-linux-3.2.61-test154.patch:
+    - Emese fixed a size overflow false positive, reported by joe (http://forums.grsecurity.net/viewtopic.php?f=3&t=3997)
+    - reverted an old compiler warning fix now causing problems with PCI device enumeration, reported by /dev/random (http://forums.grsecurity.net/viewtopic.php?f=3&t=3989)
+
+ include/linux/mod_devicetable.h                    |    2 +-
+ .../insert_size_overflow_check_ipa.c               |   18 +++++++++++++-----
+ .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
+ 3 files changed, 15 insertions(+), 7 deletions(-)
+
+commit 0b4313939d0db675558bb5320fa3c981c0e26d44
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 13 11:30:26 2014 -0400
+
+    fix another DMA-on-stack case
+    
+    Conflicts:
+    
+    	drivers/usb/host/hwa-hc.c
+
+ drivers/usb/host/hwa-hc.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
+commit 3cd4f741d3fd7c8242c0449f63961f5ec3032058
+Author: Daniel Gimpelevich <daniel@gimpelevich.san-francisco.ca.us>
+Date:   Wed Aug 21 01:43:19 2013 -0700
+
+    hso: Fix stack corruption on some architectures
+    
+    As Sergei Shtylyov explained in the #mipslinux IRC channel:
+    [Mon 2013-08-19 12:28:21 PM PDT] <headless> guys, are you sure it's not "DMA off stack" case?
+    [Mon 2013-08-19 12:28:35 PM PDT] <headless> it's a known stack corruptor on non-coherent arches
+    [Mon 2013-08-19 12:31:48 PM PDT] <DonkeyHotei> headless: for usb/ehci?
+    [Mon 2013-08-19 12:34:11 PM PDT] <DonkeyHotei> headless: explain
+    [Mon 2013-08-19 12:35:38 PM PDT] <headless> usb_control_msg() (or other such func) should not use buffer on stack. DMA from/to stack is prohibited
+    [Mon 2013-08-19 12:35:58 PM PDT] <headless> and EHCI uses DMA on control xfers (as well as all the others)
+    
+    Signed-off-by: Daniel Gimpelevich <daniel@gimpelevich.san-francisco.ca.us>
+    Acked-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/usb/hso.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit ecbc9370398c612d176b2f55b5e18d68f7a79824
+Merge: eced417 37db411
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jul 11 21:32:28 2014 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	arch/mips/kernel/scall32-o32.S
+    	arch/mips/kernel/scall64-64.S
+    	arch/mips/kernel/scall64-n32.S
+    	arch/mips/kernel/scall64-o32.S
+    	lib/lzo/lzo1x_decompress.c
+
+commit 37db411be348f02b54e131e560216f65fd8c7858
+Merge: 9a2f790 e9b1a5c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jul 11 21:25:42 2014 -0400
+
+    Merge branch 'linux-3.2.y' into pax-stable
+    
+    Conflicts:
+    	arch/x86/kernel/entry_32.S
+    	include/net/inetpeer.h
+    	net/ipv6/ip6_output.c
+
 commit eced417d64539e2cdd3488aa6380a868345f9bff
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Jul 10 00:07:03 2014 -0400
