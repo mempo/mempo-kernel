@@ -1,3 +1,12 @@
+commit c86a686a85e05591c1f88282f3e22f48802c911a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jul 15 16:40:36 2014 -0400
+
+    fix more DMA-on-stack cases
+
+ drivers/media/dvb/dvb-usb/dvb-usb-firmware.c |   37 ++++++++++++++++++-------
+ 1 files changed, 26 insertions(+), 11 deletions(-)
+
 commit 862b3b49a8fed0720d62674f5ead9bd5eec69fa0
 Merge: 0b43139 9f35dc2
 Author: Brad Spengler <spender@grsecurity.net>
