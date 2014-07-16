@@ -1,4 +1,10 @@
 
+linux-image (linux-3.2.61-mempo-0.1.66) UNRELEASED; urgency=low
+  * updated grsecurity [vuln] dma off stack (more)
+  * v0.1.66-01-rc
+
+ -- mempo <mempo@mempo.org>  Thu, 17 Jul 2014 00:40:00 +0200
+
 linux-image (linux-3.2.61-mempo-0.1.65) UNRELEASED; urgency=low
   * new kernel 3.2.61
   * updated grsecurity [vuln] dma off stack
