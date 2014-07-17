@@ -1,3 +1,37 @@
+commit 723a9740df77f121e66b66279e43e7737f4795d1
+Author: Sasha Levin <sasha.levin@oracle.com>
+Date:   Mon Jul 14 17:02:31 2014 -0700
+
+    Upstream commit: 3cf521f7dc87c031617fd47e4b7aa2593c2f3daf
+    
+    Yet another upstream silent security fix
+    
+    net/l2tp: don't fall back on UDP [get|set]sockopt
+    
+    The l2tp [get|set]sockopt() code has fallen back to the UDP functions
+    for socket option levels != SOL_PPPOL2TP since day one, but that has
+    never actually worked, since the l2tp socket isn't an inet socket.
+    
+    As David Miller points out:
+    
+      "If we wanted this to work, it'd have to look up the tunnel and then
+       use tunnel->sk, but I wonder how useful that would be"
+    
+    Since this can never have worked so nobody could possibly have depended
+    on that functionality, just remove the broken code and return -EINVAL.
+    
+    Reported-by: Sasha Levin <sasha.levin@oracle.com>
+    Acked-by: James Chapman <jchapman@katalix.com>
+    Acked-by: David Miller <davem@davemloft.net>
+    Cc: Phil Turnbull <phil.turnbull@oracle.com>
+    Cc: Vegard Nossum <vegard.nossum@oracle.com>
+    Cc: Willy Tarreau <w@1wt.eu>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ net/l2tp/l2tp_ppp.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
 commit c86a686a85e05591c1f88282f3e22f48802c911a
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jul 15 16:40:36 2014 -0400
@@ -22860,7 +22894,7 @@ Date:   Fri Jun 22 18:41:22 2012 -0400
  2 files changed, 5 insertions(+), 3 deletions(-)
 
 commit 8e4af78bb25887da94a228c4447371d69ecc07bc
-Merge: 6de9710 f94ec8d
+Merge: 6de97109 f94ec8d
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Jun 20 18:05:00 2012 -0400
 
