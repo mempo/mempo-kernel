@@ -1,4 +1,11 @@
 
+linux-image (linux-3.2.61-mempo-0.1.67) UNRELEASED; urgency=low
+  * updated grsecurity [vuln] ppp over l2tp
+  * v0.1.67-01-rc
+  * v0.1.67-02-rc
+
+ -- mempo <mempo@mempo.org>  Thu, 17 Jul 2014 23:20:00 +0200
+
 linux-image (linux-3.2.61-mempo-0.1.66) UNRELEASED; urgency=low
   * updated grsecurity [vuln] dma off stack (more)
   * v0.1.66-01-rc
