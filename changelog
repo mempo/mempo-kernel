@@ -1,8 +1,10 @@
-linux-image (linux-3.2.61-mempo-0.1.67) UNRELEASED; urgency=low
+linux-image (linux-3.2.61-mempo-0.1.68) UNRELEASED; urgency=low
   * updated grsecurity
   * v0.1.68-01-rc
+  * v0.1.68-02-rc
+  * v0.1.68-03-rc
 
- -- mempo <mempo@mempo.org>  Thu, 24 Jul 2014 15:55:00 +0200
+ -- mempo <mempo@mempo.org>  Thu, 24 Jul 2014 23:45:00 +0200
 
 linux-image (linux-3.2.61-mempo-0.1.67) UNRELEASED; urgency=low
   * updated grsecurity [vuln] ppp over l2tp
