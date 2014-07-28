@@ -1,3 +1,81 @@
+commit 4197e21dff54db8838d8bb2bb54cde06a4c50596
+Merge: 97419e4 039d801
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 27 19:57:21 2014 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit 039d8018a40cd3baf7dab410155e19af5fe28a5e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 27 19:56:53 2014 -0400
+
+    Update to pax-linux-3.2.61-test155.patch:
+    - fixed an incorrect get_user cast, reported by Corey Minyard
+      - there're a few more instances in the kernel still
+    - Emese fixed a compile error in the size overflow plugin that manifested under gcc 4.9
+
+ fs/compat_ioctl.c                                  |    2 +-
+ .../insert_size_overflow_asm.c                     |   42 --------------------
+ .../insert_size_overflow_check_core.c              |   41 +++++++++++++++++++
+ .../insert_size_overflow_check_ipa.c               |    2 +-
+ .../size_overflow_plugin/intentional_overflow.c    |    3 +
+ .../size_overflow_plugin/size_overflow_plugin.c    |    2 +-
+ 6 files changed, 47 insertions(+), 45 deletions(-)
+
+commit 97419e41b6d1530da186ecfa5b7db9214ca93b94
+Author: Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Sat Jul 26 14:52:01 2014 -0700
+
+    Upstream commit: 2062afb4f804afef61cbe62a30cac9a46e58e067
+    
+    Fix gcc-4.9.0 miscompilation of load_balance()  in scheduler
+    
+    Michel Dänzer and a couple of other people reported inexplicable random
+    oopses in the scheduler, and the cause turns out to be gcc mis-compiling
+    the load_balance() function when debugging is enabled.  The gcc bug
+    apparently goes back to gcc-4.5, but slight optimization changes means
+    that it now showed up as a problem in 4.9.0 and 4.9.1.
+    
+    The instruction scheduling problem causes gcc to schedule a spill
+    operation to before the stack frame has been created, which in turn can
+    corrupt the spilled value if an interrupt comes in.  There may be other
+    effects of this bug too, but that's the code generation problem seen in
+    Michel's case.
+    
+    This is fixed in current gcc HEAD, but the workaround as suggested by
+    Markus Trippelsdorf is pretty simple: use -fno-var-tracking-assignments
+    when compiling the kernel, which disables the gcc code that causes the
+    problem.  This can result in slightly worse debug information for
+    variable accesses, but that is infinitely preferable to actual code
+    generation problems.
+    
+    Doing this unconditionally (not just for CONFIG_DEBUG_INFO) also allows
+    non-debug builds to verify that the debug build would be identical: we
+    can do
+    
+        export GCC_COMPARE_DEBUG=1
+    
+    to make gcc internally verify that the result of the build is
+    independent of the "-g" flag (it will make the compiler build everything
+    twice, toggling the debug flag, and compare the results).
+    
+    Without the "-fno-var-tracking-assignments" option, the build would fail
+    (even with 4.8.3 that didn't show the actual stack frame bug) with a gcc
+    compare failure.
+    
+    See also gcc bugzilla:
+    
+      https://gcc.gnu.org/bugzilla/show_bug.cgi?id=61801
+    
+    Reported-by: Michel Dänzer <michel@daenzer.net>
+    Suggested-by: Markus Trippelsdorf <markus@trippelsdorf.de>
+    Cc: Jakub Jelinek <jakub@redhat.com>
+    Cc: stable@kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ Makefile |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
 commit 17acc2739760940b289b18da5efd01d928494ce0
 Author: Ben Hutchings <ben@decadent.org.uk>
 Date:   Mon Jul 21 00:06:48 2014 +0100
