@@ -1,3 +1,254 @@
+commit 3c38d5b731571fc80f97eae431ec85fbd46b0e99
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 31 19:06:01 2014 -0400
+
+    fix compile error
+
+ tools/gcc/randomize_layout_plugin.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 24710f447a99053e6ce35a8dce8c102b5a506825
+Author: James Bottomley <JBottomley@Parallels.com>
+Date:   Thu Jul 3 19:17:34 2014 +0200
+
+    Upstream commit: 89fb4cd1f717a871ef79fa7debbe840e3225cd54
+    
+    scsi: handle flush errors properly
+    
+    Flush commands don't transfer data and thus need to be special cased
+    in the I/O completion handler so that we can propagate errors to
+    the block layer and filesystem.
+    
+    Signed-off-by: James Bottomley <JBottomley@Parallels.com>
+    Reported-by: Steven Haber <steven@qumulo.com>
+    Tested-by: Steven Haber <steven@qumulo.com>
+    Reviewed-by: Martin K. Petersen <martin.petersen@oracle.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Christoph Hellwig <hch@lst.de>
+
+ drivers/scsi/scsi_lib.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit 22af163d0654be43242c6d4b1681ab9875b1ab6e
+Author: Christoph Paasch <christoph.paasch@uclouvain.be>
+Date:   Tue Jul 29 12:07:27 2014 +0200
+
+    Upstream commit: 45a07695bc64b3ab5d6d2215f9677e5b8c05a7d0
+    
+    tcp: Fix integer-overflows in TCP veno
+    
+    In veno we do a multiplication of the cwnd and the rtt. This
+    may overflow and thus their result is stored in a u64. However, we first
+    need to cast the cwnd so that actually 64-bit arithmetic is done.
+    
+    A first attempt at fixing 76f1017757aa0 ([TCP]: TCP Veno congestion
+    control) was made by 159131149c2 (tcp: Overflow bug in Vegas), but it
+    failed to add the required cast in tcp_veno_cong_avoid().
+    
+    Fixes: 76f1017757aa0 ([TCP]: TCP Veno congestion control)
+    Signed-off-by: Christoph Paasch <christoph.paasch@uclouvain.be>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp_veno.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit e304749a01bdb4bc8695674a5f247013a5b13d54
+Author: Milan Broz <gmazyland@gmail.com>
+Date:   Tue Jul 29 18:41:09 2014 +0000
+
+    Upstream commit: 4c63f83c2c2e16a13ce274ee678e28246bd33645
+    
+    crypto: af_alg - properly label AF_ALG socket
+    
+    Th AF_ALG socket was missing a security label (e.g. SELinux)
+    which means that socket was in "unlabeled" state.
+    
+    This was recently demonstrated in the cryptsetup package
+    (cryptsetup v1.6.5 and later.)
+    See https://bugzilla.redhat.com/show_bug.cgi?id=1115120
+    
+    This patch clones the sock's label from the parent sock
+    and resolves the issue (similar to AF_BLUETOOTH protocol family).
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Milan Broz <gmazyland@gmail.com>
+    Acked-by: Paul Moore <paul@paul-moore.com>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ crypto/af_alg.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 805577529b565c454ed6acb56c879fdc4614350f
+Author: Christoph Paasch <christoph.paasch@uclouvain.be>
+Date:   Tue Jul 29 13:40:57 2014 +0200
+
+    Upstream commit: 1f74e613ded11517db90b2bd57e9464d9e0fb161
+    
+    tcp: Fix integer-overflow in TCP vegas
+    
+    In vegas we do a multiplication of the cwnd and the rtt. This
+    may overflow and thus their result is stored in a u64. However, we first
+    need to cast the cwnd so that actually 64-bit arithmetic is done.
+    
+    Then, we need to do do_div to allow this to be used on 32-bit arches.
+    
+    Cc: Stephen Hemminger <stephen@networkplumber.org>
+    Cc: Neal Cardwell <ncardwell@google.com>
+    Cc: Eric Dumazet <eric.dumazet@gmail.com>
+    Cc: David Laight <David.Laight@ACULAB.COM>
+    Cc: Doug Leith <doug.leith@nuim.ie>
+    Fixes: 8d3a564da34e (tcp: tcp_vegas cong avoid fix)
+    Signed-off-by: Christoph Paasch <christoph.paasch@uclouvain.be>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/tcp_vegas.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 017aa069e797bfeefaf5d4f846f81a5b02aac423
+Author: Sven Wegener <sven.wegener@stealer.net>
+Date:   Tue Jul 22 10:26:06 2014 +0200
+
+    Upstream commit: 80705fca953d4f2983d5197401de4ce7af7699d3
+    
+    x86_32, entry: Store badsys error code in %eax
+    
+    commit 8142b215501f8b291a108a202b3a053a265b03dd upstream.
+    
+    Commit 554086d ("x86_32, entry: Do syscall exit work on badsys
+    (CVE-2014-4508)") introduced a regression in the x86_32 syscall entry
+    code, resulting in syscall() not returning proper errors for undefined
+    syscalls on CPUs supporting the sysenter feature.
+    
+    The following code:
+    
+    > int result = syscall(666);
+    > printf("result=%d errno=%d error=%s\n", result, errno, strerror(errno));
+    
+    results in:
+    
+    > result=666 errno=0 error=Success
+    
+    Obviously, the syscall return value is the called syscall number, but it
+    should have been an ENOSYS error. When run under ptrace it behaves
+    correctly, which makes it hard to debug in the wild:
+    
+    > result=-1 errno=38 error=Function not implemented
+    
+    The %eax register is the return value register. For debugging via ptrace
+    the syscall entry code stores the complete register context on the
+    stack. The badsys handlers only store the ENOSYS error code in the
+    ptrace register set and do not set %eax like a regular syscall handler
+    would. The old resume_userspace call chain contains code that clobbers
+    %eax and it restores %eax from the ptrace registers afterwards. The same
+    goes for the ptrace-enabled call chain. When ptrace is not used, the
+    syscall return value is the passed-in syscall number from the untouched
+    %eax register.
+    
+    Use %eax as the return value register in syscall_badsys and
+    sysenter_badsys, like a real syscall handler does, and have the caller
+    push the value onto the stack for ptrace access.
+    
+    Signed-off-by: Sven Wegener <sven.wegener@stealer.net>
+    Link: http://lkml.kernel.org/r/alpine.LNX.2.11.1407221022380.31021@titan.int.lan.stealer.net
+    Reviewed-and-tested-by: Andy Lutomirski <luto@amacapital.net>
+    Signed-off-by: H. Peter Anvin <hpa@zytor.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    
+    Conflicts:
+    
+    	arch/x86/kernel/entry_32.S
+
+ arch/x86/kernel/entry_32.S |    9 +++++----
+ 1 files changed, 5 insertions(+), 4 deletions(-)
+
+commit 1b7dd9b4c864a650c87c0b2f4ee428d8a58cb0fc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jul 31 18:02:05 2014 -0400
+
+    Work around a compatibility issue between the VirtualBox drivers and RANDSTRUCT.
+    Two of its ops structs, INTNETTRUNKFACTORY and RAWPCIFACTORY, were chosen for
+    randomization, but these seem to be part of a public interface used by code
+    not compiled by RANDSTRUCT.  To resolve this, omit these two type names from
+    randomization.  Thanks to Pedro Ribeiro for the report.
+
+ tools/gcc/randomize_layout_plugin.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 32ab0eb3774f2b04ec7d412dce297ecc77081cd8
+Author: Andrey Ryabinin <ryabinin.a.a@gmail.com>
+Date:   Sat Jul 26 21:26:58 2014 +0400
+
+    Upstream commit: 40eea803c6b2cfaab092f053248cbeab3f368412
+    
+    net: sendmsg: fix NULL pointer dereference
+    
+    Sasha's report:
+    	> While fuzzing with trinity inside a KVM tools guest running the latest -next
+    	> kernel with the KASAN patchset, I've stumbled on the following spew:
+    	>
+    	> [ 4448.949424] ==================================================================
+    	> [ 4448.951737] AddressSanitizer: user-memory-access on address 0
+    	> [ 4448.952988] Read of size 2 by thread T19638:
+    	> [ 4448.954510] CPU: 28 PID: 19638 Comm: trinity-c76 Not tainted 3.16.0-rc4-next-20140711-sasha-00046-g07d3099-dirty #813
+    	> [ 4448.956823]  ffff88046d86ca40 0000000000000000 ffff880082f37e78 ffff880082f37a40
+    	> [ 4448.958233]  ffffffffb6e47068 ffff880082f37a68 ffff880082f37a58 ffffffffb242708d
+    	> [ 4448.959552]  0000000000000000 ffff880082f37a88 ffffffffb24255b1 0000000000000000
+    	> [ 4448.961266] Call Trace:
+    	> [ 4448.963158] dump_stack (lib/dump_stack.c:52)
+    	> [ 4448.964244] kasan_report_user_access (mm/kasan/report.c:184)
+    	> [ 4448.965507] __asan_load2 (mm/kasan/kasan.c:352)
+    	> [ 4448.966482] ? netlink_sendmsg (net/netlink/af_netlink.c:2339)
+    	> [ 4448.967541] netlink_sendmsg (net/netlink/af_netlink.c:2339)
+    	> [ 4448.968537] ? get_parent_ip (kernel/sched/core.c:2555)
+    	> [ 4448.970103] sock_sendmsg (net/socket.c:654)
+    	> [ 4448.971584] ? might_fault (mm/memory.c:3741)
+    	> [ 4448.972526] ? might_fault (./arch/x86/include/asm/current.h:14 mm/memory.c:3740)
+    	> [ 4448.973596] ? verify_iovec (net/core/iovec.c:64)
+    	> [ 4448.974522] ___sys_sendmsg (net/socket.c:2096)
+    	> [ 4448.975797] ? put_lock_stats.isra.13 (./arch/x86/include/asm/preempt.h:98 kernel/locking/lockdep.c:254)
+    	> [ 4448.977030] ? lock_release_holdtime (kernel/locking/lockdep.c:273)
+    	> [ 4448.978197] ? lock_release_non_nested (kernel/locking/lockdep.c:3434 (discriminator 1))
+    	> [ 4448.979346] ? check_chain_key (kernel/locking/lockdep.c:2188)
+    	> [ 4448.980535] __sys_sendmmsg (net/socket.c:2181)
+    	> [ 4448.981592] ? trace_hardirqs_on_caller (kernel/locking/lockdep.c:2600)
+    	> [ 4448.982773] ? trace_hardirqs_on (kernel/locking/lockdep.c:2607)
+    	> [ 4448.984458] ? syscall_trace_enter (arch/x86/kernel/ptrace.c:1500 (discriminator 2))
+    	> [ 4448.985621] ? trace_hardirqs_on_caller (kernel/locking/lockdep.c:2600)
+    	> [ 4448.986754] SyS_sendmmsg (net/socket.c:2201)
+    	> [ 4448.987708] tracesys (arch/x86/kernel/entry_64.S:542)
+    	> [ 4448.988929] ==================================================================
+    
+    This reports means that we've come to netlink_sendmsg() with msg->msg_name == NULL and msg->msg_namelen > 0.
+    
+    After this report there was no usual "Unable to handle kernel NULL pointer dereference"
+    and this gave me a clue that address 0 is mapped and contains valid socket address structure in it.
+    
+    This bug was introduced in f3d3342602f8bcbf37d7c46641cb9bca7618eb1c
+    (net: rework recvmsg handler msg_name and msg_namelen logic).
+    Commit message states that:
+    	"Set msg->msg_name = NULL if user specified a NULL in msg_name but had a
+    	 non-null msg_namelen in verify_iovec/verify_compat_iovec. This doesn't
+    	 affect sendto as it would bail out earlier while trying to copy-in the
+    	 address."
+    But in fact this affects sendto when address 0 is mapped and contains
+    socket address structure in it. In such case copy-in address will succeed,
+    verify_iovec() function will successfully exit with msg->msg_namelen > 0
+    and msg->msg_name == NULL.
+    
+    This patch fixes it by setting msg_namelen to 0 if msg_name == NULL.
+    
+    Cc: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Cc: Eric Dumazet <edumazet@google.com>
+    Cc: <stable@vger.kernel.org>
+    Reported-by: Sasha Levin <sasha.levin@oracle.com>
+    Signed-off-by: Andrey Ryabinin <a.ryabinin@samsung.com>
+    Acked-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/compat.c     |    9 +++++----
+ net/core/iovec.c |    6 +++---
+ 2 files changed, 8 insertions(+), 7 deletions(-)
+
 commit 4197e21dff54db8838d8bb2bb54cde06a4c50596
 Merge: 97419e4 039d801
 Author: Brad Spengler <spender@grsecurity.net>
