@@ -1,3 +1,11 @@
+linux-image (linux-3.2.61-mempo-0.1.70) UNRELEASED; urgency=high
+  * updated grsecurity...
+  * ...scsi flush, AF_ALG, TCP veno,
+  * ...sysenter CVE-2014-4508 regresion, virtbox, sendmsg null
+  * v0.1.70-01-rc
+
+ -- mempo <mempo@mempo.org>  Thu, 28 Jul 2014 14:40:00 +0200
+
 linux-image (linux-3.2.61-mempo-0.1.69) UNRELEASED; urgency=low
   * updated grsecurity
   * v0.1.69-01-rc
