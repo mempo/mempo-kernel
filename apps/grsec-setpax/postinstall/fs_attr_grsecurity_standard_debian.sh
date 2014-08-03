@@ -33,6 +33,14 @@ setfattr -n user.pax.flags -v "m" /usr/lib/valgrind/memcheck-*-linux
 
 setfattr -n user.pax.flags -v "m"  /usr/lib/jvm/*/jre/lib/*/*.so  /usr/lib/jvm/*/jre/bin/*  
 
+# to gedit plugins 
+setfattr -n user.pax.flags -v rm /usr/bin/gedit  
+
+
+setfattr -n user.pax.flags -v rm /usr/bin/qtcreator
+setfattr -n user.pax.flags -v rm /usr/lib/chromium/*
+
+
 set +x
 
 # all this problems will be resolved once we have hooks that run this script when other packages are installed
