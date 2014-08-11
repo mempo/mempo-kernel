@@ -1,3 +1,10 @@
+linux-image (linux-3.2.61-mempo-0.1.72) UNRELEASED; urgency=medium
+  * new kernel 3.2.62
+  * updated grsecurity: gcc load race; LXC cfg; STACKLEAK; ESPFIX
+  * v0.1.72-01-rc
+
+ -- mempo <mempo@mempo.org>  Thu, 28 Jul 2014 14:40:00 +0200
+
 linux-image (linux-3.2.61-mempo-0.1.71) UNRELEASED; urgency=medium
   * updated grsecurity: retval, compile, __read_only, sparc64 fixes 
   * v0.1.71-01-rc
