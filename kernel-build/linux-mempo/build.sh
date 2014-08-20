@@ -4,6 +4,7 @@
 . ../../support.sh
 
 linuxdir="$1"
+flavour="$2"
 if [ -z "$linuxdir" ] ; then
 	echo "ERROR undefined linuxdir." ; exit_error
 fi
@@ -62,7 +63,9 @@ pwd_here=$PWD
 	echo "$sources_id"
 	echo "$sources_id" > "../sources_id.txt"
 
-	use_config_from=../configs/config-deskmax.config
+	config_name=$flavour
+	# TODO check if config_name is plain [a-zA-Z0-9] and >0 length
+	use_config_from=../configs/config-${config_name}.config
  	cp $use_config_from .config || { echo "ERROR Could not copy the config=$use_config_from file here in PWD=$PWD, ABORTING" ; exit_error ; }
 	config_id=`sha256sum .config | cut -d" " -f1`
 	echo "Using .config with ID=$config_id"
@@ -97,6 +100,8 @@ pwd_here=$PWD
 #	export TAR_OPTIONS="--mtime $TIMESTAMP_RFC3339 --sort-input --owner root --group root --numeric-owner" # tip: spaces in args values NOT allowed unless escaped
 # ^--- tar options will be implemented as local wrapper script
 
+	echo " * Using flavour=$flavour"
+	echo " * Using use_config_from=$use_config_from"
 	echo " * Using CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"
 	echo " * Using PATH=$PATH"
 	echo " * Using overlay_dir=$overlay_dir"

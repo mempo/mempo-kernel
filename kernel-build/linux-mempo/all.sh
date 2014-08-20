@@ -16,5 +16,5 @@ then
 	echo "Ok, back to building then."
 fi
 
-bash build-run.sh || exit
+bash build-run.sh "$@" || exit
 

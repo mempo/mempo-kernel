@@ -25,7 +25,7 @@ bash patch.sh "$linuxdir" || { echo "ERROR: in the patch.sh step" ; exit_error ;
 
 echo ""
 echo "=== BUILD ======================================"
-bash build.sh "$linuxdir" || { echo "ERROR: in the build.sh step" ; exit_error ; }
+bash build.sh "$linuxdir" "$@" || { echo "ERROR: in the build.sh step" ; exit_error ; }
 
 echo ""
 echo "=== READY ======================================"

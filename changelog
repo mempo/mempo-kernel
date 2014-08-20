@@ -1,7 +1,9 @@
 linux-image (linux-3.2.61-mempo-0.1.73) UNRELEASED; urgency=medium
   * added new flavour - deskmax with sound enabled
+  * flavours support. Now will default to flavour desk.
+  * v0.1.73-02-rc
 
- -- mempo <mempo@mempo.org>  Thu, 28 Jul 2014 14:40:00 +0200
+ -- mempo <mempo@mempo.org>  Thu, 20 Aug 2014 14:40:00 +0200
 
 linux-image (linux-3.2.61-mempo-0.1.72) UNRELEASED; urgency=medium
   * new kernel 3.2.62
