@@ -148,7 +148,7 @@ fi
 
 echo "-------------------------------------------------------------------------"
 echo "Checking PGP signature on internet-downloaded file of linux kernel (in addition to later checking the expected checksum that we have stored here)"
-#gpg --verify "kernel-sources/kernel/${kernel_file_sig}" || { echo "Invalid signature! If you're developer of this kernel-packaging (e.g. of Mempo or Debian kernel) then tripple-check what is going on, this is very strange!" ; exit 1 ; }
+gpg --verify "kernel-sources/kernel/${kernel_file_sig}" || { echo "Invalid signature! If you're developer of this kernel-packaging (e.g. of Mempo or Debian kernel) then tripple-check what is going on, this is very strange!" ; exit 1 ; }
 
 echo "-------------------------------------------------------------------------"
 echo "Removing any previous .deb files"
