@@ -62,7 +62,7 @@ pwd_here=$PWD
 	echo "$sources_id"
 	echo "$sources_id" > "../sources_id.txt"
 
-	use_config_from=../configs/config-desk.config
+	use_config_from=../configs/config-deskmax.config
  	cp $use_config_from .config || { echo "ERROR Could not copy the config=$use_config_from file here in PWD=$PWD, ABORTING" ; exit_error ; }
 	config_id=`sha256sum .config | cut -d" " -f1`
 	echo "Using .config with ID=$config_id"
