@@ -1,3 +1,38 @@
+commit 06c94f632931f42ee57420627ca758d6ce85f111
+Author: NeilBrown <neilb@suse.de>
+Date:   Wed Aug 13 09:57:07 2014 +1000
+
+    Upstream commit: 9c4bdf697c39805078392d5ddbbba5ae5680e0dd
+    
+    md/raid6: avoid data corruption during recovery of double-degraded RAID6
+    
+    During recovery of a double-degraded RAID6 it is possible for
+    some blocks not to be recovered properly, leading to corruption.
+    
+    If a write happens to one block in a stripe that would be written to a
+    missing device, and at the same time that stripe is recovering data
+    to the other missing device, then that recovered data may not be written.
+    
+    This patch skips, in the double-degraded case, an optimisation that is
+    only safe for single-degraded arrays.
+    
+    Bug was introduced in 2.6.32 and fix is suitable for any kernel since
+    then.  In an older kernel with separate handle_stripe5() and
+    handle_stripe6() functions the patch must change handle_stripe6().
+    
+    Cc: stable@vger.kernel.org (2.6.32+)
+    Fixes: 6c0069c0ae9659e3a91b68eaed06a5c6c37f45c8
+    Cc: Yuri Tikhonov <yur@emcraft.com>
+    Cc: Dan Williams <dan.j.williams@intel.com>
+    Reported-by: "Manibalan P" <pmanibalan@amiindia.co.in>
+    Tested-by: "Manibalan P" <pmanibalan@amiindia.co.in>
+    Resolves: https://bugzilla.redhat.com/show_bug.cgi?id=1090423
+    Signed-off-by: NeilBrown <neilb@suse.de>
+    Acked-by: Dan Williams <dan.j.williams@intel.com>
+
+ drivers/md/raid5.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
 commit d5379a8db503082781c6cec4938eed956f24d1df
 Author: Jiri Kosina <jkosina@suse.cz>
 Date:   Wed Aug 6 16:08:43 2014 -0700
