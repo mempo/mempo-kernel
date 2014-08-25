@@ -1,3 +1,140 @@
+commit ca6848c4921b08cfaf698337f5f83a555f74c5ce
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Fri Aug 15 09:16:04 2014 -0700
+
+    Upstream commit: dc808110bb62b64a448696ecac3938902c92e1ab
+    
+    packet: handle too big packets for PACKET_V3
+    
+    af_packet can currently overwrite kernel memory by out of bound
+    accesses, because it assumed a [new] block can always hold one frame.
+    
+    This is not generally the case, even if most existing tools do it right.
+    
+    This patch clamps too long frames as API permits, and issue a one time
+    error on syslog.
+    
+    [  394.357639] tpacket_rcv: packet too big, clamped from 5042 to 3966. macoff=82
+    
+    In this example, packet header tp_snaplen was set to 3966,
+    and tp_len was set to 5042 (skb->len)
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Fixes: f6fb8f100b80 ("af-packet: TPACKET_V3 flexible buffer implementation.")
+    Acked-by: Daniel Borkmann <dborkman@redhat.com>
+    Acked-by: Neil Horman <nhorman@tuxdriver.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/packet/internal.h
+
+ net/packet/af_packet.c |   18 ++++++++++++++++++
+ 1 files changed, 18 insertions(+), 0 deletions(-)
+
+commit 913589f0f9f214fc738582b3a12542ab67923704
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 21 20:33:45 2014 -0400
+
+    Remove GRKERNSEC_RANDNET -- it has been unnecessary for quite some
+    time now, at least since get_random_bytes started to be used directly
+    for filling of AT_RANDOM on each exec -- it's not really possible
+    anymore to store up sufficient entropy such that this option would
+    have any effect.
+    
+    Conflicts:
+    
+    	drivers/char/random.c
+
+ drivers/char/random.c |   15 ---------------
+ grsecurity/Kconfig    |   10 ----------
+ 2 files changed, 0 insertions(+), 25 deletions(-)
+
+commit df7e0d44063474bfa491b4b59fb2e1bcf300c440
+Author: Jiri Kosina <jkosina@suse.cz>
+Date:   Thu Aug 21 09:57:17 2014 -0500
+
+    Upstream commit: ad3e14d7c5268c2e24477c6ef54bbdf88add5d36
+    
+    HID: logitech: perform bounds checking on device_id early enough
+    
+    device_index is a char type and the size of paired_dj_deivces is 7
+    elements, therefore proper bounds checking has to be applied to
+    device_index before it is used.
+    
+    We are currently performing the bounds checking in
+    logi_dj_recv_add_djhid_device(), which is too late, as malicious device
+    could send REPORT_TYPE_NOTIF_DEVICE_UNPAIRED early enough and trigger the
+    problem in one of the report forwarding functions called from
+    logi_dj_raw_event().
+    
+    Fix this by performing the check at the earliest possible ocasion in
+    logi_dj_raw_event().
+    
+    Cc: stable@vger.kernel.org
+    Reported-by: Ben Hawkes <hawkes@google.com>
+    Reviewed-by: Benjamin Tissoires <benjamin.tissoires@redhat.com>
+    Signed-off-by: Jiri Kosina <jkosina@suse.cz>
+
+ drivers/hid/hid-logitech-dj.c |   13 ++++++-------
+ 1 files changed, 6 insertions(+), 7 deletions(-)
+
+commit bee2e71c3211342d70b2aef3c066ba8c815e4b2c
+Author: Jiri Kosina <jkosina@suse.cz>
+Date:   Thu Aug 21 09:57:48 2014 -0500
+
+    Upstream commit: 4ab25786c87eb20857bbb715c3ae34ec8fd6a214
+    
+    HID: fix a couple of off-by-ones
+    
+    There are a few very theoretical off-by-one bugs in report descriptor size
+    checking when performing a pre-parsing fixup. Fix those.
+    
+    Cc: stable@vger.kernel.org
+    Reported-by: Ben Hawkes <hawkes@google.com>
+    Reviewed-by: Benjamin Tissoires <benjamin.tissoires@redhat.com>
+    Signed-off-by: Jiri Kosina <jkosina@suse.cz>
+    
+    Conflicts:
+    
+    	drivers/hid/hid-kye.c
+    	drivers/hid/hid-lg.c
+
+ drivers/hid/hid-cherry.c   |    2 +-
+ drivers/hid/hid-kye.c      |    2 +-
+ drivers/hid/hid-lg.c       |    4 ++--
+ drivers/hid/hid-monterey.c |    2 +-
+ drivers/hid/hid-petalynx.c |    2 +-
+ drivers/hid/hid-sunplus.c  |    2 +-
+ 6 files changed, 7 insertions(+), 7 deletions(-)
+
+commit 610012c53a64d9b9ef0b8ea589c19066a31ebe1e
+Author: Jan Kara <jack@suse.cz>
+Date:   Sun Aug 17 11:49:57 2014 +0200
+
+    Upstream commit: 410dd3cf4c9b36f27ed4542ee18b1af5e68645a4
+    
+    isofs: Fix unbounded recursion when processing relocated directories
+    
+    We did not check relocated directory in any way when processing Rock
+    Ridge 'CL' tag. Thus a corrupted isofs image can possibly have a CL
+    entry pointing to another CL entry leading to possibly unbounded
+    recursion in kernel code and thus stack overflow or deadlocks (if there
+    is a loop created from CL entries).
+    
+    Fix the problem by not allowing CL entry to point to a directory entry
+    with CL entry (such use makes no good sense anyway) and by checking
+    whether CL entry doesn't point to itself.
+    
+    CC: stable@vger.kernel.org
+    Reported-by: Chris Evans <cevans@google.com>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/isofs/inode.c |   15 ++++++++-------
+ fs/isofs/isofs.h |   23 +++++++++++++++++++----
+ fs/isofs/rock.c  |   39 ++++++++++++++++++++++++++++-----------
+ 3 files changed, 55 insertions(+), 22 deletions(-)
+
 commit 06c94f632931f42ee57420627ca758d6ce85f111
 Author: NeilBrown <neilb@suse.de>
 Date:   Wed Aug 13 09:57:07 2014 +1000
