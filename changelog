@@ -1,3 +1,12 @@
+linux-image (linux-3.2.61-mempo-0.1.74) UNRELEASED; urgency=high
+  * grsec update: vuln: big packets for PACKET_V3 af_packet mem corrupt
+  * grsec update: GRKERNSEC_RANDNET no longer is used
+  * grsec update: various HID fixes (vuln?) including logitech
+  * grsec update: DDoS/hang on invalid cdrom format
+  * v0.1.74-01-rc
+
+ -- mempo <mempo@mempo.org>  Thu, 26 Aug 2014 00:50:00 +0200
+
 linux-image (linux-3.2.61-mempo-0.1.74) UNRELEASED; urgency=medium
   * grsec updates: raid mem corruption; and more
   * v0.1.74-01-rc
