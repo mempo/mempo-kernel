@@ -1,3 +1,116 @@
+commit 224a98d17f5ece6294e223cbce0a94cf171ca861
+Author: Jiri Kosina <jkosina@suse.cz>
+Date:   Wed Aug 27 09:12:24 2014 +0200
+
+    HID: magicmouse: sanity check report size in raw_event() callback
+    
+    The report passed to us from transport driver could potentially be
+    arbitrarily large, therefore we better sanity-check it so that
+    magicmouse_emit_touch() gets only valid values of raw_id.
+    
+    Cc: stable@vger.kernel.org
+    Reported-by: Steven Vittitoe <scvitti@google.com>
+    Signed-off-by: Jiri Kosina <jkosina@suse.cz>
+
+ drivers/hid/hid-magicmouse.c |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
+
+commit bb7484b97c9ca1fffe1f2b75a67731f1d3f7ea2c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Aug 26 00:35:30 2014 -0400
+
+    add comment
+
+ mm/mmap.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 3b450781121defb7f48dc7274dd721fe978e497b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 25 23:30:08 2014 -0400
+
+    reuse mm instead of current->mm
+
+ mm/mmap.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 08c93cf28f505aaebda320de06909f3652e9a640
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 25 23:19:09 2014 -0400
+
+    Kill Chris Evans' ulimit -d 1 technique to slightly reduce heap ASLR
+    entropy on suid/sgid binaries.
+    
+    Time he spent developing the entire exploit: who knows
+    Time I spent adding another way in addition to the 6 or so existing
+    ways his exploit is prevented: ~ 5 minutes
+    
+    Hashtag: ProjectZeroImpact
+
+ mm/mmap.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 7175f416f0740888987a185618501d7eb44d25b6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 25 19:40:32 2014 -0400
+
+    make sure in every case where we would end up performing a role
+    transition in the full-learned policy that we log the necessary
+    CAP_SETUID/CAP_SETGID.  This will happen regardless of the
+    process actually having CAP_SETUID or CAP_SETGID set, as the
+    check on role transition is done only against the subject's permitted
+    capabilities, not actual active capabilities
+    
+    This fixes full-learning on sshd and likely other applications
+    
+    Thanks to Stephane from the forums for the report!
+    
+    Conflicts:
+    
+    	grsecurity/gracl_cap.c
+    	kernel/sys.c
+
+ grsecurity/gracl_cap.c      |   41 +++++++++++++++++++++++++++++------------
+ grsecurity/grsec_disabled.c |    6 ++++++
+ include/linux/grsecurity.h  |    2 ++
+ kernel/sys.c                |   19 +++++++++++++++++++
+ 4 files changed, 56 insertions(+), 12 deletions(-)
+
+commit d8c343125b0c9b5c17fbe8f5b52d44d698b81c68
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Aug 24 14:48:12 2014 -0400
+
+    remove makefile entry for no-longer-used file
+
+ scripts/Makefile |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+commit c6a1f020e3e659e55605294bd33d3e917cf3d6f8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jun 22 16:41:15 2014 -0400
+
+    Introduce an experimental change to TPE -- reject execution of binaries that
+    are world-writable.  Contributed by Mickaël Salaün
+
+ grsecurity/grsec_tpe.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 7534afe048b5291c6282a204f5884b164395c5e2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Aug 21 23:53:18 2014 -0400
+
+    If no cgroup agent release path is specified, don't bother trying to
+    exec any nonexistent usermode helper -- prevents a waste of resources
+    and fixes some annoying grsec logs detecting this case.
+    
+    Thanks to ice9 from the forums for help with testing.
+    
+    Conflicts:
+    
+    	kernel/cgroup.c
+
+ kernel/cgroup.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
 commit ca6848c4921b08cfaf698337f5f83a555f74c5ce
 Author: Eric Dumazet <edumazet@google.com>
 Date:   Fri Aug 15 09:16:04 2014 -0700
