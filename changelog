@@ -1,6 +1,8 @@
 linux-image (linux-3.2.62-mempo-0.1.76) UNRELEASED; urgency=medium
   * grsec: TPE, RBAC learn, current->mm, mouse drv
   * v0.1.76-01-rc
+  * [fix] version for deskmax config is now .76 (was .75 resulting in wrong .deb filename!)
+  * v0.1.76-02-rc
 
  -- mempo <mempo@mempo.org>  Mon, 01 Sep 2014 14:37:00 +0200
 
