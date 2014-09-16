@@ -1,3 +1,10 @@
+linux-image (linux-3.2.63-mempo-0.1.77) UNRELEASED; urgency=medium
+  * grsec: kernel fixes, update to 3.2.63
+  * depend on libc6 version 2.13-38+deb7u4
+  * v0.1.77-01-rc
+
+ -- mempo <mempo@mempo.org>  Tue, 16 Sep 2014 14:54:00 +0200
+
 linux-image (linux-3.2.62-mempo-0.1.76) UNRELEASED; urgency=medium
   * grsec: TPE, RBAC learn, current->mm, mouse drv
   * v0.1.76-01-rc
