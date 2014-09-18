@@ -1,3 +1,47 @@
+commit e87359e46a367c3d502ec4b61ae16a344afc8bf0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 18 08:55:03 2014 -0400
+
+    update documentation
+
+ security/Kconfig |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+commit 67bcf446004cbaff424450d0943fb0321e505493
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 18 07:42:34 2014 -0400
+
+    update documentation
+
+ security/Kconfig |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit b8d9c7f895650cec62bc43a9a2eb5a3a913aadff
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 17 23:36:38 2014 -0400
+
+    reorganize EFI backport
+
+ arch/x86/include/asm/efi.h     |    1 +
+ arch/x86/platform/efi/efi.c    |   15 ++-------------
+ arch/x86/platform/efi/efi_32.c |    4 ++++
+ arch/x86/platform/efi/efi_64.c |   16 ++++++++++++++++
+ 4 files changed, 23 insertions(+), 13 deletions(-)
+
+commit 767429f32d1557e71f1ea6b271c9ff9bb470f58c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 17 23:17:07 2014 -0400
+
+    Backport a best-effort variant of minipli's KERNEXEC/EFI patch to 3.2.
+    Only if EFI runtime services are active will we allow the physmap to be
+    RWX -- shouldn't be the case for most users, but this at least protects
+    those blindly using distro configs.
+
+ arch/x86/kernel/head_64.S   |    8 ++++++--
+ arch/x86/platform/efi/efi.c |   13 +++++++++++++
+ security/Kconfig            |    3 +++
+ 3 files changed, 22 insertions(+), 2 deletions(-)
+
 commit 0163725f9f230f4b58641a875a7de730afc80c74
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Sep 15 08:30:05 2014 -0400
