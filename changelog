@@ -1,4 +1,10 @@
 linux-image (linux-3.2.63-mempo-0.1.77) UNRELEASED; urgency=medium
+  * grsec: KERNEXEC/EFI patch backport
+  * v0.1.77-02-rc
+
+ -- mempo <mempo@mempo.org>  Tue, 18 Sep 2014 15:54:00 +0200
+
+linux-image (linux-3.2.63-mempo-0.1.77) UNRELEASED; urgency=medium
   * grsec: kernel fixes, update to 3.2.63
   * depend on libc6 version 2.13-38+deb7u4
   * v0.1.77-01-rc
