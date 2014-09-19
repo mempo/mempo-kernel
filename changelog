@@ -1,8 +1,14 @@
-linux-image (linux-3.2.63-mempo-0.1.77) UNRELEASED; urgency=medium
+linux-image (linux-3.2.63-mempo-0.1.78) UNRELEASED; urgency=medium
   * grsec: KERNEXEC/EFI patch backport
   * v0.1.77-02-rc
+  * changing naming, this version here (with grsecurity from 18th) should be named 0.1.78
+  * though kocka's version will remain named as 0.1.77-02
+  * WARNING: previous release(s?) had an less random seed (empty + just date) (low security impact on anyway binary distro)
+  * build script: check if (from blockchain) seed is not-empty, show and allow to edit
+  * updating seed
+  * v0.1.78-01-rc
 
- -- mempo <mempo@mempo.org>  Tue, 18 Sep 2014 15:54:00 +0200
+ -- mempo <mempo@mempo.org>  Tue, 19 Sep 2014 10:50:00 +0200
 
 linux-image (linux-3.2.63-mempo-0.1.77) UNRELEASED; urgency=medium
   * grsec: kernel fixes, update to 3.2.63

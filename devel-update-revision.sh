@@ -1,12 +1,20 @@
 #!/bin/bash
 
+echo ""
+echo "==============================================================="
+echo "Updating revision / seed"
+echo ""
+
+
 arg_metod=$1
 
 # load current kernel version
 # and other data that might be useful (the old data before we will overwrite it)
 
+echo "Loading current data to start with"
 . kernel-build/linux-mempo/env-data.sh
 kernel_ver="$kernel_general_version"
+echo "We have kernel_ver=$kernel_ver"
 # TODO assert correct format
 
 if [[ -z "$arg_metod" ]] ; then arg_metod="increase" ; fi
@@ -18,8 +26,29 @@ entropy_data=$( wget -q "$url_provable_entropy" --output-document - )
 entropy_seed=$( printf '%s\n' "$entropy_data" | head -n 1 | tail -n 1 )
 entropy_index=$( printf '%s\n' "$entropy_data" | head -n 2 | tail -n 1 )
 entropy_name=$( printf '%s\n' "$entropy_data" | head -n 3 | tail -n 1 )
-echo "Got entropy seed from $entropy_name index $entropy_index:"
-echo "$entropy_seed"
+if [[ -z "$entropy_index" ]] || [[ -z "$entropy_seed" ]] ; then
+	echo ""
+	echo "@@@@@@ ERROR:      OUPSS. It seems we can not download the entropy. @@@@@@ Enter your own seed!!! @@@@@@"
+	echo "  Go to e.g. http://block-explorer.com/ , you see a list of blocks. The highest number is the newest block. "
+	echo "  Pick not the newest block but 6 blocks before, click it to see details"
+	echo "  And copy the number of block as INDEX and the Hash as SEED."
+	echo "  Or even better use local litecoin node once is synchronized"
+	echo "Sorry for this problem. Press ENTER to continue"
+	read _
+else
+	echo "Got entropy seed from $entropy_name index $entropy_index:"
+	echo "$entropy_seed"
+fi
+
+echo ""
+echo "This is the seeds we have now, you can review them or edit them."
+echo "  (It is best to confirm with locally running litecoin node if you can;"
+echo "  though that is not too important as we anyway in binary distributions)"
+echo ""
+
+read -e -p "The block INDEX (short nunber): " -i "$entropy_index"
+read -e -p "The block SEED (long random string): " -i "$entropy_seed"
+echo ""
 
 newenv_date=$(date +'%Y-%m-%d %H:%M:%S')
 

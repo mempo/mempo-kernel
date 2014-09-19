@@ -1,0 +1,52 @@
+
+*** This document here is more definitive. ***
+
+Build and RELEASE (distribute) system for use in mempo.
+
+The build model here is related to:
+https://github.com/rfree2/fossoffice/blob/master/task/aptmempo/repo-server/server.txt
+
+
+We need users: 
+BUILD   - kernelbuild: the user (must be called "kernelbuild" usually) who runs the build process
+SIGN    - repomake: the user who has gpg keys for signing the deb of kernel [and possibly own repo)
+UPLOAD  - reposend: the user who can upload files to file-server (e.g. to http server)
+
+Life of a deb package:
+foo.deb - sha=7777cccc deterministically build package - created by user BUILD
+foo.deb - sha=7777cccc deterministically build package by other user (always same checksum)
+foo.deb.sig   - the signature on orginal deb sha=7777cccc - by SIGN
+~/repos/.../pool/f/foo.deb - the file sha=7777cccc that is prepared to be served as debian-repo - by SIGN
+~/repost...manifest        - the manifest, including the new file 7777cccc and previous ones - by SIGN
+/var/www/...pool/f/foo.deb - the file being served by file-server - copied there by UPLOAD
+/var/www/...manifest       - the file being served by file-server - copied there by UPLOAD
+/var/www/sign/foo.deb.sig  - uploaded by UPLOAD
+
+/home/kernelbuild/build/foo.deb <- created by BUILD
+/home/kernelbuild/publish/foo.deb <- copy by BUILD (this dir is chmod 755)
+/home/kernelbuild/publish/sign/foo/ <- signed by SIGN (this dir is chgrp SIGN, chmod g+rwx)
+/home/makerepo/repo-prepare/ <- SIGN created by reprepro
+(srv) /var/www/repo/.. <- uploaded entire tree from repo-prepare/ by UPLOAD
+
+chmod 755 /home/kernelbuild/publish/
+chmod 755 /home/makerepo/repo-prepare/
+
+/home/kernelbuild/deterministic-kernel/ <-- build happens here
+/home/kernelbuild/build/ <-- symlink to build dir with *.deb
+/home/kernelbuild/publish <-- symlink to place that should contain *.deb for publishing
+/home/kernelbuild/publish/sign <-- this will be chowned so that SIGN user can create .deb.sig there
+
+Actions:
+
+1. build kernel with ./run.sh (or triggered by BOTBUILD) and copy results to public
+2. sign to .deb.sig 
+3. run reprepro to compile+sign the repository
+4. upload the repository
+5. upload the sig
+
+
+Additional users:
+BOTBUILD - observes github (or other source) and triggers the build process when new version
+BOTSAY   - observes github (or other source) and announces new version to various systems
+
+

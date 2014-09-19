@@ -1,6 +1,8 @@
 #!/bin/bash -e
 # do NOT run this directly, run build-run.sh
 
+# this is the main inner build script - it executes build directly
+
 . ../../support.sh
 
 linuxdir="$1"
