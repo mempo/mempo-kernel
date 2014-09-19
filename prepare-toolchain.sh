@@ -99,7 +99,7 @@ function require_exact_ver() { # ($name,$ver_needed)
 # gcc (Debian 4.7.2-5) 4.7.2
 # gcc-4.7 (Debian 4.7.2-5) 4.7.2
 
-require_exact_ver "libc6" "2.13-38+deb7u3"
+require_exact_ver "libc6" "2.13-38+deb7u4"
 require_exact_ver "gcc" "4:4.7.2-1"
 require_exact_ver "gcc-4.7" "4.7.2-5"
 require_exact_ver "gcc-4.7-plugin-dev" "4.7.2-5"

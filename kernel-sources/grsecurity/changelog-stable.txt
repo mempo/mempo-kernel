@@ -1,3 +1,481 @@
+commit e87359e46a367c3d502ec4b61ae16a344afc8bf0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 18 08:55:03 2014 -0400
+
+    update documentation
+
+ security/Kconfig |    7 ++++++-
+ 1 files changed, 6 insertions(+), 1 deletions(-)
+
+commit 67bcf446004cbaff424450d0943fb0321e505493
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 18 07:42:34 2014 -0400
+
+    update documentation
+
+ security/Kconfig |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit b8d9c7f895650cec62bc43a9a2eb5a3a913aadff
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 17 23:36:38 2014 -0400
+
+    reorganize EFI backport
+
+ arch/x86/include/asm/efi.h     |    1 +
+ arch/x86/platform/efi/efi.c    |   15 ++-------------
+ arch/x86/platform/efi/efi_32.c |    4 ++++
+ arch/x86/platform/efi/efi_64.c |   16 ++++++++++++++++
+ 4 files changed, 23 insertions(+), 13 deletions(-)
+
+commit 767429f32d1557e71f1ea6b271c9ff9bb470f58c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Sep 17 23:17:07 2014 -0400
+
+    Backport a best-effort variant of minipli's KERNEXEC/EFI patch to 3.2.
+    Only if EFI runtime services are active will we allow the physmap to be
+    RWX -- shouldn't be the case for most users, but this at least protects
+    those blindly using distro configs.
+
+ arch/x86/kernel/head_64.S   |    8 ++++++--
+ arch/x86/platform/efi/efi.c |   13 +++++++++++++
+ security/Kconfig            |    3 +++
+ 3 files changed, 22 insertions(+), 2 deletions(-)
+
+commit 0163725f9f230f4b58641a875a7de730afc80c74
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 15 08:30:05 2014 -0400
+
+    exempt atomic_[inc|add]_return_unchecked() from size_overflow
+
+ arch/x86/include/asm/atomic.h |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 9056786e17d0bbeebf5ad5a8554ba8c8a76960dc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 14 18:41:06 2014 -0400
+
+    update hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit ab9e7ecf3984d4e5ef4ff3a45278710aacd396ce
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 14 17:17:26 2014 -0400
+
+    compile fix
+
+ kernel/time/alarmtimer.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit f838dc40b8e11a24b7075f0c978f4fab134c831b
+Author: Richard Larocque <rlarocque@google.com>
+Date:   Tue Sep 9 18:31:03 2014 -0700
+
+    alarmtimer: Return relative times in timer_gettime
+    
+    Returns the time remaining for an alarm timer, rather than the time at
+    which it is scheduled to expire.  If the timer has already expired or it
+    is not currently scheduled, the it_value's members are set to zero.
+    
+    This new behavior matches that of the other posix-timers and the POSIX
+    specifications.
+    
+    This is a change in user-visible behavior, and may break existing
+    applications.  Hopefully, few users rely on the old incorrect behavior.
+    
+    Cc: stable@vger.kernel.org
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Ingo Molnar <mingo@kernel.org>
+    Cc: Richard Cochran <richardcochran@gmail.com>
+    Cc: Prarit Bhargava <prarit@redhat.com>
+    Cc: Sharvil Nanavati <sharvil@google.com>
+    Signed-off-by: Richard Larocque <rlarocque@google.com>
+    [jstultz: minor style tweak]
+    Signed-off-by: John Stultz <john.stultz@linaro.org>
+
+ kernel/time/alarmtimer.c |   18 +++++++++++-------
+ 1 files changed, 11 insertions(+), 7 deletions(-)
+
+commit 0b0613996b5978239272e4204191848027ed5b89
+Author: Richard Larocque <rlarocque@google.com>
+Date:   Tue Sep 9 18:31:05 2014 -0700
+
+    alarmtimer: Lock k_itimer during timer callback
+    
+    Locks the k_itimer's it_lock member when handling the alarm timer's
+    expiry callback.
+    
+    The regular posix timers defined in posix-timers.c have this lock held
+    during timout processing because their callbacks are routed through
+    posix_timer_fn().  The alarm timers follow a different path, so they
+    ought to grab the lock somewhere else.
+    
+    Cc: stable@vger.kernel.org
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Ingo Molnar <mingo@kernel.org>
+    Cc: Richard Cochran <richardcochran@gmail.com>
+    Cc: Prarit Bhargava <prarit@redhat.com>
+    Cc: Sharvil Nanavati <sharvil@google.com>
+    Signed-off-by: Richard Larocque <rlarocque@google.com>
+    Signed-off-by: John Stultz <john.stultz@linaro.org>
+
+ kernel/time/alarmtimer.c |   10 ++++++++--
+ 1 files changed, 8 insertions(+), 2 deletions(-)
+
+commit 8117fc080568e6aa32ff446c070100a6eab6272b
+Author: Richard Larocque <rlarocque@google.com>
+Date:   Tue Sep 9 18:31:04 2014 -0700
+
+    alarmtimer: Do not signal SIGEV_NONE timers
+    
+    Avoids sending a signal to alarm timers created with sigev_notify set to
+    SIGEV_NONE by checking for that special case in the timeout callback.
+    
+    The regular posix timers avoid sending signals to SIGEV_NONE timers by
+    not scheduling any callbacks for them in the first place.  Although it
+    would be possible to do something similar for alarm timers, it's simpler
+    to handle this as a special case in the timeout.
+    
+    Prior to this patch, the alarm timer would ignore the sigev_notify value
+    and try to deliver signals to the process anyway.  Even worse, the
+    sanity check for the value of sigev_signo is skipped when SIGEV_NONE was
+    specified, so the signal number could be bogus.  If sigev_signo was an
+    unitialized value (as it often would be if SIGEV_NONE is used), then
+    it's hard to predict which signal will be sent.
+    
+    Cc: stable@vger.kernel.org
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Ingo Molnar <mingo@kernel.org>
+    Cc: Richard Cochran <richardcochran@gmail.com>
+    Cc: Prarit Bhargava <prarit@redhat.com>
+    Cc: Sharvil Nanavati <sharvil@google.com>
+    Signed-off-by: Richard Larocque <rlarocque@google.com>
+    Signed-off-by: John Stultz <john.stultz@linaro.org>
+
+ kernel/time/alarmtimer.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 038a6c21fd91be8221651495d280f60a4a252444
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 14 13:22:45 2014 -0400
+
+    compile fix
+
+ kernel/futex.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 51ae12a86010d07565a351852e4205c7b4bc6f6e
+Author: Thomas Gleixner <tglx@linutronix.de>
+Date:   Thu Sep 11 23:44:35 2014 +0200
+
+    futex: Unlock hb->lock in futex_wait_requeue_pi() error path
+    
+    futex_wait_requeue_pi() calls futex_wait_setup(). If
+    futex_wait_setup() succeeds it returns with hb->lock held and
+    preemption disabled. Now the sanity check after this does:
+    
+            if (match_futex(&q.key, &key2)) {
+    	   	ret = -EINVAL;
+    		goto out_put_keys;
+    	}
+    
+    which releases the keys but does not release hb->lock.
+    
+    So we happily return to user space with hb->lock held and therefor
+    preemption disabled.
+    
+    Unlock hb->lock before taking the exit route.
+    
+    Reported-by: Dave "Trinity" Jones <davej@redhat.com>
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+    Reviewed-by: Darren Hart <dvhart@linux.intel.com>
+    Reviewed-by: Davidlohr Bueso <dave@stgolabs.net>
+    Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>
+    Cc: stable@vger.kernel.org
+    Link: http://lkml.kernel.org/r/alpine.DEB.2.10.1409112318500.4178@nanos
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+ kernel/futex.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 7044939f80c7cc215bfdf67010793989ea099a7a
+Merge: df4e799 c312fd4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 14 11:43:48 2014 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	include/net/secure_seq.h
+    	tools/gcc/size_overflow_plugin/size_overflow_hash.data
+
+commit c312fd4b91bc9dd81a4c8732ab1ddef762f9c827
+Merge: 31cded1 de9ba61
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 14 11:39:36 2014 -0400
+
+    Update to pax-linux-3.2.63-test157.patch:
+    - forward port to 3.2.63
+    - updated the size overflow hash table
+    - hopefully fixed a build race on ia64, reported by Dennis Schridde (https://bugs.gentoo.org/show_bug.cgi?id=503878)
+    
+    Merge branch 'linux-3.2.y' into pax-stable
+    
+    Conflicts:
+    	arch/sparc/mm/fault_64.c
+    	arch/x86/include/asm/pgtable_64_types.h
+    	arch/x86/kernel/entry_64.S
+    	arch/x86/kernel/ldt.c
+    	drivers/gpu/drm/ttm/ttm_page_alloc.c
+    	include/net/inetpeer.h
+    	net/ipv4/inetpeer.c
+    	net/ipv4/route.c
+    	net/ipv6/ip6_output.c
+
+commit df4e7992d0535f0fd5ac23e766a05934fa5c1e5f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 11 22:12:35 2014 -0400
+
+    compile fix
+
+ net/ceph/mon_client.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit ee18422bf9260f9fb20f33197fb32261b47530d8
+Author: Ilya Dryomov <ilya.dryomov@inktank.com>
+Date:   Tue Sep 9 19:39:15 2014 +0400
+
+    libceph: do not hard code max auth ticket len
+    
+    We hard code cephx auth ticket buffer size to 256 bytes.  This isn't
+    enough for any moderate setups and, in case tickets themselves are not
+    encrypted, leads to buffer overflows (ceph_x_decrypt() errors out, but
+    ceph_decode_copy() doesn't - it's just a memcpy() wrapper).  Since the
+    buffer is allocated dynamically anyway, allocated it a bit later, at
+    the point where we know how much is going to be needed.
+    
+    Fixes: http://tracker.ceph.com/issues/8979
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+    Reviewed-by: Sage Weil <sage@redhat.com>
+
+ net/ceph/auth_x.c |   64 ++++++++++++++++++++++++-----------------------------
+ 1 files changed, 29 insertions(+), 35 deletions(-)
+
+commit 4dfa313156b7147936b3bad7f2807a1f74a421bd
+Author: Ilya Dryomov <ilya.dryomov@inktank.com>
+Date:   Mon Sep 8 17:25:34 2014 +0400
+
+    libceph: add process_one_ticket() helper
+    
+    Add a helper for processing individual cephx auth tickets.  Needed for
+    the next commit, which deals with allocating ticket buffers.  (Most of
+    the diff here is whitespace - view with git diff -b).
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+    Reviewed-by: Sage Weil <sage@redhat.com>
+
+ net/ceph/auth_x.c |  228 +++++++++++++++++++++++++++++------------------------
+ 1 files changed, 124 insertions(+), 104 deletions(-)
+
+commit d0840d5576f29f2f51c18aef2e5c3e825a9a3025
+Author: Sage Weil <sage@redhat.com>
+Date:   Mon Aug 4 07:01:54 2014 -0700
+
+    libceph: gracefully handle large reply messages from the mon
+    
+    We preallocate a few of the message types we get back from the mon.  If we
+    get a larger message than we are expecting, fall back to trying to allocate
+    a new one instead of blindly using the one we have.
+    
+    CC: stable@vger.kernel.org
+    Signed-off-by: Sage Weil <sage@redhat.com>
+    Reviewed-by: Ilya Dryomov <ilya.dryomov@inktank.com>
+
+ net/ceph/mon_client.c |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+commit 1cf74ebe958195a7dc114e56f0100bc3ca97d9a8
+Author: Jan Kara <jack@suse.cz>
+Date:   Thu Sep 4 14:06:55 2014 +0200
+
+    udf: Avoid infinite loop when processing indirect ICBs
+    
+    We did not implement any bound on number of indirect ICBs we follow when
+    loading inode. Thus corrupted medium could cause kernel to go into an
+    infinite loop, possibly causing a stack overflow.
+    
+    Fix the possible stack overflow by removing recursion from
+    __udf_read_inode() and limit number of indirect ICBs we follow to avoid
+    infinite loops.
+    
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/udf/inode.c |   35 +++++++++++++++++++++--------------
+ 1 files changed, 21 insertions(+), 14 deletions(-)
+
+commit 617f4c4872b809c6b6ea651d5198b7820b3e0abf
+Author: Jan Kara <jack@suse.cz>
+Date:   Thu Sep 4 13:32:50 2014 +0200
+
+    udf: Fold udf_fill_inode() into __udf_read_inode()
+    
+    There's no good reason to separate these since udf_fill_inode() is
+    called only from __udf_read_inode() and both do part of the same thing.
+    
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/udf/inode.c |   22 +++++-----------------
+ 1 files changed, 5 insertions(+), 17 deletions(-)
+
+commit df842208ddd1fae7409c4bc8e8e008e88ede1f46
+Author: Ashish Sangwan <ashishsangwan2@gmail.com>
+Date:   Tue Jun 26 19:33:11 2012 +0530
+
+    UDF: Remove unnecessary variable "offset" from udf_fill_inode
+    
+    The variable "offset" is not needed. Remove it.
+    
+    Signed-off-by: Ashish Sangwan <ashish.sangwan2@gmail.com>
+    Signed-off-by: Namjae Jeon <linkinjeon@gmail.com>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+    
+    Conflicts:
+    
+    	fs/udf/inode.c
+
+ fs/udf/inode.c |    4 ----
+ 1 files changed, 0 insertions(+), 4 deletions(-)
+
+commit fc485c36ac5e9d60f2dec3fa5b338271aaeda71b
+Author: Jan Kara <jack@suse.cz>
+Date:   Thu Sep 4 11:47:51 2014 +0200
+
+    udf: Avoid dir link count to go negative
+    
+    If we are writing back inode of unlinked directory, its link count ends
+    up being (u16)-1. Although the inode is deleted, udf_iget() can load the
+    inode when NFS uses stale file handle and get confused.
+    
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/udf/inode.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 148f1629b2c5874e0159a8770c9d119265b698ed
+Author: Ani Sinha <ani@arista.com>
+Date:   Mon Sep 8 14:49:59 2014 -0700
+
+    net:socket: set msg_namelen to 0 if msg_name is passed as NULL in msghdr struct from userland.
+    
+    Linux manpage for recvmsg and sendmsg calls does not explicitly mention setting msg_namelen to 0 when
+    msg_name passed set as NULL. When developers don't set msg_namelen member in msghdr, it might contain garbage
+    value which will fail the validation check and sendmsg and recvmsg calls from kernel will return EINVAL. This will
+    break old binaries and any code for which there is no access to source code.
+    To fix this, we set msg_namelen to 0 when msg_name is passed as NULL from userland.
+    
+    Signed-off-by: Ani Sinha <ani@arista.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/socket.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 3edd6b95bf89a262d09ac87c05e2e2432db18bd0
+Merge: ca5c222 31cded1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 11 18:30:45 2014 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit 31cded121ad293acd7ddb47a01d20bfbc59aff0c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 11 18:30:03 2014 -0400
+
+    Update to pax-linux-3.2.62-test157.patch:
+    - fixed an assert in the latent entropy plugin under gcc 4.5, reported by Emese
+
+ tools/gcc/latent_entropy_plugin.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit ca5c222c961d8336eff035e27432a714c27cf674
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Sep 11 18:20:33 2014 -0400
+
+    3.2 didn't need this deferring
+    
+    Revert "pax: defer KERNEXEC instrumentation in IRQ return path"
+    
+    This reverts commit 188e7e319dfbd150d27d1d7451ebad1834000ce5.
+
+ arch/x86/kernel/entry_64.S |   19 -------------------
+ 1 files changed, 0 insertions(+), 19 deletions(-)
+
+commit 77c5c6e41bc486fc92de079882048cdfeb88558b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 8 20:59:54 2014 -0400
+
+    compile fix
+
+ drivers/media/dvb/dvb-usb/cinergyT2-fe.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit e35a79ff36f8d1822a12f64784e886260bf472e4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 8 20:36:10 2014 -0400
+
+    fix several more cases of DMA-on-stack
+
+ drivers/media/dvb/dvb-usb/cinergyT2-fe.c |  179 ++++++++++++++++++++++--------
+ 1 files changed, 132 insertions(+), 47 deletions(-)
+
+commit c5584f68b79036abf8b615a828c83844babeef86
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 8 19:28:37 2014 -0400
+
+    compile fix
+
+ drivers/media/dvb/dvb-usb/cinergyT2-core.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 4da912717213ddce20610d7c73a166ff19943bd6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Sep 8 19:09:58 2014 -0400
+
+    Fix yet another DMA-on-stack case in the driver for the DVB-T TerraTec
+    Cinergy T2, reported by sainz76 on the forums.
+
+ drivers/media/dvb/dvb-usb/cinergyT2-core.c |   90 +++++++++++++++++++++++-----
+ 1 files changed, 74 insertions(+), 16 deletions(-)
+
+commit 188e7e319dfbd150d27d1d7451ebad1834000ce5
+Author: Mathias Krause <mathias.krause@secunet.com>
+Date:   Mon Sep 8 13:13:02 2014 +0200
+
+    pax: defer KERNEXEC instrumentation in IRQ return path
+    
+    The EFI runtime service to relocate, well, the EFI runtime services
+    (SetVirtualAddressMap) gets called with a physical mapping and with
+    interrupts enabled. If an IRQ triggers while we're executing code in
+    the EFI region, the KERNEXEC instrumentation will set the MSB of the
+    return address. But this address is actually located in the lower 4GB,
+    thereby setting the MSB makes the CPU #GP as the return address just
+    got non-canonical.
+    
+    Fix this by deferring the KERNEXEC instrumentation for the iret path
+    until alternatives are applied. This allows this early EFI runtime
+    service calls to get interrupted not only by IRQs but also NMIs and
+    activates the instrumentation before any userland code will be
+    executed -- even before the other APs are started.
+    
+    Signed-off-by: Mathias Krause <mathias.krause@secunet.com>
+
+ arch/x86/kernel/entry_64.S |   19 +++++++++++++++++++
+ 1 files changed, 19 insertions(+), 0 deletions(-)
+
 commit 224a98d17f5ece6294e223cbce0a94cf171ca861
 Author: Jiri Kosina <jkosina@suse.cz>
 Date:   Wed Aug 27 09:12:24 2014 +0200
