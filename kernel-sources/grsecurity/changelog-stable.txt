@@ -1,3 +1,159 @@
+commit c8b75207af997e24ce98faba23fdf4bf53058562
+Merge: 415d00a be01ef4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 28 13:57:15 2014 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit be01ef4bda6b1918b5623d98ef83ca56065bf818
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Sep 28 13:56:35 2014 -0400
+
+    Update to pax-linux-3.2.63-test159.patch:
+    - made mmap_rnd use the passed down mm on ppc
+    - fixed some REFCOUNT false positives in drbd, reported by schiffi (https://forums.grsecurity.net/viewtopic.php?f=3&t=3786)
+    - removed bash dependence from scripts/gcc-plugin.sh
+
+ arch/powerpc/mm/mmap_64.c          |   10 +++++-----
+ arch/x86/include/asm/atomic.h      |    4 ++--
+ drivers/block/drbd/drbd_bitmap.c   |    2 +-
+ drivers/block/drbd/drbd_int.h      |    4 ++--
+ drivers/block/drbd/drbd_main.c     |    4 ++--
+ drivers/block/drbd/drbd_receiver.c |   12 ++++++------
+ drivers/block/drbd/drbd_worker.c   |    8 ++++----
+ scripts/gcc-plugin.sh              |   28 ++++++++++++++++++----------
+ 8 files changed, 40 insertions(+), 32 deletions(-)
+
+commit 415d00aaae1b4639be3059a87fd1aadb40ad5fd9
+Author: Mike Christie <michaelc@cs.wisc.edu>
+Date:   Wed Sep 3 00:00:39 2014 -0500
+
+    [SCSI] libiscsi: fix potential buffer overrun in __iscsi_conn_send_pdu
+    
+    This patches fixes a potential buffer overrun in __iscsi_conn_send_pdu.
+    This function is used by iscsi drivers and userspace to send iscsi PDUs/
+    commands. For login commands, we have a set buffer size. For all other
+    commands we do not support data buffers.
+    
+    This was reported by Dan Carpenter here:
+    http://www.spinics.net/lists/linux-scsi/msg66838.html
+    
+    Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: Mike Christie <michaelc@cs.wisc.edu>
+    Reviewed-by: Sagi Grimberg <sagig@mellanox.com>
+    Signed-off-by: Christoph Hellwig <hch@lst.de>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: James Bottomley <JBottomley@Parallels.com>
+
+ drivers/scsi/libiscsi.c |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
+
+commit 5f973d4bb62ee99e0282101e5a86045c6a71517d
+Author: Anton Altaparmakov <aia21@cam.ac.uk>
+Date:   Mon Sep 22 01:53:03 2014 +0100
+
+    Fix nasty 32-bit overflow bug in buffer i/o code.
+    
+    On 32-bit architectures, the legacy buffer_head functions are not always
+    handling the sector number with the proper 64-bit types, and will thus
+    fail on 4TB+ disks.
+    
+    Any code that uses __getblk() (and thus bread(), breadahead(),
+    sb_bread(), sb_breadahead(), sb_getblk()), and calls it using a 64-bit
+    block on a 32-bit arch (where "long" is 32-bit) causes an inifinite loop
+    in __getblk_slow() with an infinite stream of errors logged to dmesg
+    like this:
+    
+      __find_get_block_slow() failed. block=6740375944, b_blocknr=2445408648
+      b_state=0x00000020, b_size=512
+      device sda1 blocksize: 512
+    
+    Note how in hex block is 0x191C1F988 and b_blocknr is 0x91C1F988 i.e. the
+    top 32-bits are missing (in this case the 0x1 at the top).
+    
+    This is because grow_dev_page() is broken and has a 32-bit overflow due
+    to shifting the page index value (a pgoff_t - which is just 32 bits on
+    32-bit architectures) left-shifted as the block number.  But the top
+    bits to get lost as the pgoff_t is not type cast to sector_t / 64-bit
+    before the shift.
+    
+    This patch fixes this issue by type casting "index" to sector_t before
+    doing the left shift.
+    
+    Note this is not a theoretical bug but has been seen in the field on a
+    4TiB hard drive with logical sector size 512 bytes.
+    
+    This patch has been verified to fix the infinite loop problem on 3.17-rc5
+    kernel using a 4TB disk image mounted using "-o loop".  Without this patch
+    doing a "find /nt" where /nt is an NTFS volume causes the inifinite loop
+    100% reproducibly whilst with the patch it works fine as expected.
+    
+    Signed-off-by: Anton Altaparmakov <aia21@cantab.net>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/buffer.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
+commit 28c151879ad50651c4d1d55bb0bcd42d8b92d462
+Author: Miklos Szeredi <mszeredi@suse.cz>
+Date:   Wed Sep 24 17:56:17 2014 +0200
+
+    shmem: fix nlink for rename overwrite directory
+    
+    If overwriting an empty directory with rename, then need to drop the extra
+    nlink.
+    
+    Test prog:
+    
+    #include <stdio.h>
+    #include <fcntl.h>
+    #include <err.h>
+    #include <sys/stat.h>
+    
+    int main(void)
+    {
+    	const char *test_dir1 = "test-dir1";
+    	const char *test_dir2 = "test-dir2";
+    	int res;
+    	int fd;
+    	struct stat statbuf;
+    
+    	res = mkdir(test_dir1, 0777);
+    	if (res == -1)
+    		err(1, "mkdir(\"%s\")", test_dir1);
+    
+    	res = mkdir(test_dir2, 0777);
+    	if (res == -1)
+    		err(1, "mkdir(\"%s\")", test_dir2);
+    
+    	fd = open(test_dir2, O_RDONLY);
+    	if (fd == -1)
+    		err(1, "open(\"%s\")", test_dir2);
+    
+    	res = rename(test_dir1, test_dir2);
+    	if (res == -1)
+    		err(1, "rename(\"%s\", \"%s\")", test_dir1, test_dir2);
+    
+    	res = fstat(fd, &statbuf);
+    	if (res == -1)
+    		err(1, "fstat(%i)", fd);
+    
+    	if (statbuf.st_nlink != 0) {
+    		fprintf(stderr, "nlink is %lu, should be 0\n", statbuf.st_nlink);
+    		return 1;
+    	}
+    
+    	return 0;
+    }
+    
+    Signed-off-by: Miklos Szeredi <mszeredi@suse.cz>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ mm/shmem.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
 commit e87359e46a367c3d502ec4b61ae16a344afc8bf0
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Sep 18 08:55:03 2014 -0400
