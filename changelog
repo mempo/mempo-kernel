@@ -1,3 +1,9 @@
+linux-image (linux-3.2.63-mempo-0.1.79) UNRELEASED; urgency=medium
+  * grsec: pax,ppc:mmap_rnd,refcount;32 __getblk,nlink,libiscsi
+  * v0.1.79-01-rc
+
+ -- mempo <mempo@mempo.org>  Tue, 19 Sep 2014 10:50:00 +0200
+
 linux-image (linux-3.2.63-mempo-0.1.78) UNRELEASED; urgency=medium
   * grsec: KERNEXEC/EFI patch backport
   * v0.1.77-02-rc
