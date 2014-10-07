@@ -5,6 +5,8 @@
 # linuxdir = linux-3.2.48   used to create linux-3.2.48.tar file name,
 # dir names etc.
 
+echo "The wrapping build script" # this is the outer script, calling the main script
+
 . ../../support.sh
 
 

@@ -201,6 +201,10 @@ cat changelog  | grep -B 1 -A 4 linux-image | head -n 4
 echo "Update version CONFIG_LOCALVERSION to mempo version" ; mywait_e
 # TODO: find update version name in .config
 vim kernel-build/linux-mempo/configs/config-*.config 
+grep "CONFIG_LOCALVERSION" kernel-build/linux-mempo/configs/config-*.config
+echo "^------------- DOES THIS LOOK OK, this are the versions from config file. (edit them now in other window if not correct and press ENTER when done)"
+read _
+
 
 # TODO generate new block for new mempo version,
 # TODO ...and put there new grsecurity info
