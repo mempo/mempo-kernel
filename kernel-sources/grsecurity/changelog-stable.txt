@@ -1,3 +1,175 @@
+commit 0167ef50b08f65e4d6568f935bbb39051ac051f1
+Author: Mel Gorman <mgorman@suse.de>
+Date:   Thu Oct 2 19:47:41 2014 +0100
+
+    mm: migrate: Close race between migration completion and mprotect
+    
+    A migration entry is marked as write if pte_write was true at the time the
+    entry was created. The VMA protections are not double checked when migration
+    entries are being removed as mprotect marks write-migration-entries as
+    read. It means that potentially we take a spurious fault to mark PTEs write
+    again but it's straight-forward. However, there is a race between write
+    migrations being marked read and migrations finishing. This potentially
+    allows a PTE to be write that should have been read. Close this race by
+    double checking the VMA permissions using maybe_mkwrite when migration
+    completes.
+    
+    [torvalds@linux-foundation.org: use maybe_mkwrite]
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Mel Gorman <mgorman@suse.de>
+    Acked-by: Rik van Riel <riel@redhat.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	mm/migrate.c
+
+ mm/migrate.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit ccf387045d784306de13eb2d2d72286f486ae2aa
+Author: Herton R. Krzesinski <herton@redhat.com>
+Date:   Wed Oct 1 18:49:54 2014 -0300
+
+    net/rds: fix possible double free on sock tear down
+    
+    I got a report of a double free happening at RDS slab cache. One
+    suspicion was that may be somewhere we were doing a sock_hold/sock_put
+    on an already freed sock. Thus after providing a kernel with the
+    following change:
+    
+     static inline void sock_hold(struct sock *sk)
+     {
+    -       atomic_inc(&sk->sk_refcnt);
+    +       if (!atomic_inc_not_zero(&sk->sk_refcnt))
+    +               WARN(1, "Trying to hold sock already gone: %p (family: %hd)\n",
+    +                       sk, sk->sk_family);
+     }
+    
+    The warning successfuly triggered:
+    
+    Trying to hold sock already gone: ffff81f6dda61280 (family: 21)
+    WARNING: at include/net/sock.h:350 sock_hold()
+    Call Trace:
+    <IRQ>  [<ffffffff8adac135>] :rds:rds_send_remove_from_sock+0xf0/0x21b
+    [<ffffffff8adad35c>] :rds:rds_send_drop_acked+0xbf/0xcf
+    [<ffffffff8addf546>] :rds_rdma:rds_ib_recv_tasklet_fn+0x256/0x2dc
+    [<ffffffff8009899a>] tasklet_action+0x8f/0x12b
+    [<ffffffff800125a2>] __do_softirq+0x89/0x133
+    [<ffffffff8005f30c>] call_softirq+0x1c/0x28
+    [<ffffffff8006e644>] do_softirq+0x2c/0x7d
+    [<ffffffff8006e4d4>] do_IRQ+0xee/0xf7
+    [<ffffffff8005e625>] ret_from_intr+0x0/0xa
+    <EOI>
+    
+    Looking at the call chain above, the only way I think this would be
+    possible is if somewhere we already released the same socket->sock which
+    is assigned to the rds_message at rds_send_remove_from_sock. Which seems
+    only possible to happen after the tear down done on rds_release.
+    
+    rds_release properly calls rds_send_drop_to to drop the socket from any
+    rds_message, and some proper synchronization is in place to avoid race
+    with rds_send_drop_acked/rds_send_remove_from_sock. However, I still see
+    a very narrow window where it may be possible we touch a sock already
+    released: when rds_release races with rds_send_drop_acked, we check
+    RDS_MSG_ON_CONN to avoid cleanup on the same rds_message, but in this
+    specific case we don't clear rm->m_rs. In this case, it seems we could
+    then go on at rds_send_drop_to and after it returns, the sock is freed
+    by last sock_put on rds_release, with concurrently we being at
+    rds_send_remove_from_sock; then at some point in the loop at
+    rds_send_remove_from_sock we process an rds_message which didn't have
+    rm->m_rs unset for a freed sock, and a possible sock_hold on an sock
+    already gone at rds_release happens.
+    
+    This hopefully address the described condition above and avoids a double
+    free on "second last" sock_put. In addition, I removed the comment about
+    socket destruction on top of rds_send_drop_acked: we call rds_send_drop_to
+    in rds_release and we should have things properly serialized there, thus
+    I can't see the comment being accurate there.
+    
+    Signed-off-by: Herton R. Krzesinski <herton@redhat.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/rds/send.c |   11 +++++++----
+ 1 files changed, 7 insertions(+), 4 deletions(-)
+
+commit 814084597d04dad0a63fa31ec62843d1be0c1b35
+Author: Peter Zijlstra <peterz@infradead.org>
+Date:   Thu Oct 2 16:17:02 2014 -0700
+
+    perf: fix perf bug in fork()
+    
+    Oleg noticed that a cleanup by Sylvain actually uncovered a bug; by
+    calling perf_event_free_task() when failing sched_fork() we will not yet
+    have done the memset() on ->perf_event_ctxp[] and will therefore try and
+    'free' the inherited contexts, which are still in use by the parent
+    process.  This is bad..
+    
+    Suggested-by: Oleg Nesterov <oleg@redhat.com>
+    Reported-by: Oleg Nesterov <oleg@redhat.com>
+    Reported-by: Sylvain 'ythier' Hitier <sylvain.hitier@gmail.com>
+    Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+    Cc: Ingo Molnar <mingo@kernel.org>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/events/core.c |    4 +++-
+ kernel/fork.c        |    5 +++--
+ 2 files changed, 6 insertions(+), 3 deletions(-)
+
+commit f9bbaa2d511c409c33108afc8d95be1458a8b399
+Author: Mel Gorman <mgorman@suse.de>
+Date:   Thu Oct 2 19:47:42 2014 +0100
+
+    mm: numa: Do not mark PTEs pte_numa when splitting huge pages
+    
+    This patch reverts 1ba6e0b50b ("mm: numa: split_huge_page: transfer the
+    NUMA type from the pmd to the pte"). If a huge page is being split due
+    a protection change and the tail will be in a PROT_NONE vma then NUMA
+    hinting PTEs are temporarily created in the protected VMA.
+    
+     VM_RW|VM_PROTNONE
+    |-----------------|
+          ^
+          split here
+    
+    In the specific case above, it should get fixed up by change_pte_range()
+    but there is a window of opportunity for weirdness to happen. Similarly,
+    if a huge page is shrunk and split during a protection update but before
+    pmd_numa is cleared then a pte_numa can be left behind.
+    
+    Instead of adding complexity trying to deal with the case, this patch
+    will not mark PTEs NUMA when splitting a huge page. NUMA hinting faults
+    will not be triggered which is marginal in comparison to the complexity
+    in dealing with the corner cases during THP split.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Mel Gorman <mgorman@suse.de>
+    Acked-by: Rik van Riel <riel@redhat.com>
+    Acked-by: Kirill A. Shutemov <kirill.shutemov@linux.intel.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ mm/huge_memory.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit ed22c82434784ecdb766ce2ca5b08f8271a2887a
+Merge: c8b7520 a072601
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 6 18:28:59 2014 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit a072601054f8387ccd9ca7b25e1b852194053a60
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 6 18:28:19 2014 -0400
+
+    Update to pax-linux-3.2.63-test160.patch:
+    - fixed a potential miscompile with certain gcc versions in pax_open_kernel/pax_close_kernel, reported by gyurix and hunger
+
+ arch/x86/include/asm/pgtable.h |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
 commit c8b75207af997e24ce98faba23fdf4bf53058562
 Merge: 415d00a be01ef4
 Author: Brad Spengler <spender@grsecurity.net>
