@@ -1,3 +1,9 @@
+linux-image (linux-3.2.63-mempo-0.1.80) UNRELEASED; urgency=medium
+  * grsec: mm:migrate, net/rds, perf, mm:numa, fixes; pax update
+  * v0.1.80-01-rc
+
+ -- mempo <mempo@mempo.org>  Tue, 07 Oct 2014 11:05:00 +0200
+
 linux-image (linux-3.2.63-mempo-0.1.79) UNRELEASED; urgency=medium
   * grsec: pax,ppc:mmap_rnd,refcount;32 __getblk,nlink,libiscsi
   * v0.1.79-01-rc
