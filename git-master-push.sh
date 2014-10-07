@@ -3,6 +3,7 @@
 git fetch --all --tags 
 echo "pause... enter to continue" ; read _
 
+git merge --ff-only mempo/master 
 git merge --ff-only rfree/master 
 echo "--- log ---"
 git log | head
