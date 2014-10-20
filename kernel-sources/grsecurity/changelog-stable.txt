@@ -1,3 +1,305 @@
+commit 47b962c93d130853fdadd9b27a14b26068c599e6
+Author: David S. Miller <davem@davemloft.net>
+Date:   Sat Oct 18 23:12:33 2014 -0400
+
+    sparc64: Do not define thread fpregs save area as zero-length array.
+    
+    This breaks the stack end corruption detection facility.
+    
+    What that facility does it write a magic value to "end_of_stack()"
+    and checking to see if it gets overwritten.
+    
+    "end_of_stack()" is "task_thread_info(p) + 1", which for sparc64 is
+    the beginning of the FPU register save area.
+    
+    So once the user uses the FPU, the magic value is overwritten and the
+    debug checks trigger.
+    
+    Fix this by making the size explicit.
+    
+    Due to the size we use for the fpsaved[], gsr[], and xfsr[] arrays we
+    are limited to 7 levels of FPU state saves.  So each FPU register set
+    is 256 bytes, allocate 256 * 7 for the fpregs area.
+    
+    Reported-by: Meelis Roos <mroos@linux.ee>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	arch/sparc/include/asm/thread_info_64.h
+
+ arch/sparc/include/asm/thread_info_64.h |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit ae21ca789a180a1146d84440d0293f9f8dce5875
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Wed Oct 8 09:02:13 2014 -0700
+
+    x86,kvm,vmx: Preserve CR4 across VM entry
+    
+    CR4 isn't constant; at least the TSD and PCE bits can vary.
+    
+    TBH, treating CR0 and CR3 as constant scares me a bit, too, but it looks
+    like it's correct.
+    
+    This adds a branch and a read from cr4 to each vm entry.  Because it is
+    extremely likely that consecutive entries into the same vcpu will have
+    the same host cr4 value, this fixes up the vmcs instead of restoring cr4
+    after the fact.  A subsequent patch will add a kernel-wide cr4 shadow,
+    reducing the overhead in the common case to just two memory reads and a
+    branch.
+    
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Acked-by: Paolo Bonzini <pbonzini@redhat.com>
+    Cc: stable@vger.kernel.org
+    Cc: Petr Matousek <pmatouse@redhat.com>
+    Cc: Gleb Natapov <gleb@kernel.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	arch/x86/kvm/vmx.c
+    
+    Conflicts:
+    
+    	arch/x86/kvm/vmx.c
+    
+    Conflicts:
+    
+    	arch/x86/kvm/vmx.c
+
+ arch/x86/kvm/vmx.c |   16 ++++++++++++++--
+ 1 files changed, 14 insertions(+), 2 deletions(-)
+
+commit b025a1925f7ea22127022fba62cf4f7abb9abc91
+Author: Catalin Marinas <catalin.marinas@arm.com>
+Date:   Fri Oct 17 17:38:49 2014 +0100
+
+    futex: Ensure get_futex_key_refs() always implies a barrier
+    
+    Commit b0c29f79ecea (futexes: Avoid taking the hb->lock if there's
+    nothing to wake up) changes the futex code to avoid taking a lock when
+    there are no waiters. This code has been subsequently fixed in commit
+    11d4616bd07f (futex: revert back to the explicit waiter counting code).
+    Both the original commit and the fix-up rely on get_futex_key_refs() to
+    always imply a barrier.
+    
+    However, for private futexes, none of the cases in the switch statement
+    of get_futex_key_refs() would be hit and the function completes without
+    a memory barrier as required before checking the "waiters" in
+    futex_wake() -> hb_waiters_pending(). The consequence is a race with a
+    thread waiting on a futex on another CPU, allowing the waker thread to
+    read "waiters == 0" while the waiter thread to have read "futex_val ==
+    locked" (in kernel).
+    
+    Without this fix, the problem (user space deadlocks) can be seen with
+    Android bionic's mutex implementation on an arm64 multi-cluster system.
+    
+    Signed-off-by: Catalin Marinas <catalin.marinas@arm.com>
+    Reported-by: Matteo Franchin <Matteo.Franchin@arm.com>
+    Fixes: b0c29f79ecea (futexes: Avoid taking the hb->lock if there's nothing to wake up)
+    Acked-by: Davidlohr Bueso <dave@stgolabs.net>
+    Tested-by: Mike Galbraith <umgwanakikbuti@gmail.com>
+    Cc: <stable@vger.kernel.org>
+    Cc: Darren Hart <dvhart@linux.intel.com>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Ingo Molnar <mingo@kernel.org>
+    Cc: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ kernel/futex.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 7dcfaa72177dd7ea055b02d7132e06032a46feea
+Author: Stephen Smalley <sds@tycho.nsa.gov>
+Date:   Mon Oct 6 16:32:52 2014 -0400
+
+    selinux: fix inode security list corruption
+    
+    sb_finish_set_opts() can race with inode_free_security()
+    when initializing inode security structures for inodes
+    created prior to initial policy load or by the filesystem
+    during ->mount().   This appears to have always been
+    a possible race, but commit 3dc91d4 ("SELinux:  Fix possible
+    NULL pointer dereference in selinux_inode_permission()")
+    made it more evident by immediately reusing the unioned
+    list/rcu element  of the inode security structure for call_rcu()
+    upon an inode_free_security().  But the underlying issue
+    was already present before that commit as a possible use-after-free
+    of isec.
+    
+    Shivnandan Kumar reported the list corruption and proposed
+    a patch to split the list and rcu elements out of the union
+    as separate fields of the inode_security_struct so that setting
+    the rcu element would not affect the list element.  However,
+    this would merely hide the issue and not truly fix the code.
+    
+    This patch instead moves up the deletion of the list entry
+    prior to dropping the sbsec->isec_lock initially.  Then,
+    if the inode is dropped subsequently, there will be no further
+    references to the isec.
+    
+    Reported-by: Shivnandan Kumar <shivnandan.k@samsung.com>
+    Signed-off-by: Stephen Smalley <sds@tycho.nsa.gov>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Paul Moore <pmoore@redhat.com>
+
+ security/selinux/hooks.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 9ead2f4f82f8812b5e708c69df0f35a43303cdd6
+Author: Emil Tantilov <emil.s.tantilov@intel.com>
+Date:   Thu Oct 16 15:49:02 2014 +0000
+
+    ixgbe: check for vfs outside of sriov_num_vfs before dereference
+    
+    The check for vfinfo is not sufficient because it does not protect
+    against specifying vf that is outside of sriov_num_vfs range.
+    All of the ndo functions have a check for it except for
+    ixgbevf_ndo_set_spoofcheck().
+    
+    The following patch is all we need to protect against this panic:
+    
+    ip link set p96p1 vf 0 spoofchk off
+    BUG: unable to handle kernel NULL pointer dereference at 0000000000000052
+    IP: [<ffffffffa044a1c1>]
+    ixgbe_ndo_set_vf_spoofchk+0x51/0x150 [ixgbe]
+    
+    Reported-by: Thierry Herbelot <thierry.herbelot@6wind.com>
+    Signed-off-by: Emil Tantilov <emil.s.tantilov@intel.com>
+    Acked-by: Thierry Herbelot <thierry.herbelot@6wind.com>
+    Signed-off-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+
+ drivers/net/ethernet/intel/ixgbe/ixgbe_sriov.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit b339b27c54edc34ab000ed44750fd2a6f2a92d71
+Author: Cong Wang <cwang@twopensource.com>
+Date:   Tue Oct 14 12:35:08 2014 -0700
+
+    rds: avoid calling sock_kfree_s() on allocation failure
+    
+    It is okay to free a NULL pointer but not okay to mischarge the socket optmem
+    accounting. Compile test only.
+    
+    Reported-by: rucsoftsec@gmail.com
+    Cc: Chien Yen <chien.yen@oracle.com>
+    Cc: Stephen Hemminger <stephen@networkplumber.org>
+    Signed-off-by: Cong Wang <cwang@twopensource.com>
+    Signed-off-by: Cong Wang <xiyou.wangcong@gmail.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/rds/rdma.c |    7 ++++---
+ 1 files changed, 4 insertions(+), 3 deletions(-)
+
+commit 8cb7feae433dcd9c588fa06511999428dc2523bd
+Author: David S. Miller <davem@davemloft.net>
+Date:   Tue Oct 14 17:02:37 2014 -0400
+
+    net: Trap attempts to call sock_kfree_s() with a NULL pointer.
+    
+    Unlike normal kfree() it is never right to call sock_kfree_s() with
+    a NULL pointer, because sock_kfree_s() also has the side effect of
+    discharging the memory from the sockets quota.
+    
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/sock.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 715a5366c9682a82390ada6325b9e69502eeeaf9
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Wed Oct 8 23:44:00 2014 -0400
+
+    fix misuses of f_count() in ppp
+    
+    we used to check for "nobody else could start doing anything with
+    that opened file" by checking that refcount was 2 or less - one
+    for descriptor table and one we'd acquired in fget() on the way to
+    wherever we are.  That was race-prone (somebody else might have
+    had a reference to descriptor table and do fget() just as we'd
+    been checking) and it had become flat-out incorrect back when
+    we switched to fget_light() on those codepaths - unlike fget(),
+    it doesn't grab an extra reference unless the descriptor table
+    is shared.  The same change allowed a race-free check, though -
+    we are safe exactly when refcount is less than 2.
+    
+    It was a long time ago; pre-2.6.12 for ioctl() (the codepath leading
+    to ppp one) and 2.6.17 for sendmsg() (netlink one).  OTOH,
+    netlink hadn't grown that check until 3.9 and ppp used to live
+    in drivers/net, not drivers/net/ppp until 3.1.  The bug existed
+    well before that, though, and the same fix used to apply in old
+    location of file.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    
+    Conflicts:
+    
+    	net/netlink/af_netlink.c
+
+ drivers/net/ppp/ppp_generic.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ade236d58652fa8f628280e4063af42ed0711124
+Author: Mikulas Patocka <mpatocka@redhat.com>
+Date:   Sun Jul 27 13:00:41 2014 -0400
+
+    fs: make cont_expand_zero interruptible
+    
+    This patch makes it possible to kill a process looping in
+    cont_expand_zero. A process may spend a lot of time in this function, so
+    it is desirable to be able to kill it.
+    
+    It happened to me that I wanted to copy a piece data from the disk to a
+    file. By mistake, I used the "seek" parameter to dd instead of "skip". Due
+    to the "seek" parameter, dd attempted to extend the file and became stuck
+    doing so - the only possibility was to reset the machine or wait many
+    hours until the filesystem runs out of space and cont_expand_zero fails.
+    We need this patch to be able to terminate the process.
+    
+    Signed-off-by: Mikulas Patocka <mpatocka@redhat.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/buffer.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 99897cc1fd3d5db9f99e304eaf9384e173b7f014
+Author: Sasha Levin <sasha.levin@oracle.com>
+Date:   Thu Oct 9 15:24:37 2014 -0700
+
+    fsnotify: don't put user context if it was never assigned
+    
+    On some failure paths we may attempt to free user context even if it
+    wasn't assigned yet.  This will cause a NULL ptr deref and a kernel BUG.
+    
+    The path I was looking at is in inotify_new_group():
+    
+            oevent = kmalloc(sizeof(struct inotify_event_info), GFP_KERNEL);
+            if (unlikely(!oevent)) {
+                    fsnotify_destroy_group(group);
+                    return ERR_PTR(-ENOMEM);
+            }
+    
+    fsnotify_destroy_group() would get called here, but
+    group->inotify_data.user is only getting assigned later:
+    
+    	group->inotify_data.user = get_current_user();
+    
+    Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+    Cc: John McCutchan <john@johnmccutchan.com>
+    Cc: Robert Love <rlove@rlove.org>
+    Cc: Eric Paris <eparis@parisplace.org>
+    Reviewed-by: Heinrich Schuchardt <xypron.glpk@gmx.de>
+    Reviewed-by: Jan Kara <jack@suse.cz>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/notify/inotify/inotify_fsnotify.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
+
 commit cc70da15da095551dfa374da20202ece530aa8f9
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Oct 13 19:31:03 2014 -0400
