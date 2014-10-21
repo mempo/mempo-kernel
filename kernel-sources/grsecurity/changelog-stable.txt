@@ -1,3 +1,14 @@
+commit 822662d8112a3078613bef60e41c2e0266526c65
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Oct 20 17:34:00 2014 -0400
+
+    Revert "x86,kvm,vmx: Preserve CR4 across VM entry"
+    
+    This reverts commit ae21ca789a180a1146d84440d0293f9f8dce5875.
+
+ arch/x86/kvm/vmx.c |   16 ++--------------
+ 1 files changed, 2 insertions(+), 14 deletions(-)
+
 commit 47b962c93d130853fdadd9b27a14b26068c599e6
 Author: David S. Miller <davem@davemloft.net>
 Date:   Sat Oct 18 23:12:33 2014 -0400
