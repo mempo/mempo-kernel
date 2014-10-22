@@ -2,4 +2,4 @@
 export kernel_general_version="3.2.63" # base version (should match the one is sources.list)
 export KERNEL_DATE='2014-10-21 20:50:25' # UTC time of mempo version. This is > then max(kernel,grsec,patches) times
 export CURRENT_SEED='471e5bf561557ee75790de423d63077945310ea7d5c57b7b0833c51cc662e94f' # litecoin block 662281 (*)
-export DEBIAN_REVISION='01' # see README.md how to update it on git tag, on rc and final releases
+export DEBIAN_REVISION='02' # see README.md how to update it on git tag, on rc and final releases
