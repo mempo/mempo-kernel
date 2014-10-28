@@ -1,6 +1,8 @@
 linux-image (linux-3.2.63-mempo-0.1.83) UNRELEASED; urgency=medium
   * grsec update
   * v0.1.83-01-rc
+  * require current libc: "libc6" "2.13-38+deb7u6"
+  * v0.1.83-02-rc
 
  -- mempo <mempo@mempo.org>  Tue, 25 Oct 2014 18:40:00 +0200
 

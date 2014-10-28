@@ -223,4 +223,5 @@ vim changelog
 
 
 
+echo ; echo "REMEMBER to also EDIT THE changelog file before commiting!" ; echo
 
