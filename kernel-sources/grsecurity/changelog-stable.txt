@@ -1,3 +1,45 @@
+commit 6d89098a102aa6e390bd81afc0251481153a0000
+Merge: d1aabff 0ae27fae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 31 20:01:33 2014 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	tools/gcc/size_overflow_plugin/size_overflow_hash.data
+
+commit 0ae27fae60a294e66c123c86514a703755ba0a7f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Oct 31 20:00:03 2014 -0400
+
+    Update to pax-linux-3.2.63-test161.patch:
+    - added pax_sanitize_slab=full mode, by Mathias Krause <minipli@googlemail.com>
+    - fixed pax_sanitize_slab breakage on SLAB_DESTROY_BY_RCU slabs, by Mathias Krause <minipli@googlemail.com>
+      - this should fix several reports:
+        - https://forums.grsecurity.net/viewtopic.php?f=1&t=4020
+        - https://forums.grsecurity.net/viewtopic.php?f=3&t=4037
+        - https://forums.grsecurity.net/viewtopic.php?f=1&t=4071
+    - updated size overflow hash table
+
+ Documentation/kernel-parameters.txt                |    9 ++++-
+ include/linux/slab.h                               |    7 +++-
+ mm/mm_init.c                                       |   24 ++++++++++---
+ mm/slab.c                                          |   22 +++++++----
+ mm/slob.c                                          |   37 ++++++++++++--------
+ mm/slub.c                                          |   13 ++++++-
+ security/Kconfig                                   |    8 +++-
+ .../size_overflow_plugin/size_overflow_hash.data   |    6 +++-
+ 8 files changed, 91 insertions(+), 35 deletions(-)
+
+commit d1aabffb4f6d13f860ddf15a44d69f0a2cb6f6f2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Oct 25 09:04:00 2014 -0400
+
+    remove memweight prototype added in recent backport, thanks to minipli
+
+ include/linux/string.h |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
 commit aa0ebeb5f62bea5736cbc2ad48383398ad2edbe8
 Author: Cesar Eduardo Barros <cesarb@cesarb.eti.br>
 Date:   Mon Nov 25 22:00:41 2013 -0200
