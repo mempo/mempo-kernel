@@ -1,3 +1,12 @@
+commit 2ce01ec7e2fa13e6127ead8d3ff2b9f25328a3eb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 2 07:48:21 2014 -0500
+
+    Apply https://bugs.debian.org/cgi-bin/bugreport.cgi?msg=12;filename=ipv6-reuse-ip6_frag_id-from-ip6_ufo_append_data.patch;att=1;bug=766195
+
+ net/ipv6/udp.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 6d89098a102aa6e390bd81afc0251481153a0000
 Merge: d1aabff 0ae27fae
 Author: Brad Spengler <spender@grsecurity.net>
