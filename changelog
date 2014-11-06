@@ -1,3 +1,9 @@
+linux-image (linux-3.2.64-mempo-0.1.86) UNRELEASED; urgency=medium
+  * grsec update to 3.2.64
+  * v0.1.86-01-rc
+
+ -- mempo <mempo@mempo.org>  Thu, 06 Nov 2014 18:21:00 +0200
+
 linux-image (linux-3.2.63-mempo-0.1.85) UNRELEASED; urgency=high
   * grsec: Apply debian bugfix, bug id: 766195
   * v0.1.85-01-rc
