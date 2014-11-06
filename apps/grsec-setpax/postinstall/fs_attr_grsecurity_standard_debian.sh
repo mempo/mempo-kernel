@@ -15,6 +15,7 @@ set -x
 setfattr -n user.pax.flags -v "rm" /usr/lib/xulrunner-*/xulrunner-stub 
 setfattr -n user.pax.flags -v "rm" /usr/lib/iceweasel/iceweasel # debian 7
 setfattr -n user.pax.flags -v "rm" /usr/lib/icedove/icedove-bin
+setfattr -n user.pax.flags -v "rm" /usr/lib/icedove/icedove
 setfattr -n user.pax.flags -v "rm" /usr/lib/iceowl/iceowl-bin # debian 6
 
 # tricky part is to run this in between upgrade of kernel for reinstalling/updating grub
