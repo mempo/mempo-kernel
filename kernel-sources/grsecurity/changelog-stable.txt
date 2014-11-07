@@ -1,3 +1,100 @@
+commit 45244eed041187d7d0646fc706b5b6aa42cfb0f5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Nov 6 19:32:02 2014 -0500
+
+    add additional unnecessary checks
+
+ kernel/trace/trace_syscalls.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit 4a99fd4808d62e255d9ca9eee53b22548409b184
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Nov 6 19:26:53 2014 -0500
+
+    add additional unnecessary checks
+
+ kernel/trace/trace_syscalls.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 8a0f199e3ee0e27d0ec77b508f8fedbfd4b416c3
+Author: Rabin Vincent <rabin@rab.in>
+Date:   Wed Oct 29 23:06:58 2014 +0100
+
+    tracing/syscalls: Ignore numbers outside NR_syscalls' range
+    
+    ARM has some private syscalls (for example, set_tls(2)) which lie
+    outside the range of NR_syscalls.  If any of these are called while
+    syscall tracing is being performed, out-of-bounds array access will
+    occur in the ftrace and perf sys_{enter,exit} handlers.
+    
+     # trace-cmd record -e raw_syscalls:* true && trace-cmd report
+     ...
+     true-653   [000]   384.675777: sys_enter:            NR 192 (0, 1000, 3, 4000022, ffffffff, 0)
+     true-653   [000]   384.675812: sys_exit:             NR 192 = 1995915264
+     true-653   [000]   384.675971: sys_enter:            NR 983045 (76f74480, 76f74000, 76f74b28, 76f74480, 76f76f74, 1)
+     true-653   [000]   384.675988: sys_exit:             NR 983045 = 0
+     ...
+    
+     # trace-cmd record -e syscalls:* true
+     [   17.289329] Unable to handle kernel paging request at virtual address aaaaaace
+     [   17.289590] pgd = 9e71c000
+     [   17.289696] [aaaaaace] *pgd=00000000
+     [   17.289985] Internal error: Oops: 5 [#1] PREEMPT SMP ARM
+     [   17.290169] Modules linked in:
+     [   17.290391] CPU: 0 PID: 704 Comm: true Not tainted 3.18.0-rc2+ #21
+     [   17.290585] task: 9f4dab00 ti: 9e710000 task.ti: 9e710000
+     [   17.290747] PC is at ftrace_syscall_enter+0x48/0x1f8
+     [   17.290866] LR is at syscall_trace_enter+0x124/0x184
+    
+    Fix this by ignoring out-of-NR_syscalls-bounds syscall numbers.
+    
+    Commit cd0980fc8add "tracing: Check invalid syscall nr while tracing syscalls"
+    added the check for less than zero, but it should have also checked
+    for greater than NR_syscalls.
+    
+    Link: http://lkml.kernel.org/p/1414620418-29472-1-git-send-email-rabin@rab.in
+    
+    Fixes: cd0980fc8add "tracing: Check invalid syscall nr while tracing syscalls"
+    Cc: stable@vger.kernel.org # 2.6.33+
+    Signed-off-by: Rabin Vincent <rabin@rab.in>
+    Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+    
+    Conflicts:
+    
+    	kernel/trace/trace_syscalls.c
+
+ kernel/trace/trace_syscalls.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit 2266e7f10843e5604f5bad64cf5ffcf3bc682ec1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 5 18:58:28 2014 -0500
+
+    remove duplicate definition of alarm_expires_remaining()
+
+ kernel/time/alarmtimer.c |    6 ------
+ 1 files changed, 0 insertions(+), 6 deletions(-)
+
+commit 84ce6cc8416f8efdd4e89f2e315f4856b4074573
+Merge: 2ce01ec d8acbe5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 5 17:58:45 2014 -0500
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	net/ceph/mon_client.c
+
+commit d8acbe5f02ec899be4eb1dd4e2cc28b2c9db7694
+Merge: 0ae27fae 7d039b9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 5 17:57:14 2014 -0500
+
+    Merge branch 'linux-3.2.y' into pax-stable
+    
+    Conflicts:
+    	arch/x86/kvm/vmx.c
+
 commit 2ce01ec7e2fa13e6127ead8d3ff2b9f25328a3eb
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Nov 2 07:48:21 2014 -0500
