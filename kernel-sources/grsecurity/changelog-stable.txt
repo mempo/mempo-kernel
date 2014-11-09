@@ -1,3 +1,160 @@
+commit a212bffcabd3bfc120a967d10703f9510ae461c0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 9 08:51:17 2014 -0500
+
+    set directory mode to 500
+
+ scripts/package/mkspec |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 5d086b901dee6040ed285aab22ccefc5c8f75d3a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 9 07:56:51 2014 -0500
+
+    force make rpm to install sensitive files with 0400
+
+ scripts/package/mkspec |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 11f4f37191435da7708d941b0299a94ad10678b5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Nov 8 21:54:19 2014 -0500
+
+    backport mkspec
+
+ scripts/package/mkspec |   48 +++++++++++++++++++++++++++++++++++++++++-------
+ 1 files changed, 41 insertions(+), 7 deletions(-)
+
+commit 4eef462cd7f38a5e1a1efa098c8f17c4d4474652
+Author: Mike Marciniszyn <mike.marciniszyn@intel.com>
+Date:   Mon Jun 24 08:48:37 2013 -0400
+
+    kbuild: fix error when building from src rpm
+    
+    The following issue can be reproduced with Linus' tree on
+    an x86_64 server.
+    
+    >+ cp /home/user/rpmbuild-test/BUILDROOT/kernel-3.9.2.x86_64/boot/vmlinuz-3.9.2
+    >cp: missing destination file operand after
+    >/home/user/rpmbuild-test/BUILDROOT/kernel-3.9.2-1.x86_64/boot/vmlinuz-3.9.2'
+    >Try `cp --help' for more information.
+    >error: Bad exit status from /var/tmp/rpm-tmp.R4o0iI (%install)
+    
+    Here are the commands to reproduce:
+    
+    make defconfig
+    make rpm-pkg
+    
+    Use the resulting src rpm to build as follows:
+    
+    mkdir ~/rpmbuild-test
+    cd ~/rpmbuild-test
+    rpmbuild --rebuild --define "_topdir `pwd`" -vv ~/rpmbuild/SRPMS/kernel-3.10.0_rc1+-1.src.rpm
+    
+    The issue is because the %install script uses $KBUILD_IMAGE and it hasn't
+    been set since it is only available in the kbuild system and not in the
+    %install script.
+    
+    This patch adds a Makefile target to emit the image_name that can be used
+    and modifies the mkspec to use the dynamic name in %install.
+    
+    Signed-off-by: Mike Marciniszyn <mike.marciniszyn@intel.com>
+    Signed-off-by: Michal Marek <mmarek@suse.cz>
+    
+    Conflicts:
+    
+    	Makefile
+
+ Makefile               |   15 ++++++++++++++-
+ scripts/package/mkspec |    1 +
+ 2 files changed, 15 insertions(+), 1 deletions(-)
+
+commit 76503f668448645f0026a0aaabee4d2517c41d55
+Author: Robert Richter <robert.richter@calxeda.com>
+Date:   Thu May 2 14:50:37 2013 +0200
+
+    Makefile: Fix install error with make -j option
+    
+    Make modules_install fails with -j option:
+    
+       DEPMOD
+     Usage: .../.source/linux/scripts/depmod.sh /sbin/depmod <kernelrelease>
+     make[1]: *** [_modinst_post] Error 1
+    
+    Adding kernelrelease dependency to fix this.
+    
+    Signed-off-by: Robert Richter <robert.richter@calxeda.com>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Michal Marek <mmarek@suse.cz>
+
+ Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 1fcf40a8dc8791d0609c26ea638172acbdc977c8
+Author: 张忠山 <zzs0213@gmail.com>
+Date:   Sun Jun 30 17:09:28 2013 +0800
+
+    kbuild: create directory for dir/file.o
+    
+    When add a obj with dir to obj-y, like this
+    
+        obj-y += dir/file.o
+    
+    The $(obj)/dir not created, this patch fix this.
+    
+    When try to add a file(which in a subdir) to my board's obj-y, the build
+    progress crashed.
+    
+    For example, I use at91rm9200ek board, and in kernel dir run:
+    
+      mkdir objtree
+      make O=objtree at91rm9200_defconfig
+      mkdir arch/arm/mach-at91/dir
+      touch arch/arm/mach-at91/dir/file.c
+    
+    and edit arch/arm/mach-at91/dir/file.c to add some code.
+    then edit arch/arm/mach-at91/Makefile, change the following line:
+    
+      obj-$(CONFIG_MACH_AT91RM9200EK) += board-rm9200ek.o
+    
+    to:
+    
+      obj-$(CONFIG_MACH_AT91RM9200EK) += board-rm9200ek.o dir/file.o
+    
+    Now build it:
+    
+      make O=objtree
+    
+    Then the error appears:
+      ...
+      CC      arch/arm/mach-at91/board-rm9200dk.o
+      CC      arch/arm/mach-at91/board-rm9200ek.o
+      CC      arch/arm/mach-at91/dir/file.o
+      linux-2.6/arch/arm/mach-at91/dir/file.c:5:
+        fatal error: opening dependency file
+        arch/arm/mach-at91/dir/.file.o.d: No such file or directory
+    
+    Check the objtree:
+      LANG=en ls objtree/arch/arm/mach-at91/dir
+      ls: cannot access objtree/arch/arm/mach-at91/dir: No such file or directory
+    
+    It's apparently that the target dir not created for file.o
+    
+    Check kbuild source code. It seems that kbuild create dirs for that in
+    $(obj-dirs).  But if the dir need not to create a built-in.o, It should
+    never in  $(obj-dirs).
+    
+    So I make this patch to make sure It in  $(obj-dirs)
+    
+    this bug caused by commit
+       f5fb976520a53f45f8bbf2e851f16b3b5558d485
+    
+    Signed-off-by: 张忠山 <zzs0213@gmail.com>
+    Signed-off-by: Michal Marek <mmarek@suse.cz>
+
+ scripts/Makefile.lib |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 45244eed041187d7d0646fc706b5b6aa42cfb0f5
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Nov 6 19:32:02 2014 -0500
