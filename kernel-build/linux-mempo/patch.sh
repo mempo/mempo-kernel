@@ -1,7 +1,7 @@
 #!/bin/bash -e
-#to be executed by another script.
+# Do NOT call this directly, see readme. See and update build-system.txt
 
-. ../../support.sh
+source ../../support.sh
 
 linuxdir="$1"
 if [ -z "$linuxdir" ] ; then
@@ -32,7 +32,7 @@ tar -xf "$linuxfile" || { echo "Can not unpack linuxfile=$linuxfile" ; exit_erro
 				|| { echo "ERROR: Patch failed ($filename). " ; exit_error ; }
 			echo " DONE ($filename)"
 		fi
-	done < ../sources.list
+	done < ../sourcecode.list
 	echo "Done patching"
 )
 err=$? ; if [[ $err != 0 ]] ; then exit_error $err; fi

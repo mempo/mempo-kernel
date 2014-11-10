@@ -66,13 +66,13 @@ When incresing Mempo (_M.M.M_)
 
 When upstream grsecurity/patches change, then update:
 * changelog
-* sources.list - the checksum and file name of patch
+* sourcecode.list - the checksum and file name of patch
 * linux-mempo/env.sh - `KERNEL_DATE`
 * increase _M.M.M_ as written above
 
 When new upstream vanilla kernel (_V.V.V_)
 * changelog
-* sources.list - the checksum and file name of kernel
+* sourcecode.list - the checksum and file name of kernel
 * linux-mempo/env.sh - `kernel_general_version` and `KERNEL_DATE`
 * increase _M.M.M_
 

@@ -81,7 +81,7 @@ function show_mempo_contact {
 }
 
 echo "-------------------------------------------------------------------------"
-. prepare-toolchain.sh # check toolchain and libs
+source prepare-toolchain.sh # check toolchain and libs
 echo ""
 
 echo "-------------------------------------------------------------------------"

@@ -1,11 +1,10 @@
 #!/bin/bash -e
-
-# THE MAIN FILE :-)
-# run me.
+# Do NOT call this directly, see readme. See and update build-system.txt
+# Main file that starts the build when all the sources are unpacked
 
 echo "Rebuilding everything"
 
-bash get-sources.sh || exit 
+bash get-sources.sh "$@" || exit 
 
 if [[ "$*" == *edit_config* ]] # http://superuser.com/questions/186272/check-if-any-of-the-parameters-to-a-bash-script-match-a-string / http://superuser.com/a/186304
 then

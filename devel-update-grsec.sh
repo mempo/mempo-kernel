@@ -90,17 +90,18 @@ function download() {
 	set +x
 } 
 
-#all line gr in sources.list
+#all line gr in sourcecode.list
 function sources_list() { 
-	echo "Updating sources.list"
+	thefile=sourcecode.list
+	echo "Updating $thefile"
 	cd kernel-build/linux-mempo/
 	# echo "Debug in sources_list, new_grsec=$new_grsec" 1>&2
 	# exit ;
 	all=P,x,x,grsecurity,$new_grsec,sha256,$sha256,./tmp-path/  
 	all2=$(echo $all | sed -e 's/\ //g')
 	echo $all2
-	file='sources.list'
-	tmp='sources.list.tmp'
+	file="$(thefile)"
+	tmp="$(thefile).tmp"
 	mv $file $tmp
 	let i=0
 	
@@ -119,7 +120,7 @@ function sources_list() {
 }
 
 echo "Loading (current/old) env data"
-. kernel-build/linux-mempo/env-data.sh
+source kernel-build/linux-mempo/env-data.sh
 
 
 echo "Checking new version of grsecurity from network"
@@ -140,7 +141,7 @@ if [[ "$kernel_ver" != "$kernel_general_version" ]] ; then
 	ver_a=$kernel_general_version
 	ver_b=$kernel_ver
 	file_env="kernel-build/linux-mempo/env-data.sh"
-	file_source="kernel-build/linux-mempo/sources.list"
+	file_source="kernel-build/linux-mempo/sourcecode.list"
 
 	# TODO do the below automatically (after informing what will be done)
 	echo "Bad kernel version $kernel_general_version vs $kernel_ver from $new_grsec" >&2 
@@ -214,7 +215,7 @@ vim changelog
 #       #       modified:   devel-update-grsec.sh
 #       #       modified:   kernel-build/linux-mempo/configs/config-desk.config
 #       #       modified:   kernel-build/linux-mempo/env-data.sh
-#       #       modified:   kernel-build/linux-mempo/sources.list
+#       #       modified:   kernel-build/linux-mempo/sourcecode.list
 #
 
 # TODO commit

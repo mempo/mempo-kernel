@@ -1,4 +1,5 @@
 #!/bin/bash
+# Do NOT call this directly, see readme. See and update build-system.txt
 
 printf "%s\n" "Generating environment"
 

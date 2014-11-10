@@ -2,13 +2,13 @@
 
 # Test do we have needed tool chain programs 
 
-. support.sh
+source support.sh
 
 all_ok=1
 
 echo "Looking for tools"
 
-. dpkg-vercomp.sh
+source dpkg-vercomp.sh
 
 echo "-----------------------------"
 echo "Dpkg"

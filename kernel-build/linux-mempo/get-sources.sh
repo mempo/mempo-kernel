@@ -1,8 +1,9 @@
 #!/bin/bash -e
+# Do NOT call this directly, see readme. See and update build-system.txt
 
 base=../../kernel-sources
 
-. ../../support.sh || { echo "Can not load suport.sh" ; exit 1 ; }
+source ../../support.sh || { echo "Can not load suport.sh" ; exit 1 ; }
 
 echo "Getting sources (and verifying checksums) for kernel and patches, from base=$base"
 
@@ -48,7 +49,7 @@ echo "Processing sources list"
 while IFS=, read -r kind reserved1 reserved2 subdir filename hash_type hash localdir
 do
 	get_and_check "$subdir" "$filename" "$hash_type" "$hash" "$localdir"
-done < sources.list
+done < sourcecode.list
 echo "Sources list completed"
 
 if [ -d "tmp/" ] ; then

@@ -1,9 +1,9 @@
 #!/bin/bash -e
-# do NOT run this directly, run build-run.sh
+# Do NOT call this directly, see readme. See and update build-system.txt
 
 # this is the main inner build script - it executes build directly
 
-. ../../support.sh
+source ../../support.sh
 
 linuxdir="$1"
 flavour="$2"
@@ -18,14 +18,14 @@ echo "Building linuxdir=$linuxdir"
 # bash $HOME/make-source-info
 
 echo "Loading env"
-. env.sh
+source env.sh
 export BUILD_NICENESS=0
 
 echo "Starting build in $linuxdir"
 
 pwd_here=$PWD
 
-        cores_max_autodetect=32 # TODO configure this? e.g. from amount of RAM available
+	cores_max_autodetect=32 # TODO configure this? e.g. from amount of RAM available
 	if [[ -z $CONCURRENCY_LEVEL ]] ; then
                 echo "Will try to auto-detect proper CONCURENCY_LEVEL since none was set in variable"
 		cores=2
@@ -41,7 +41,7 @@ pwd_here=$PWD
                         echo "Warning: can not detect number of CPUs to optimize build speed, please configure CONCURENCY_LEVEL variable if you want"
                 fi
 		export CONCURRENCY_LEVEL=$cores
-        fi
+	fi
 
 
 	echo "CONCURRENCY_LEVEL=$CONCURRENCY_LEVEL"

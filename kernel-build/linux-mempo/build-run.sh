@@ -1,17 +1,16 @@
 #!/bin/bash -e
+# Do NOT call this directly, see readme. See and update build-system.txt
 # run get-sources.sh before this.
-# Do NOT run this file, use all.sh
 
 # linuxdir = linux-3.2.48   used to create linux-3.2.48.tar file name,
 # dir names etc.
 
 echo "The wrapping build script" # this is the outer script, calling the main script
 
-. ../../support.sh
-
+source ../../support.sh
 
 echo "Loading env.sh"
-. env.sh
+source env.sh
 echo "kernel_general_name=$kernel_general_version" # from env.sh
 export linuxdir="linux-$kernel_general_version" # e.g.: linux-3.2.53
 echo "Working on linux sources in linuxdir=$linuxdir"

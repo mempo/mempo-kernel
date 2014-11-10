@@ -1,11 +1,42 @@
 
-*** This document here is more definitive. ***
+*** This document here is most definitive. ***
 
-Build and RELEASE (distribute) system for use in mempo.
+Use this document, it is most definitive (how ever also check other sources if they would happen
+to have additional remarks sometimes)
+* read additional info on http://wiki.debian.org/Mempo/SameKernel
+* QUESTIONS - then contact us: http://wiki.debian.org/Mempo/Mempo
+* QUESTIONS: chat with us on IRC on #mempo on irc.oftc.net or best on anonymous irc2p 
+  (geti2p.net), or irc.freenode.org. And WAIT for THE REPLY 48 hours. Repeat question.
+
+=== How build works ===
+
+download-and-build-all.sh 
+	download-and-build.sh "deskmax"
+		remove old working dir (e.g. ~/deterministic-kernel/)
+		github clone
+		check github gpg signature with help of git-gpg-check (our program)
+		go to the downloaded sources of eg https://github.com/mempo/deterministic-kernel.git and there:
+			./run-flavour.sh "deskmax"
+				load env-data
+				check preconditions like UID, PWD, disk free
+				prepare-toolchain.sh
+					with help of lib dpkg-vercomp.sh
+					checks exact version of needed packages
+				kernel-build/linux-mempo/all.sh "deskmax"
+					get-sources.sh "deskmax" - it gets the files locally (copy them) and verify
+					build-run.sh "deskmax" - starts the build since now sources are fully ready
+						it sets export linuxdir="linux-3.2.64"
+						patch.sh "linux-3.2.64"
+							build.sh - calls the actuall build
+								set various env variables and settings to get reproducible build
+								in faketime (and nice etc) call:
+									make-kpkg
+
+
+=== Build and RELEASE (distribute) system for use in mempo. ===
 
 The build model here is related to:
 https://github.com/rfree2/fossoffice/blob/master/task/aptmempo/repo-server/server.txt
-
 
 We need users: 
 BUILD   - kernelbuild: the user (must be called "kernelbuild" usually) who runs the build process
