@@ -11,11 +11,71 @@ to have additional remarks sometimes)
   (geti2p.net), or irc.freenode.org. And WAIT for THE REPLY 48 hours. Repeat question.
 * source code: https://github.com/mempo/ . Check always the GPG signature.
 
+=== As the user ===
+
+To simply use the mempo kernels, download them from deb.mempo.org (or .i2p), consult
+section "Variants" below.
+
+To build them from sources just start ./run-flavour.sh "deskmax" or similar, but first
+you need to install few tools. The build script should stop and tell you what to do.
+
 === How to prepare new upgrade ===
 
 This is for co-developers who wish to prepare a new version of mempo (e.g. when new grsecurity
 is out).
 Read info in README.md (and rest of this document here).
+
+=== Variants ===
+
+This is how we now imaging which versions should be provided for users (there is a security versus performance/compatibility tradeoff).
+
+E.g. in most secure mode things are slower, Xen is blocked, Wine is blocked, most X drivers are blocks, and other things work but are made harder e.g. no auto-loading or auto-mounting - need to write scripts to make this easy for user again.
+
+Variants of kernel config (not all are yet implemented):
+
+    Desk - this is the current variant (previously named good). It turns out all protections (especially in recent versions) except ioport/kmem blocks and [since 2014.08.21] except some options that are considered too restrictive for desktop, e.g. without some proc restrictions that block sound system etc.
+    DeskMax - [since 2014.08.21] (previously Desk had this role basically) this is the spartan desktop, allows ioport/kmem (as long as it's needed for most gfx cards) but blocks everything else e.g. even sound support possibly
+    Serv - for servers mostly this will also turn on ioport/kmem, meaning that kernel will be extremely strongly protected from being damaged by other programs or most parts of kernel. Desktops can use this too but will need a fix to X server and require open good gfx drivers.
+    ServMax - same but could turn on various "paranoid" options, extra double checking, extra asserts...
+    Weak - that will be a mode that is not as secure. It will be more compatible or faster then Desktop
+    WeakXen - takes all steps needed to allow Xen (and wine?) at cost of lowering kernel protection
+    Weaker - takes normal kernel and just turns on the low-cost simple protections, for full speed and compatibility, e.g. like hiding all processes of other users, adding some loggin and other "why not this isn't harming even most not-pro users".
+		NoProtect - vanilla kernel with default settings and no additional protection in comparsion to standard kernel (only upside is that it is deterministc build)
+    MempoBox - desktop running on selected hardware. Like Desk but all not used drivers can be removed making things MUCH more secure, easy and fast (to build/test).
+    MempoBunker - server running on selected hardware, like ServMax.
+
+,------,--------,-------,------------,--------,------------,
+| Done | Target |For    | Also works | Kernel |  Variant   | 
+| yet? | Arch   |Debian | with       |        |            |
+|------+--------+-------+------------+--------+------------|
+| wip  | x86_64 | Deb7  |            | 3.2.x  | ServMax    |
+| wip  | x86_64 | Deb7  |            | 3.2.x  | Serv       |
+| YES! | x86_64 | Deb7  |            | 3.2.x  | Desk       |
+| YES! | x86_64 | Deb7  |            | 3.2.x  | DeskMax    |
+| wip  | x86_64 | Deb7  |            | 3.2.x  | Weak       |
+| wip  | x86_64 | Deb7  |            | 3.2.x  | WeakXen    |
+| wip  | x86_64 | Deb7  |            | 3.2.x  | Weaker     |
+|------+--------+-------+------------+--------+------------|
+|  p?  | i386   | Deb7  |            | 3.2.x  | ServMax    |
+|------+--------+-------+------------+--------+------------|
+|      | x86_64 | Deb8  | Deb7       | 3.14.x | ServMax    |
+|      | x86_64 | Deb8  | Deb7       | 3.14.x | Serv       |
+|  F?  | x86_64 | Deb8  | Deb7       | 3.14.x | Desk       |
+|  F?  | x86_64 | Deb8  | Deb7       | 3.14.x | DeskMax    |
+|      | x86_64 | Deb8  | Deb7       | 3.14.x | Weak       |
+|      | x86_64 | Deb8  | Deb7       | 3.14.x | WeakXen    |
+|      | x86_64 | Deb8  | Deb7       | 3.14.x | Weaker     |
+|------+--------+-------+------------+--------+------------|
+|  p   | Arm11  | RPian|             | ?      | ServMax    |
+|  p   | Arm11  | RPian|             | ?      | Desk       |
+|------+--------+-------+------------+--------+------------|
+| p = planned in not so far away future                    |
+| F = works, in a fork (ask user kocka on IRC)             |
+| wip = in progress                                        |
+| RPian = raspbian                                         |
+| if nothing is written - then it's planned later          |
+,----------------------------------------------------------,
+
 
 === How build works ===
 
