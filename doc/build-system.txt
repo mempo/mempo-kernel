@@ -1,6 +1,8 @@
 
 *** This document here is most definitive. ***
 
+Also first see README.md file.
+
 Use this document, it is most definitive (how ever also check other sources if they would happen
 to have additional remarks sometimes)
 * read additional info on http://wiki.debian.org/Mempo/SameKernel
@@ -9,7 +11,15 @@ to have additional remarks sometimes)
   (geti2p.net), or irc.freenode.org. And WAIT for THE REPLY 48 hours. Repeat question.
 * source code: https://github.com/mempo/ . Check always the GPG signature.
 
+=== How to prepare new upgrade ===
+
+This is for co-developers who wish to prepare a new version of mempo (e.g. when new grsecurity
+is out).
+Read info in README.md (and rest of this document here).
+
 === How build works ===
+
+This is needed for troubleshooting of build process and to develop it.
 
 download-and-build-all.sh 
 	download-and-build.sh "deskmax"
@@ -35,6 +45,8 @@ download-and-build-all.sh
 
 
 === Build and RELEASE (distribute) system for use in mempo. ===
+
+This section is for people going to deploy the build bot.
 
 The build model here is related to:
 https://github.com/rfree2/fossoffice/blob/master/task/aptmempo/repo-server/server.txt
