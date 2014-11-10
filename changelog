@@ -1,6 +1,7 @@
 linux-image (linux-3.2.64-mempo-0.1.87) UNRELEASED; urgency=medium
   * grsec update
   * v0.1.87-01-rc
+  * v0.1.87-02-rc
 
  -- mempo <mempo@mempo.org>  Sun, 09 Nov 2014 21:47:17 +0200
 
