@@ -48,6 +48,9 @@ download-and-build-all.sh
 
 This section is for people going to deploy the build bot.
 
+First, the tools are mainly in other git repo, in:
+https://github.com/mempo/mempobot
+
 The build model here is related to:
 https://github.com/rfree2/fossoffice/blob/master/task/aptmempo/repo-server/server.txt
 
