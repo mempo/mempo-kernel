@@ -7,6 +7,7 @@ to have additional remarks sometimes)
 * QUESTIONS - then contact us: http://wiki.debian.org/Mempo/Mempo
 * QUESTIONS: chat with us on IRC on #mempo on irc.oftc.net or best on anonymous irc2p 
   (geti2p.net), or irc.freenode.org. And WAIT for THE REPLY 48 hours. Repeat question.
+* source code: https://github.com/mempo/ . Check always the GPG signature.
 
 === How build works ===
 
