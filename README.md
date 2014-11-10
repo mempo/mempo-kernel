@@ -6,6 +6,8 @@ Deterministic kernel build scripts, for Linux, mainly for Debian for now.
 This scripts will build kernel in deterministic way, and also apply our default 
 settings and patches. 
 
+It will also use grsecurity patch to create secure hardened grsecurity/pax kernel (optional).
+
 
 Dependencies for build:
 ```
@@ -15,6 +17,7 @@ apt-get install faketime time git build-essential libncurses5-dev libncursesw5-d
 https://wiki.debian.org/SameKernel
 https://wiki.debian.org/Mempo
 
+READ all details here in files in doc/ especially in doc/build-system.txt
 
 Security
 ====================
@@ -40,6 +43,8 @@ TRUST CHAIN currently:
 
 updating this project
 ====================
+
+First of, read the details in doc/build-system.txt and rest of doc/ folder!
 
 Maintainers of this project should do following in reaction to new version of codes:
 
