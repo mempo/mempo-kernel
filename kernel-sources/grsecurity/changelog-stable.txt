@@ -1,3 +1,274 @@
+commit ff71f599298edb9e77adbb8785931ee9d48832f4
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Mon Nov 10 18:00:09 2014 +0100
+
+    net: sctp: fix memory leak in auth key management
+    
+    A very minimal and simple user space application allocating an SCTP
+    socket, setting SCTP_AUTH_KEY setsockopt(2) on it and then closing
+    the socket again will leak the memory containing the authentication
+    key from user space:
+    
+    unreferenced object 0xffff8800837047c0 (size 16):
+      comm "a.out", pid 2789, jiffies 4296954322 (age 192.258s)
+      hex dump (first 16 bytes):
+        01 00 00 00 04 00 00 00 00 00 00 00 00 00 00 00  ................
+      backtrace:
+        [<ffffffff816d7e8e>] kmemleak_alloc+0x4e/0xb0
+        [<ffffffff811c88d8>] __kmalloc+0xe8/0x270
+        [<ffffffffa0870c23>] sctp_auth_create_key+0x23/0x50 [sctp]
+        [<ffffffffa08718b1>] sctp_auth_set_key+0xa1/0x140 [sctp]
+        [<ffffffffa086b383>] sctp_setsockopt+0xd03/0x1180 [sctp]
+        [<ffffffff815bfd94>] sock_common_setsockopt+0x14/0x20
+        [<ffffffff815beb61>] SyS_setsockopt+0x71/0xd0
+        [<ffffffff816e58a9>] system_call_fastpath+0x12/0x17
+        [<ffffffffffffffff>] 0xffffffffffffffff
+    
+    This is bad because of two things, we can bring down a machine from
+    user space when auth_enable=1, but also we would leave security sensitive
+    keying material in memory without clearing it after use. The issue is
+    that sctp_auth_create_key() already sets the refcount to 1, but after
+    allocation sctp_auth_set_key() does an additional refcount on it, and
+    thus leaving it around when we free the socket.
+    
+    Fixes: 65b07e5d0d0 ("[SCTP]: API updates to suport SCTP-AUTH extensions.")
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Cc: Vlad Yasevich <vyasevich@gmail.com>
+    Acked-by: Neil Horman <nhorman@tuxdriver.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/auth.c |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+commit 93687bc50e84e3466e54149ffe09df189097c2b4
+Author: Nadav Amit <namit@cs.technion.ac.il>
+Date:   Wed Sep 17 02:50:50 2014 +0300
+
+    KVM: x86: Don't report guest userspace emulation error to userspace
+    
+    Commit fc3a9157d314 ("KVM: X86: Don't report L2 emulation failures to
+    user-space") disabled the reporting of L2 (nested guest) emulation failures to
+    userspace due to race-condition between a vmexit and the instruction emulator.
+    The same rational applies also to userspace applications that are permitted by
+    the guest OS to access MMIO area or perform PIO.
+    
+    This patch extends the current behavior - of injecting a #UD instead of
+    reporting it to userspace - also for guest userspace code.
+    
+    Signed-off-by: Nadav Amit <namit@cs.technion.ac.il>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ arch/x86/kvm/x86.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 10271c71740c76a8d9f05529d66476818245d289
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Mon Nov 10 17:54:26 2014 +0100
+
+    net: sctp: fix NULL pointer dereference in af->from_addr_param on malformed packet
+    
+    An SCTP server doing ASCONF will panic on malformed INIT ping-of-death
+    in the form of:
+    
+      ------------ INIT[PARAM: SET_PRIMARY_IP] ------------>
+    
+    While the INIT chunk parameter verification dissects through many things
+    in order to detect malformed input, it misses to actually check parameters
+    inside of parameters. E.g. RFC5061, section 4.2.4 proposes a 'set primary
+    IP address' parameter in ASCONF, which has as a subparameter an address
+    parameter.
+    
+    So an attacker may send a parameter type other than SCTP_PARAM_IPV4_ADDRESS
+    or SCTP_PARAM_IPV6_ADDRESS, param_type2af() will subsequently return 0
+    and thus sctp_get_af_specific() returns NULL, too, which we then happily
+    dereference unconditionally through af->from_addr_param().
+    
+    The trace for the log:
+    
+    BUG: unable to handle kernel NULL pointer dereference at 0000000000000078
+    IP: [<ffffffffa01e9c62>] sctp_process_init+0x492/0x990 [sctp]
+    PGD 0
+    Oops: 0000 [#1] SMP
+    [...]
+    Pid: 0, comm: swapper Not tainted 2.6.32-504.el6.x86_64 #1 Bochs Bochs
+    RIP: 0010:[<ffffffffa01e9c62>]  [<ffffffffa01e9c62>] sctp_process_init+0x492/0x990 [sctp]
+    [...]
+    Call Trace:
+     <IRQ>
+     [<ffffffffa01f2add>] ? sctp_bind_addr_copy+0x5d/0xe0 [sctp]
+     [<ffffffffa01e1fcb>] sctp_sf_do_5_1B_init+0x21b/0x340 [sctp]
+     [<ffffffffa01e3751>] sctp_do_sm+0x71/0x1210 [sctp]
+     [<ffffffffa01e5c09>] ? sctp_endpoint_lookup_assoc+0xc9/0xf0 [sctp]
+     [<ffffffffa01e61f6>] sctp_endpoint_bh_rcv+0x116/0x230 [sctp]
+     [<ffffffffa01ee986>] sctp_inq_push+0x56/0x80 [sctp]
+     [<ffffffffa01fcc42>] sctp_rcv+0x982/0xa10 [sctp]
+     [<ffffffffa01d5123>] ? ipt_local_in_hook+0x23/0x28 [iptable_filter]
+     [<ffffffff8148bdc9>] ? nf_iterate+0x69/0xb0
+     [<ffffffff81496d10>] ? ip_local_deliver_finish+0x0/0x2d0
+     [<ffffffff8148bf86>] ? nf_hook_slow+0x76/0x120
+     [<ffffffff81496d10>] ? ip_local_deliver_finish+0x0/0x2d0
+    [...]
+    
+    A minimal way to address this is to check for NULL as we do on all
+    other such occasions where we know sctp_get_af_specific() could
+    possibly return with NULL.
+    
+    Fixes: d6de3097592b ("[SCTP]: Add the handling of "Set Primary IP Address" parameter to INIT")
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Cc: Vlad Yasevich <vyasevich@gmail.com>
+    Acked-by: Neil Horman <nhorman@tuxdriver.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/sm_make_chunk.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit cf03f413cb7a521f972d043fd44dd3286e02faa5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Nov 14 23:06:29 2014 -0500
+
+    Backport:
+    Author: Dan Carpenter <dan.carpenter@oracle.com>
+    Date:   Fri Sep 5 09:09:28 2014 -0300
+    
+        [media] ttusb-dec: buffer overflow in ioctl
+    
+        We need to add a limit check here so we don't overflow the buffer.
+    
+        Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+        Signed-off-by: Mauro Carvalho Chehab <mchehab@osg.samsung.com>
+
+ drivers/media/dvb/ttusb-dec/ttusbdecfe.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 0a3190868b001a2defe98eac355a39bbfe01d772
+Author: Ilya Dryomov <idryomov@redhat.com>
+Date:   Thu Oct 23 00:25:22 2014 +0400
+
+    libceph: do not crash on large auth tickets
+    
+    Large (greater than 32k, the value of PAGE_ALLOC_COSTLY_ORDER) auth
+    tickets will have their buffers vmalloc'ed, which leads to the
+    following crash in crypto:
+    
+    [   28.685082] BUG: unable to handle kernel paging request at ffffeb04000032c0
+    [   28.686032] IP: [<ffffffff81392b42>] scatterwalk_pagedone+0x22/0x80
+    [   28.686032] PGD 0
+    [   28.688088] Oops: 0000 [#1] PREEMPT SMP
+    [   28.688088] Modules linked in:
+    [   28.688088] CPU: 0 PID: 878 Comm: kworker/0:2 Not tainted 3.17.0-vm+ #305
+    [   28.688088] Hardware name: Bochs Bochs, BIOS Bochs 01/01/2007
+    [   28.688088] Workqueue: ceph-msgr con_work
+    [   28.688088] task: ffff88011a7f9030 ti: ffff8800d903c000 task.ti: ffff8800d903c000
+    [   28.688088] RIP: 0010:[<ffffffff81392b42>]  [<ffffffff81392b42>] scatterwalk_pagedone+0x22/0x80
+    [   28.688088] RSP: 0018:ffff8800d903f688  EFLAGS: 00010286
+    [   28.688088] RAX: ffffeb04000032c0 RBX: ffff8800d903f718 RCX: ffffeb04000032c0
+    [   28.688088] RDX: 0000000000000000 RSI: 0000000000000001 RDI: ffff8800d903f750
+    [   28.688088] RBP: ffff8800d903f688 R08: 00000000000007de R09: ffff8800d903f880
+    [   28.688088] R10: 18df467c72d6257b R11: 0000000000000000 R12: 0000000000000010
+    [   28.688088] R13: ffff8800d903f750 R14: ffff8800d903f8a0 R15: 0000000000000000
+    [   28.688088] FS:  00007f50a41c7700(0000) GS:ffff88011fc00000(0000) knlGS:0000000000000000
+    [   28.688088] CS:  0010 DS: 0000 ES: 0000 CR0: 000000008005003b
+    [   28.688088] CR2: ffffeb04000032c0 CR3: 00000000da3f3000 CR4: 00000000000006b0
+    [   28.688088] Stack:
+    [   28.688088]  ffff8800d903f698 ffffffff81392ca8 ffff8800d903f6e8 ffffffff81395d32
+    [   28.688088]  ffff8800dac96000 ffff880000000000 ffff8800d903f980 ffff880119b7e020
+    [   28.688088]  ffff880119b7e010 0000000000000000 0000000000000010 0000000000000010
+    [   28.688088] Call Trace:
+    [   28.688088]  [<ffffffff81392ca8>] scatterwalk_done+0x38/0x40
+    [   28.688088]  [<ffffffff81392ca8>] scatterwalk_done+0x38/0x40
+    [   28.688088]  [<ffffffff81395d32>] blkcipher_walk_done+0x182/0x220
+    [   28.688088]  [<ffffffff813990bf>] crypto_cbc_encrypt+0x15f/0x180
+    [   28.688088]  [<ffffffff81399780>] ? crypto_aes_set_key+0x30/0x30
+    [   28.688088]  [<ffffffff8156c40c>] ceph_aes_encrypt2+0x29c/0x2e0
+    [   28.688088]  [<ffffffff8156d2a3>] ceph_encrypt2+0x93/0xb0
+    [   28.688088]  [<ffffffff8156d7da>] ceph_x_encrypt+0x4a/0x60
+    [   28.688088]  [<ffffffff8155b39d>] ? ceph_buffer_new+0x5d/0xf0
+    [   28.688088]  [<ffffffff8156e837>] ceph_x_build_authorizer.isra.6+0x297/0x360
+    [   28.688088]  [<ffffffff8112089b>] ? kmem_cache_alloc_trace+0x11b/0x1c0
+    [   28.688088]  [<ffffffff8156b496>] ? ceph_auth_create_authorizer+0x36/0x80
+    [   28.688088]  [<ffffffff8156ed83>] ceph_x_create_authorizer+0x63/0xd0
+    [   28.688088]  [<ffffffff8156b4b4>] ceph_auth_create_authorizer+0x54/0x80
+    [   28.688088]  [<ffffffff8155f7c0>] get_authorizer+0x80/0xd0
+    [   28.688088]  [<ffffffff81555a8b>] prepare_write_connect+0x18b/0x2b0
+    [   28.688088]  [<ffffffff81559289>] try_read+0x1e59/0x1f10
+    
+    This is because we set up crypto scatterlists as if all buffers were
+    kmalloc'ed.  Fix it.
+    
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Ilya Dryomov <idryomov@redhat.com>
+    Reviewed-by: Sage Weil <sage@redhat.com>
+
+ net/ceph/crypto.c |  169 +++++++++++++++++++++++++++++++++++++++++------------
+ 1 files changed, 132 insertions(+), 37 deletions(-)
+
+commit aafa4475f259b57627560b2bc4ab940d1cee8175
+Author: Stefan Richter <stefanr@s5r6.in-berlin.de>
+Date:   Tue Nov 11 17:16:44 2014 +0100
+
+    firewire: cdev: prevent kernel stack leaking into ioctl arguments
+    
+    Found by the UC-KLEE tool:  A user could supply less input to
+    firewire-cdev ioctls than write- or write/read-type ioctl handlers
+    expect.  The handlers used data from uninitialized kernel stack then.
+    
+    This could partially leak back to the user if the kernel subsequently
+    generated fw_cdev_event_'s (to be read from the firewire-cdev fd)
+    which notably would contain the _u64 closure field which many of the
+    ioctl argument structures contain.
+    
+    The fact that the handlers would act on random garbage input is a
+    lesser issue since all handlers must check their input anyway.
+    
+    The fix simply always null-initializes the entire ioctl argument buffer
+    regardless of the actual length of expected user input.  That is, a
+    runtime overhead of memset(..., 40) is added to each firewirew-cdev
+    ioctl() call.  [Comment from Clemens Ladisch:  This part of the stack is
+    most likely to be already in the cache.]
+    
+    Remarks:
+      - There was never any leak from kernel stack to the ioctl output
+        buffer itself.  IOW, it was not possible to read kernel stack by a
+        read-type or write/read-type ioctl alone; the leak could at most
+        happen in combination with read()ing subsequent event data.
+      - The actual expected minimum user input of each ioctl from
+        include/uapi/linux/firewire-cdev.h is, in bytes:
+        [0x00] = 32, [0x05] =  4, [0x0a] = 16, [0x0f] = 20, [0x14] = 16,
+        [0x01] = 36, [0x06] = 20, [0x0b] =  4, [0x10] = 20, [0x15] = 20,
+        [0x02] = 20, [0x07] =  4, [0x0c] =  0, [0x11] =  0, [0x16] =  8,
+        [0x03] =  4, [0x08] = 24, [0x0d] = 20, [0x12] = 36, [0x17] = 12,
+        [0x04] = 20, [0x09] = 24, [0x0e] =  4, [0x13] = 40, [0x18] =  4.
+    
+    Reported-by: David Ramos <daramos@stanford.edu>
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Stefan Richter <stefanr@s5r6.in-berlin.de>
+
+ drivers/firewire/core-cdev.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit e2af9fe7a51667cabae68a142529a2db2fd4ccdc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 12 18:06:32 2014 -0500
+
+    fix a case of DMA-on-stack reported here:
+    https://bugs.archlinux.org/task/42756
+    
+    Conflicts:
+    
+    	drivers/staging/line6/driver.c
+
+ drivers/staging/line6/driver.c |   17 ++++++++++++-----
+ 1 files changed, 12 insertions(+), 5 deletions(-)
+
+commit df8edaa95c47032e8fe57fe7222b829d76c02e63
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 9 17:51:13 2014 -0500
+
+    update mkspec to also chmod /boot, etc since we have no control over generated initrd images
+
+ scripts/package/mkspec |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
+
 commit a212bffcabd3bfc120a967d10703f9510ae461c0
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Nov 9 08:51:17 2014 -0500
