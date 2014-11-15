@@ -65,10 +65,14 @@ pwd_here=$PWD
 	echo "$sources_id"
 	echo "$sources_id" > "../sources_id.txt"
 
-	config_name=$flavour
+	ini_file="../configs/$flavour.ini"
+	echo "ini_file=$ini_file"
+	source "$ini_file"  || { echo "ERROR can not load the ini_file=$ini_file (for flavour=$flavour) in PWD=$PWD, ABORTING" ; exit_error ; }
+	echo "kernel_config_name=$kernel_config_name"
+
 	# TODO check if config_name is plain [a-zA-Z0-9] and >0 length
-	use_config_from=../configs-kernel/config-${config_name}.config
- 	cp $use_config_from .config || { echo "ERROR Could not copy the config=$use_config_from file here in PWD=$PWD, ABORTING" ; exit_error ; }
+	use_config_from=../configs-kernel/${kernel_config_name}
+ 	cp $use_config_from .config || { echo "ERROR Could not copy the config from use_config_from=$use_config_from file here in PWD=$PWD, ABORTING" ; exit_error ; }
 	config_id=`sha256sum .config | cut -d" " -f1`
 	echo "Using .config with ID=$config_id"
 	echo $PWD
