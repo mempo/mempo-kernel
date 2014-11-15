@@ -1,4 +1,4 @@
 #!/bin/bash
 
-bash run-flavour.sh "deskmax"
+./run-flavour.sh "deb7/deskmax"
 
