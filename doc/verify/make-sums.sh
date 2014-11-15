@@ -1,8 +1,11 @@
-#!/bin/bash
+#!/bin/bash -e
 
-cp /home/kernelbuild.pub/*.sig sig/
+mkdir -p sig || { echo "Can not make the dir for signatures" ; exit 1; }
 
-( cd /home/kernelbuild.pub/ ; sha256sum *deb | sort -k 2 ) > SHA256.SUMS.txt
-( cd /home/kernelbuild.pub/ ; sha512sum *deb | sort -k 2 ) > SHA512.SUMS.txt
-( cd /home/kernelbuild.pub/ ; whirlpooldeep *deb | sort -k 2 ) > WHIRLPOOL.SUMS.txt
+cp /home/kernelbuild.pub/sign/*.sig sig/ || { echo "Can not copy"; exit 1; }
+
+( cd sig/ ; sha1sum -- *sig | sort -k 2 ) > SHA1.SUMS.txt
+( cd sig/ ; sha256sum -- *sig | sort -k 2 ) > SHA256.SUMS.txt
+( cd sig/ ; sha512sum -- *sig | sort -k 2 ) > SHA512.SUMS.txt
+( cd sig/ ; whirlpooldeep -l -- *sig | sort -k 2 ) > WHIRLPOOL.SUMS.txt
 
