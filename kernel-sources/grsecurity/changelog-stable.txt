@@ -1,3 +1,36 @@
+commit a8d06d0a75f9576c2cee14268e8150a54bb87975
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 19 17:25:18 2014 -0500
+
+    From: Mathias Krause <minipli@googlemail.com>
+    To: "David S. Miller" <davem@davemloft.net>
+    Cc: netdev@vger.kernel.org, Mathias Krause <minipli@googlemail.com>, Dmitry
+            Kozlov <xeb@mail.ru>
+    Subject: [PATCH net] pptp: fix stack info leak in pptp_getname()
+    
+    pptp_getname() only partially initializes the stack variable sa,
+    particularly only fills the pptp part of the sa_addr union. The code
+    thereby discloses 16 bytes of kernel stack memory via getsockname().
+    
+    Fix this by memset(0)'ing the union before.
+    
+    Cc: Dmitry Kozlov <xeb@mail.ru>
+    Signed-off-by: Mathias Krause <minipli@googlemail.com>
+    ---
+    Probably material for stable, too -- v2.6.37+.
+
+ drivers/net/ppp/pptp.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 364afa01eb7e1e31eab44addf8f7563c3db2ae8e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 19 08:37:05 2014 -0500
+
+    increase amount of memory reserved for modules in server configs
+
+ security/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit ff71f599298edb9e77adbb8785931ee9d48832f4
 Author: Daniel Borkmann <dborkman@redhat.com>
 Date:   Mon Nov 10 18:00:09 2014 +0100
@@ -4067,7 +4100,7 @@ Date:   Tue Jun 10 09:43:02 2014 -0400
     	security/Kconfig
 
 commit 3ceecde1a9ba0b5d3d250561445b279b11d87a5c
-Merge: 9aa785b 6b3965a
+Merge: 9aa785b0 6b3965a
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jun 10 09:33:31 2014 -0400
 
@@ -4443,7 +4476,7 @@ Date:   Mon Jun 2 15:29:48 2014 -0400
  8 files changed, 66 insertions(+), 2 deletions(-)
 
 commit 7f9eb5130b5ca75efc0cdbd5090d1bed9bbeeb16
-Merge: 265e351 9aa785b
+Merge: 265e351 9aa785b0
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jun 2 15:11:37 2014 -0400
 
