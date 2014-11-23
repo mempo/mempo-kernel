@@ -22,7 +22,7 @@ if [[ -z "$arg_metod" ]] ; then arg_metod="increase" ; fi
 echo "### Preparing new env"
 url_provable_entropy="http://mempo.org/random/blockchain/default/get/"
 echo "Getting provable entropy from $url_provable_entropy"
-entropy_data=$( wget -q "$url_provable_entropy" --output-document - ) 
+entropy_data=$( wget --tries=3 --timeout=15 -q "$url_provable_entropy" --output-document - ) 
 entropy_seed=$( printf '%s\n' "$entropy_data" | head -n 1 | tail -n 1 )
 entropy_index=$( printf '%s\n' "$entropy_data" | head -n 2 | tail -n 1 )
 entropy_name=$( printf '%s\n' "$entropy_data" | head -n 3 | tail -n 1 )
