@@ -13,8 +13,9 @@ to have additional remarks sometimes)
 
 === As the user ===
 
-To simply use the mempo kernels, download them from deb.mempo.org (or .i2p), consult
-section "Variants" below.
+To simply use the mempo kernels, download them from deb.mempo.org (or .i2p) as compiled
+binary .deb files; 
+Consult section "Variants" below.
 
 To build them from sources just start ./run-flavour.sh "deskmax" or similar, but first
 you need to install few tools. The build script should stop and tell you what to do.
@@ -49,7 +50,7 @@ Variants of kernel config (not all are yet implemented):
 | yet? | Arch   |Debian | with       |        |            |
 |------+--------+-------+------------+--------+------------|
 | wip  | x86_64 | Deb7  |            | 3.2.x  | ServMax    |
-| wip  | x86_64 | Deb7  |            | 3.2.x  | Serv       |
+| YES! | x86_64 | Deb7  |            | 3.2.x  | Serv       |
 | YES! | x86_64 | Deb7  |            | 3.2.x  | Desk       |
 | YES! | x86_64 | Deb7  |            | 3.2.x  | DeskMax    |
 | wip  | x86_64 | Deb7  |            | 3.2.x  | Weak       |
@@ -66,8 +67,8 @@ Variants of kernel config (not all are yet implemented):
 |      | x86_64 | Deb8  | Deb7       | 3.14.x | WeakXen    |
 |      | x86_64 | Deb8  | Deb7       | 3.14.x | Weaker     |
 |------+--------+-------+------------+--------+------------|
-|  p   | Arm11  | RPian|             | ?      | ServMax    |
-|  p   | Arm11  | RPian|             | ?      | Desk       |
+|  p   | Arm11  | RPian |            | ?      | ServMax    |
+|  p   | Arm11  | RPian |            | ?      | Desk       |
 |------+--------+-------+------------+--------+------------|
 | p = planned in not so far away future                    |
 | F = works, in a fork (ask user kocka on IRC)             |
@@ -82,7 +83,7 @@ Variants of kernel config (not all are yet implemented):
 This is needed for troubleshooting of build process and to develop it.
 
 download-and-build-all.sh 
-	download-and-build.sh "deskmax"
+	download-and-build.sh "deb7/deskmax"
 		remove old working dir (e.g. ~/deterministic-kernel/)
 		github clone
 		check github gpg signature with help of git-gpg-check (our program)
@@ -93,9 +94,9 @@ download-and-build-all.sh
 				prepare-toolchain.sh
 					with help of lib dpkg-vercomp.sh
 					checks exact version of needed packages
-				kernel-build/linux-mempo/all.sh "deskmax"
-					get-sources.sh "deskmax" - it gets the files locally (copy them) and verify
-					build-run.sh "deskmax" - starts the build since now sources are fully ready
+				kernel-build/linux-mempo/all.sh "deb7/deskmax"
+					get-sources.sh "deb7/deskmax" - it gets the files locally (copy them) and verify
+					build-run.sh "deb7/deskmax" - starts the build since now sources are fully ready
 						it sets export linuxdir="linux-3.2.64"
 						patch.sh "linux-3.2.64"
 							build.sh - calls the actuall build
