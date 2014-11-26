@@ -1,3 +1,102 @@
+commit fc12e990aeafab216e27899a3d91b8a6b62d99ce
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Nov 26 00:57:50 2014 -0500
+
+    add the exclusion back
+
+ scripts/package/mkspec |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 0096b982d885bcf5a24ab25aacf0712c816d4f4f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 25 23:39:17 2014 -0500
+
+    install symlinks in -devel package properly
+
+ scripts/package/mkspec |   12 +++++-------
+ 1 files changed, 5 insertions(+), 7 deletions(-)
+
+commit c59c87659cd7d8cca18bc29646d043d5f980f235
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 25 22:13:24 2014 -0500
+
+    Give the files in the tarball used by the source rpm root.root ownership
+
+ scripts/package/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 26ef1245da16a6ac5831188d754ab220a0a2103e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 25 22:09:09 2014 -0500
+
+    Revert "Give the files in the tarball used by the source rpm root.root ownership"
+    
+    This reverts commit a49bfe985435a279361feb9c1e53ad65736f4af6.
+
+ scripts/package/Makefile |   47 ++++++++++++++++++++++++++-------------------
+ 1 files changed, 27 insertions(+), 20 deletions(-)
+
+commit a49bfe985435a279361feb9c1e53ad65736f4af6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Nov 25 21:52:00 2014 -0500
+
+    Give the files in the tarball used by the source rpm root.root ownership
+    
+    Conflicts:
+    
+    	scripts/package/Makefile
+
+ scripts/package/Makefile |   47 +++++++++++++++++++--------------------------
+ 1 files changed, 20 insertions(+), 27 deletions(-)
+
+commit 0925f49db68edea999a3dffaba8a2d4622c7accb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 23 14:08:10 2014 -0500
+
+    move our make rpm chmods to %pre
+
+ scripts/package/mkspec |   22 ++++++++++++----------
+ 1 files changed, 12 insertions(+), 10 deletions(-)
+
+commit 345f3be3c9beb7182fd9654917783f9a13566057
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Nov 23 09:54:26 2014 -0500
+
+    Harden network settings by default since most users won't bother
+    modifying /etc/sysctl.conf.
+    
+    Specifically we're now setting rp_filter = 1 and accept_redirects = 0
+
+ net/ipv4/devinet.c  |    6 ++++--
+ net/ipv6/addrconf.c |    4 ++--
+ 2 files changed, 6 insertions(+), 4 deletions(-)
+
+commit ea07aca49c23771bf88fea479b505997856e45b9
+Author: Laura Abbott <lauraa@codeaurora.org>
+Date:   Sat Dec 21 01:03:06 2013 +0100
+
+    ARM: 7931/1: Correct virt_addr_valid
+    
+    The definition of virt_addr_valid is that virt_addr_valid should
+    return true if and only if virt_to_page returns a valid pointer.
+    The current definition of virt_addr_valid only checks against the
+    virtual address range. There's no guarantee that just because a
+    virtual address falls bewteen PAGE_OFFSET and high_memory the
+    associated physical memory has a valid backing struct page. Follow
+    the example of other architectures and convert to pfn_valid to
+    verify that the virtual address is actually valid. The check for
+    an address between PAGE_OFFSET and high_memory is still necessary
+    as vmalloc/highmem addresses are not valid with virt_to_page.
+    
+    Cc: Will Deacon <will.deacon@arm.com>
+    Cc: Nicolas Pitre <nico@linaro.org>
+    Acked-by: Will Deacon <will.deacon@arm.com>
+    Signed-off-by: Laura Abbott <lauraa@codeaurora.org>
+    Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+
+ arch/arm/include/asm/memory.h |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
 commit a8d06d0a75f9576c2cee14268e8150a54bb87975
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Nov 19 17:25:18 2014 -0500
