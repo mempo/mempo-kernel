@@ -1,3 +1,9 @@
+linux-image (linux-3.2.64-mempo-0.1.91) UNRELEASED; urgency=medium
+  * grsec update, harden network settings
+  * v0.1.91-01-rc
+
+ -- mempo <mempo@mempo.org>  Wed, 26 Nov 2014 16:32:42 +0200
+
 linux-image (linux-3.2.64-mempo-0.1.90) UNRELEASED; urgency=medium
   * this time NO update of grsec nor kernel
   * config: turn on sysctl options on init, and use latent entropy
