@@ -2,6 +2,11 @@ linux-image (linux-3.2.64-mempo-0.1.90) UNRELEASED; urgency=medium
   * this time NO update of grsec nor kernel
   * config: turn on sysctl options on init, and use latent entropy
   * adding new flavour: serv
+  * adding new flavour: zero (for tests)
+  * changes to scripting (validate the envdata etc)
+  * NOT using latent after all, but using sysctl (default turn ON sysctl grsec options)
+  * v0.1.90-03-rc
+
 
 linux-image (linux-3.2.64-mempo-0.1.89) UNRELEASED; urgency=medium
   * grsec update, fix pptp info leak
