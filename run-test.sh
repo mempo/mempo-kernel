@@ -6,7 +6,7 @@ computer=$HOSTNAME
 
 date_start=$( date -u +%s )
 
-./run-flavour "$1" "$2" "$3" || { echo "Build failed, aborting" ; exit 1; }
+bash ./run-flavour.sh "$1" "$2" "$3" || { echo "Build failed, aborting" ; exit 1; }
 
 date_done=$( date -u +%s )
 
