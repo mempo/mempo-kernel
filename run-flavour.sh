@@ -202,8 +202,8 @@ echo "The directory with duplicates of built files (saved for later reference) h
 du -sh "$savelater_basedir"
 
 echo "===== PUBLISH THIS ====== 8< ---cut here--- 8< --------------------------"
-echo "Built $flavour v $version on $computer in $seconds sec. Size: $buildsize Sums: $sums_short" | tee -a ~/result.txt
-echo "Built $flavour v $version on $computer in $seconds sec. Size: $buildsize Sums: $sums_normal" | tee -a ~/result-detail.txt
+echo "Built $flavour v $version on $computer in $build_seconds sec. Size: $buildsize Sums: $sums_short" | tee -a ~/result.txt
+echo "Built $flavour v $version on $computer in $build_seconds sec. Size: $buildsize Sums: $sums_normal" | tee -a ~/result-detail.txt
 echo ""
 echo "Please check sha256sum checksums of the generated .deb files that you can find here below:"
 echo $sums_normal_eol
