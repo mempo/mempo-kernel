@@ -1,10 +1,19 @@
 #!/bin/bash
+# For use of developers
+# (and called to re-check before build)
+# This script does some sanity checks on some of the data
+# Usage:
+# devel-check-sanity.sh [batch at pos1]
+# * argument 1 can be "batch" then script works more as not-interactive one
 
 source "support.sh"
 
 echo "======================================="
 echo "Running sanity checks"
 echo "======================================="
+
+opt_batch="no"
+if [[ "$1" == "batch" ]] ; then opt_batch="yes" ; fi
 
 function mistake() {
 		printf "\nERROR:\n%s\n" "Mistake in config: $@"
@@ -27,7 +36,8 @@ do
 done
 
 function kernel_general_version_VALIDATE() {
-	if [[ "$1" =~ ^[0-9]{1,4}\.[0-9]{1,4}*\.[0-9]{1,4}$ ]] ; then return 0 ; fi
+    # echo "TEST $1" # XXX
+	if [[ "$1" =~ ^[0-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}$ ]] ; then return 0 ; fi
 	if [[ "$2" != "q" ]] ; then echo "Failed regexp for string: [$1]" ; fi
 	return 1
 }
@@ -86,6 +96,8 @@ function check_envdata() {
 
 		kernel_general_version_VALIDATE "$kernel_general_version" || mistake "bad kernel version"
 		kernel_general_version_VALIDATE "3.14.2" q || mistake "$bad_regexp_msg"
+		kernel_general_version_VALIDATE "3.1414.2" q && mistake "$bad_regexp_msg"
+		kernel_general_version_VALIDATE "3.141414.2" q && mistake "$bad_regexp_msg"
 		kernel_general_version_VALIDATE "3.14.2x" q && mistake "$bad_regexp_msg"
 		kernel_general_version_VALIDATE "3.14.x2" q && mistake "$bad_regexp_msg"
 		kernel_general_version_VALIDATE "3.14x.2" q && mistake "$bad_regexp_msg"
@@ -136,6 +148,7 @@ function check_envdata() {
 }
 
 check_envdata || exit 1
+
 echo
 echo "OK - all automatic SANIT-CHECKS checks are GOOD so far :)"
 echo
@@ -145,7 +158,10 @@ echo "You  HAVE TO ALSO:  Check on your own:"
 echo "  * Does all kernelconfig files contain correct version of mempo"
 echo "  * Does changelog have the correct entry"
 echo "that is all."
-mywait
+
+if [[ "$opt_batch" == "no" ]] ; then
+    mywait
+fi
 
 
 
