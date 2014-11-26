@@ -43,3 +43,18 @@ function ask_quit() {
 }
 
 
+function mywait() {
+	if [[ "$skip_intro" == true ]]; then return; fi
+	echo "Press ENTER when you done the above instructions"
+	read _ 
+}
+function mywait_e() {
+	if [[ "$skip_intro" == true ]]; then return; fi
+	echo "Press ENTER when ready, I will open editor"
+	read _ 
+} 
+function mywait_d() {
+	if [[ "$skip_intro" == true ]]; then return; fi
+	echo "Press ENTER to download files"
+	read _ 
+}

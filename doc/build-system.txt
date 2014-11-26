@@ -111,6 +111,8 @@ This section is for people going to deploy the build bot.
 
 First, the tools are mainly in other git repo, in:
 https://github.com/mempo/mempobot
+Use this repository, primarly to get the script download-and-build-all.sh , this
+script will in turn download actuall script/patches that constitute our SameKernel.
 
 The build model here is related to:
 https://github.com/rfree2/fossoffice/blob/master/task/aptmempo/repo-server/server.txt

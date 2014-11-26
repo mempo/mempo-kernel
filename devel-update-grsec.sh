@@ -65,21 +65,6 @@ echo ""
 echo " *** this script is not finished yet, you will need to do some work manually! *** "
 echo "Read README and info how to update on https://github.com/mempo/deterministic-kernel/ (or local file README.md here)" 
 
-function mywait() {
-	if [[ "$skip_intro" == true ]]; then return; fi
-	echo "Press ENTER when you done the above instructions"
-	read _ 
-}
-function mywait_e() {
-	if [[ "$skip_intro" == true ]]; then return; fi
-	echo "Press ENTER when ready, I will open editor"
-	read _ 
-} 
-function mywait_d() {
-	if [[ "$skip_intro" == true ]]; then return; fi
-	echo "Press ENTER to download files"
-	read _ 
-}
 
 function download() { 
 	echo "Downloading $new_grec from $url " 
@@ -157,7 +142,7 @@ if [[ "$kernel_ver" != "$kernel_general_version" ]] ; then
 fi
 echo "Main kernel version is OK"
 
-. devel-update-revision.sh "restart" || { echo "Can not update revision"; exit 2; }
+. devel-update-revision.sh "restart" "batch" || { echo "Can not update revision"; exit 2; }
 
 echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" ; mywait 
 
@@ -223,6 +208,21 @@ vim changelog
 # TODO git push
 
 
-
 echo ; echo "REMEMBER to also EDIT THE changelog file before commiting!" ; echo
+
+echo "Now I will run sanity checks, ok?"
+mywait
+
+bash devel-check-sanity.sh || { echo "It seems sanity checks failed? I will exit then." ; exit 102; }
+
+echo "Ok that is all. Thanks. "
+mywait
+
+
+
+
+
+
+
+
 
