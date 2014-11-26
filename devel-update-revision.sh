@@ -5,8 +5,12 @@ echo "==============================================================="
 echo "Updating revision / seed"
 echo ""
 
+source support.sh
+
 
 arg_metod=$1
+
+arg_batch=$2 # nothing, or "batch", if batch then we are called from other script so do not act as all is done (e.g. calls sanity checks), the caller should
 
 # load current kernel version
 # and other data that might be useful (the old data before we will overwrite it)
@@ -46,8 +50,9 @@ echo "  (It is best to confirm with locally running litecoin node if you can;"
 echo "  though that is not too important as we anyway in binary distributions)"
 echo ""
 
-read -e -p "The block INDEX (short nunber): " -i "$entropy_index"
-read -e -p "The block SEED (long random string): " -i "$entropy_seed"
+echo "you can EDIT THIS if you want:"
+read -e -p "The block INDEX (short nunber): " -i "$entropy_index" entropy_index
+read -e -p "The block SEED (long random string, must be 64 0-9a-f hex characters): " -i "$entropy_seed" entropy_seed
 echo ""
 
 newenv_date=$(date +'%Y-%m-%d %H:%M:%S')
@@ -82,3 +87,11 @@ cp "$f_newenv" "$f_oldenv"
 echo "New env is:"
 cat "$f_oldenv"
 echo ""
+
+if [[ "$arg_batch" != "batch" ]]
+then
+	bash devel-check-sanity.sh || { echo "It seems sanity checks failed? I will exit then." ; exit 102; }
+	echo "Ok that is all. Thanks."
+	mywait
+fi
+

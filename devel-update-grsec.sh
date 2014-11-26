@@ -142,7 +142,7 @@ if [[ "$kernel_ver" != "$kernel_general_version" ]] ; then
 fi
 echo "Main kernel version is OK"
 
-. devel-update-revision.sh "restart" "batch" || { echo "Can not update revision"; exit 2; }
+bash devel-update-revision.sh "restart" "batch" || { echo "Can not update revision"; exit 2; }
 
 echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" ; mywait 
 
@@ -214,15 +214,6 @@ echo "Now I will run sanity checks, ok?"
 mywait
 
 bash devel-check-sanity.sh || { echo "It seems sanity checks failed? I will exit then." ; exit 102; }
-
-echo "Ok that is all. Thanks. "
+echo "Ok that is all. Thanks."
 mywait
-
-
-
-
-
-
-
-
 
