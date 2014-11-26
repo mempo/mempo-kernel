@@ -5,6 +5,11 @@ echo "Welcome to SameKernel"
 
 pwd_normal=$PWD # save starting top-dir
 
+flavour="$1"
+version=$( git describe --tags )
+computer=$HOSTNAME
+date_start=$( date -u +%s )
+
 # set -x 
 mkdir -p kernel-sources/kernel
 
@@ -174,10 +179,34 @@ echo "-------------------------------------------------------------------------"
 
 cd $pwd_normal
 
+date_done=$( date -u +%s )
+build_seconds=$(( date_done - date_start ))
+
+# cd kernel-build/linux-mempo
+sums_normal_eol="$(sha256sum *.deb )"
+sums_normal="$(echo $sums_normal_eol)" # flatten it into one line with no /n
+
+sums_short_eol="$(sha256sum *.deb | cut -c 1-10 )"
+sums_short="$(echo $sums_short_eol)" # flatten it into one line with no /n
+
+buildsize="$(du -s -BM kernel-build/linux-mempo/ | cut -f1)"
+
+savelater_basedir="$HOME/test/" # save there the files for later reference, each in unique directory e.g. to compare between builds of same version
+savelater_dir="$savelater_basedir/$version/$flavour/$date"
+echo "Will save this uniquie build results for later reference: $savelater_dir"
+mkdir -p "$savelater_dir" 
+cp -var kernel-build/linux-mempo/*.deb  "$savelater_dir/"
+echo "The directory with duplicates of built files (saved for later reference) has following size (you can delete it if you are not comparing kernels)"
+du -sh "$savelater_basedir"
+
 echo "===== PUBLISH THIS ====== 8< ---cut here--- 8< --------------------------"
+echo "Built $flavour v $version on $computer in $seconds sec. Size: $buildsize Sums: $sums_short" | tee -a ~/result.txt
+echo "Built $flavour v $version on $computer in $seconds sec. Size: $buildsize Sums: $sums_normal" | tee -a ~/result-detail.txt
+echo ""
 echo "Please check sha256sum checksums of the generated .deb files that you can find here below:"
-sha256sum kernel-build/linux-mempo/*.deb || { echo ; echo "WARNING: can not find the produced .deb files! it seems the build failed! Please report this problem to us!"; exit_error; }
-echo "github version is: "
+echo $sums_normal_eol
+echo "github version was: "
+echo -- $version
 git tag -v `git describe --tags`
 echo "----- 8< ------ 8< ------ 8< ---cut here--- 8< --------------------------"
 echo 
