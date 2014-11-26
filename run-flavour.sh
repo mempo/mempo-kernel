@@ -176,26 +176,28 @@ bash ./all.sh $@ || { echo ; echo "WARNING: Build of kernel seem to had some pro
 set +x
 echo "-------------------------------------------------------------------------"
 
-
-cd $pwd_normal
-
 date_done=$( date -u +%s )
 build_seconds=$(( date_done - date_start ))
 
-# cd kernel-build/linux-mempo
+cd $pwd_normal 
+buildsize="$(du -s -BM kernel-build/linux-mempo/ | cut -f1)"
+
+cd $pwd_normal ; cd kernel-build/linux-mempo/ # next to the deb files
 sums_normal_eol="$(sha256sum *.deb )"
 sums_normal="$(echo $sums_normal_eol)" # flatten it into one line with no /n
 
 sums_short_eol="$(sha256sum *.deb | cut -c 1-10 )"
 sums_short="$(echo $sums_short_eol)" # flatten it into one line with no /n
 
-buildsize="$(du -s -BM kernel-build/linux-mempo/ | cut -f1)"
-
 savelater_basedir="$HOME/test/" # save there the files for later reference, each in unique directory e.g. to compare between builds of same version
-savelater_dir="$savelater_basedir/$version/$flavour/$date"
+savelater_dir="$savelater_basedir/$version/$flavour/$date_start/"
+
+
+cd $pwd_normal
+
 echo "Will save this uniquie build results for later reference: $savelater_dir"
 mkdir -p "$savelater_dir" 
-cp -var kernel-build/linux-mempo/*.deb  "$savelater_dir/"
+cp -var kernel-build/linux-mempo/*.deb  "$savelater_dir"
 echo "The directory with duplicates of built files (saved for later reference) has following size (you can delete it if you are not comparing kernels)"
 du -sh "$savelater_basedir"
 
@@ -206,12 +208,12 @@ echo ""
 echo "Please check sha256sum checksums of the generated .deb files that you can find here below:"
 echo $sums_normal_eol
 echo "github version was: "
-echo -- $version
+echo "$version"
 git tag -v `git describe --tags`
 echo "----- 8< ------ 8< ------ 8< ---cut here--- 8< --------------------------"
 echo 
-echo -n "PRIVATE information FYI: This build was (completed) at date: " ; date
-echo -n "PRIVATE information FYI: This build was done on hostname=" ; hostname 
+echo -n "PRIVATE information FYI: This build was (completed) at date: " ; $date_done
+echo -n "PRIVATE information FYI: This build was done on computer=" ; $computer 
 
 echo
 echo "If you see checksums line above, then please compare/publish them with other users."
