@@ -72,6 +72,9 @@ function download() {
 	echo "Downloading $new_grec from $url " 
 	set -x  
 	cd $gr_path ; rm changelog-${opt_stable_version}.txt 
+
+	# TODO detect if we are re-downloading same file again, if that link redirects to a file name that we already have 
+	# for the kernel/sig and then report a bug that this is the same version so no need for upgrade
 	wget  http://grsecurity.net/changelog-${opt_stable_version}.txt  $url $url.sig 
 	sha256=$(sha256deep  -q  $new_grsec)  ;  cd ../..
 	set +x
@@ -100,11 +103,10 @@ function sources_list() {
 		if [[ $i -eq 2 ]]
 		then    
 			match="no"
-			grep 'ID_grsecurity_main_ID' "$thefile" || { echo "ERROR: Can not find the line to edit here"; exit 1; }
-			match="yes"
+			echo "$line" | grep 'ID_grsecurity_main_ID' && match="yes"
 			if [[ "$match" != "yes" ]] ; then
 					echo "@@@ ERROR IN THE SCRIPT ! @@@"
-					echo "The sources list file ($thefile) had unexpected format (see sources for details) !"
+					echo "The sources list file ($thefile) had unexpected format i=($i) line=($line) (see sources for details) !"
 					echo "Press ctrl-c to exit and FIX THIS PROBLEM" ; read _ 
 					echo "abort." ; exit 1;
 			fi

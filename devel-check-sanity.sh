@@ -9,9 +9,11 @@
 source 'support.sh' || { echo "Can not load lib" ; exit 1; }
 source 'lib-sanity.sh' || { echo "Can not load lib" ; exit 1; }
 
+echo
 echo "======================================="
 echo "Running sanity checks"
 echo "======================================="
+echo
 
 opt_batch="no"
 if [[ "$1" == "batch" ]] ; then opt_batch="yes" ; fi
@@ -151,6 +153,7 @@ function check_envdata() {
 check_envdata || exit 1
 
 check_sourcecode_list || exit 1
+echo "Checked source code list"
 
 echo
 echo "OK - all automatic SANIT-CHECKS checks are GOOD so far :)"

@@ -1,10 +1,17 @@
 linux-image (linux-3.2.64-mempo-0.1.91) UNRELEASED; urgency=medium
   * grsec update, harden network settings
   * v0.1.91-01-rc
+  * fixed the bug that wrong (older) grsecurity patch was used!
+  * fixed the devel devel-update-grsec.sh script to update sources list!
+  * added sanity checks against related kind of problems
+  * now really using grsecurity-3.0-3.2.64-201411220952.patch
+  * removed other older patches from git as cleanup
+  * v0.1.91-02-rc
 
  -- mempo <mempo@mempo.org>  Wed, 26 Nov 2014 16:32:42 +0200
 
 linux-image (linux-3.2.64-mempo-0.1.90) UNRELEASED; urgency=medium
+  * WARNING (added later): critical bug: this version was in fact using only grsecurity grsecurity-3.0-3.2.64-201411091051.patch
   * this time NO update of grsec nor kernel
   * config: turn on sysctl options on init, and use latent entropy
   * adding new flavour: serv
@@ -13,14 +20,17 @@ linux-image (linux-3.2.64-mempo-0.1.90) UNRELEASED; urgency=medium
   * NOT using latent after all, but using sysctl (default turn ON sysctl grsec options)
   * v0.1.90-03-rc
 
+ -- mempo <mempo@mempo.org>  Wed, 26 Nov 2014 12:00:00 +0200
 
 linux-image (linux-3.2.64-mempo-0.1.89) UNRELEASED; urgency=medium
+  * WARNING (added later): critical bug: this version was in fact using only grsecurity grsecurity-3.0-3.2.64-201411091051.patch
   * grsec update, fix pptp info leak
   * v0.1.89-01-rc
 
  -- mempo <mempo@mempo.org>  Sun, 23 Nov 2014 10:20:17 +0200
 
 linux-image (linux-3.2.64-mempo-0.1.88) UNRELEASED; urgency=medium
+  * WARNING (added later): critical bug: this version was in fact using only grsecurity grsecurity-3.0-3.2.64-201411091051.patch
   * grsec update
   * v0.1.88-01-rc
   * fixed build script, using .ini: now use ./run-flavour "deb7/desk"
