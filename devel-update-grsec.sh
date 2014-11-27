@@ -1,7 +1,7 @@
 #!/bin/bash -e
 # using rss to get newest version of gr, rsstail must be installed!
 
-source 'support.sh'
+source 'support.sh' || { echo "Can not load lib" ; exit 1; }
 
 opt_stable_version="stable" # the 3.2 kernel was "stable2" untill 2014-06-23, now it's "stable". 
 
@@ -80,26 +80,28 @@ function download() {
 #all line gr in sourcecode.list
 function sources_list() { 
 	pwd=$PWD
-	cd kernel-build/linux-mempo/ # working here
+	cd "kernel-build/linux-mempo/" || { echo "ERROR: can not chang working directory" ; exit 1; } # working here
 	thefile="sourcecode.list" # TODO make this depend on choosen ini file
 	echo "Updating $thefile"
 	# echo "Debug in sources_list, new_grsec=$new_grsec" 1>&2
 	# exit ;
-	all=P,ID_grsecurity_main_ID,x,grsecurity,$new_grsec,sha256,$sha256,./tmp-path/  
+	all="P,ID_grsecurity_main_ID,x,grsecurity,$new_grsec,sha256,$sha256,./tmp-path/"
 	all2=$(echo $all | sed -e 's/\ //g')
-	echo $all2
+	echo "Will add line: ($all2)"
+
 	file="$thefile"
 	tmp="$thefile.tmp"
-	mv $file $tmp
+	mv "$file" "$tmp" || { echo "ERROR: Can not move file ($file) to tmp ($tmp)"; exit 1; }
+
 	let i=0
-	
 	# format of this file, is that it must have exactly *one* line with tag *ID_grsecurity_main_ID* , the line *number 2*
 	for line in $(cat $tmp); do
 		let i=$i+1
 		if [[ $i -eq 2 ]]
 		then    
 			match="no"
-			grep 'ID_grsecurity_main_ID' "$thefile" && match="yes"
+			grep 'ID_grsecurity_main_ID' "$thefile" || { echo "ERROR: Can not find the line to edit here"; exit 1; }
+			match="yes"
 			if [[ "$match" != "yes" ]] ; then
 					echo "@@@ ERROR IN THE SCRIPT ! @@@"
 					echo "The sources list file ($thefile) had unexpected format (see sources for details) !"
@@ -164,8 +166,8 @@ echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or
 #mywait
 
 echo "[AUTO] I will download new grsec (to kernel-sources/grsecurity/) and I will update sources.list" ; mywait_d ;
-download
-sources_list
+download || { echo "ERROR: Download failed" ; exit 1; }
+sources_list || { echo "ERROR: Sources list update failed" ; exit 2; }
 
 echo "-------------"
 echo "[CHECK] Now we will check the GPG signature on grsecurity:"

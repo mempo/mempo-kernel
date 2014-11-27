@@ -1,12 +1,11 @@
 #!/bin/bash
 
+source 'support.sh' || { echo "Can not load lib" ; exit 1; }
+
 echo ""
 echo "==============================================================="
 echo "Updating revision / seed"
 echo ""
-
-source support.sh
-
 
 arg_metod=$1
 

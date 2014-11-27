@@ -5,6 +5,9 @@ echo "Welcome to SameKernel"
 
 pwd_normal=$PWD # save starting top-dir
 
+source 'support.sh' || { echo "Can not load lib" ; exit 1; }
+
+
 flavour="$1"
 version=$( git describe --tags )
 computer=$HOSTNAME
@@ -24,7 +27,6 @@ user_download_folder="${HOME}/Downloads/" # where user stores downloads, use thi
 
 echo "Will work on kernel $kernel_version"
 
-source support.sh
 
 export LC_ALL="C"
 

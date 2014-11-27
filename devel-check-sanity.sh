@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 # For use of developers
 # (and called to re-check before build)
 # This script does some sanity checks on some of the data
@@ -6,8 +6,8 @@
 # devel-check-sanity.sh [batch at pos1]
 # * argument 1 can be "batch" then script works more as not-interactive one
 
-source 'support.sh'
-source 'lib-sanity.sh'
+source 'support.sh' || { echo "Can not load lib" ; exit 1; }
+source 'lib-sanity.sh' || { echo "Can not load lib" ; exit 1; }
 
 echo "======================================="
 echo "Running sanity checks"
