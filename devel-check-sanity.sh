@@ -85,6 +85,7 @@ function KERNEL_DATE_VALIDATE() {
 function check_envdata() {
 	(
 		file_envdata="kernel-build/linux-mempo/env-data.sh"
+		file_env="kernel-build/linux-mempo/env.sh" # TODO for custom env-data from ini this needs to be modified
 		echo "Checking file_envdata: $file_envdata"
 		# cat $file_envdata
 # export kernel_general_version="3.2.64" # base version (should match the one is sourcecode.list)
@@ -144,6 +145,16 @@ function check_envdata() {
 		DEBIAN_REVISION_VALIDATE "01 " q && mistake "$bad_regexp_msg"
 		DEBIAN_REVISION_VALIDATE " 01" q && mistake "$bad_regexp_msg"
 		DEBIAN_REVISION_VALIDATE "" q && mistake "$bad_regexp_msg"
+
+		echo "Executing $file_env"
+		source "$file_env" || mistake "Can not read file_env=$file_env"
+		echo "Checking the seed"
+		echo "len=$MEMPO_RAND_SEED_SEED_len"
+		((MEMPO_RAND_SEED_SEED_len >= 93)) || mistake "Seed has wrong length"
+		echo "LOCAL_SEED_was_used=$LOCAL_SEED_was_used"
+		if [[ "$LOCAL_SEED_was_used" == "yes" ]] ; then 
+			((MEMPO_RAND_SEED_SEED_len >= 93+3)) || mistake "Seed has wrong length (considering the LOCAL_SEED that you are using)"
+		fi
 
 		echo "Done checks for file_envdata: $file_envdata"
 	) || exit 1

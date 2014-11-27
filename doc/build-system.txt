@@ -26,6 +26,21 @@ This is for co-developers who wish to prepare a new version of mempo (e.g. when 
 is out).
 Read info in README.md (and rest of this document here).
 
+=== How to have local random seed e.g. with other randstruct ===
+
+RANDSTRUCT is randomized code, which is good to defend against attackers but bad for reproducible builds.
+
+You can now set own LOCAL_SEED.
+Then YOUR builds will be reproducible (as long as you written down the secret seed), 
+but they will be different then builds done by people who do not know your LOCAL_SEED.
+This could help some of admins (Kocka?) of multiuser installations that prefer a bit higher security at cost of not verifying with regular images.
+
+To set this seed, run this small script (once) on user that will build kernels:
+
+( echo "This will create (and OVERRIDE any previous) hidden mempo rc config that includes random LOCAL_SEED. Back up any old seed. Type y to continue" ; read yn ; if [[ "$yn" != "y" ]] ; then echo "aborting then" ; exit ; fi ; mkdir -p $HOME/.mempo/secret/ && chmod 700 $HOME/.mempo/secret/ && f="$HOME/.mempo/secret/rc.ini" && echo -n 'LOCAL_SEED="' > "$f" && head -c 16 /dev/random | sha256sum | head -c 64 >> "$f" ; echo '"' >> "$f" ; echo "DONE. $f contains: " && cat "$f" && echo "Write this down." )
+
+Backup/write down your LOCAL_SEED for future reference. And then run build normally. Of course you will now have other checksum then the official ones.
+
 === Variants ===
 
 This is how we now imaging which versions should be provided for users (there is a security versus performance/compatibility tradeoff).

@@ -7,7 +7,10 @@ linux-image (linux-3.2.64-mempo-0.1.91) UNRELEASED; urgency=medium
   * now really using grsecurity-3.0-3.2.64-201411220952.patch
   * removed other older patches from git as cleanup
   * v0.1.91-02-rc (not tagged in git)
-  * v0.1.91-03-rc
+  * v0.1.91-03-rc (not tagged in git)
+  * v0.1.91-04-rc (not tagged in git)
+  * support for the LOCAL_SEED, see doc/build-system.txt
+  * v0.1.91-05-rc
 
  -- mempo <mempo@mempo.org>  Wed, 26 Nov 2014 16:32:42 +0200
 
