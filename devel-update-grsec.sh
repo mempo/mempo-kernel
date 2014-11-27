@@ -1,5 +1,7 @@
-#!/bin/bash
+#!/bin/bash -e
 # using rss to get newest version of gr, rsstail must be installed!
+
+source 'support.sh'
 
 opt_stable_version="stable" # the 3.2 kernel was "stable2" untill 2014-06-23, now it's "stable". 
 
@@ -77,31 +79,44 @@ function download() {
 
 #all line gr in sourcecode.list
 function sources_list() { 
-	thefile=sourcecode.list
+	pwd=$PWD
+	cd kernel-build/linux-mempo/ # working here
+	thefile="sourcecode.list" # TODO make this depend on choosen ini file
 	echo "Updating $thefile"
-	cd kernel-build/linux-mempo/
 	# echo "Debug in sources_list, new_grsec=$new_grsec" 1>&2
 	# exit ;
-	all=P,x,x,grsecurity,$new_grsec,sha256,$sha256,./tmp-path/  
+	all=P,ID_grsecurity_main_ID,x,grsecurity,$new_grsec,sha256,$sha256,./tmp-path/  
 	all2=$(echo $all | sed -e 's/\ //g')
 	echo $all2
-	file="$(thefile)"
-	tmp="$(thefile).tmp"
+	file="$thefile"
+	tmp="$thefile.tmp"
 	mv $file $tmp
 	let i=0
 	
+	# format of this file, is that it must have exactly *one* line with tag *ID_grsecurity_main_ID* , the line *number 2*
 	for line in $(cat $tmp); do
-        	let i=$i+1
-		if [[ $i -eq 2 ]]       
+		let i=$i+1
+		if [[ $i -eq 2 ]]
 		then    
+			match="no"
+			grep 'ID_grsecurity_main_ID' "$thefile" && match="yes"
+			if [[ "$match" != "yes" ]] ; then
+					echo "@@@ ERROR IN THE SCRIPT ! @@@"
+					echo "The sources list file ($thefile) had unexpected format (see sources for details) !"
+					echo "Press ctrl-c to exit and FIX THIS PROBLEM" ; read _ 
+					echo "abort." ; exit 1;
+			fi
 			echo $all2 >> $file  
 			echo "Line: $all2 was saved" 
-        	else  
-                	echo $line >> $file 
-        	fi 
+     	else  
+    	 	echo $line >> $file 
+      fi 
 	done 
+
+	# more tests will be done as part of sanity checks later
+
 	rm $tmp
-	cd ../..
+	cd $pwd # back to correct dir
 }
 
 echo "Loading (current/old) env data"
@@ -186,8 +201,8 @@ echo ""
 cat changelog  | grep -B 1 -A 4 linux-image | head -n 4
 echo "Update version CONFIG_LOCALVERSION to mempo version" ; mywait_e
 # TODO: find update version name in .config
-vim kernel-build/linux-mempo/configs/config-*.config 
-grep "CONFIG_LOCALVERSION" kernel-build/linux-mempo/configs/config-*.config
+vim kernel-build/linux-mempo/configs-kernel/*.kernel-config
+grep "CONFIG_LOCALVERSION" kernel-build/linux-mempo/configs-kernel/*.kernel-config
 echo "^------------- DOES THIS LOOK OK, this are the versions from config file. (edit them now in other window if not correct and press ENTER when done)"
 read _
 

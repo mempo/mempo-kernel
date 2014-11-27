@@ -6,7 +6,8 @@
 # devel-check-sanity.sh [batch at pos1]
 # * argument 1 can be "batch" then script works more as not-interactive one
 
-source "support.sh"
+source 'support.sh'
+source 'lib-sanity.sh'
 
 echo "======================================="
 echo "Running sanity checks"
@@ -148,6 +149,8 @@ function check_envdata() {
 }
 
 check_envdata || exit 1
+
+check_sourcecode_list || exit 1
 
 echo
 echo "OK - all automatic SANIT-CHECKS checks are GOOD so far :)"
