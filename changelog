@@ -1,12 +1,13 @@
 linux-image (linux-3.2.64-mempo-0.1.91) UNRELEASED; urgency=medium
   * grsec update, harden network settings
-  * v0.1.91-01-rc
+  * v0.1.91-01-rc (not tagged in git)
   * fixed the bug that wrong (older) grsecurity patch was used!
   * fixed the devel devel-update-grsec.sh script to update sources list!
   * added sanity checks against related kind of problems
   * now really using grsecurity-3.0-3.2.64-201411220952.patch
   * removed other older patches from git as cleanup
-  * v0.1.91-02-rc
+  * v0.1.91-02-rc (not tagged in git)
+  * v0.1.91-03-rc
 
  -- mempo <mempo@mempo.org>  Wed, 26 Nov 2014 16:32:42 +0200
 

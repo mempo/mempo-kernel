@@ -18,6 +18,23 @@ function exit_error() {
 	exit 1
 }
 
+function	start_quit_dev() {
+	echo ""
+	echo "***************************************************************************************"
+	echo "WARNING for developer:"
+}
+
+function ask_quit_dev() {
+	echo "***************************************************************************************"
+	echo "Read carefully error/warning for DEVELOPER."
+	echo "If you are sure all is fine the enter, in uppercase, the word YES"
+	echo "otherwise we will abort"
+	read yn
+	if [[ $yn == "YES" ]] ; then 
+		echo "Ok, ignoring this."
+	else exit_error ; exit 1 ; fi
+}
+
 function ask_quit() {
 	kind=$1
 	if [[ $kind == "nosum" ]] ; then

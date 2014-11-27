@@ -167,9 +167,14 @@ echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or
 
 #mywait
 
-echo "[AUTP] GIT: remove all old patches first"
-git rm "$gr_path/*.patch"
-git rm "$gr_path/*.patch.sig"
+echo "[AUTO] GIT: remove all old patches first"
+git rm "$gr_path/*.patch" ""$gr_path/*.patch.sig || { 
+	start_quit_dev
+	echo "Strange, there are no old patches to git remove. If you do not know what is going on, git checkout and start over"; 
+	echo "View of the directory gr_path=$gr_path is:"
+	ls -l "$gr_path"
+	ask_quit_dev
+}
 
 echo "[AUTO] I will download new grsec (to kernel-sources/grsecurity/) and I will update sources.list" ; mywait_d ;
 download || { echo "ERROR: Download failed" ; exit 1; }
@@ -182,9 +187,23 @@ echo "Press ENTER to continue if all is OK with signature (ctrl-c to abort)"
 read _
 
 echo "Commiting the new grsec ($new_grsec) files to git in one commit:"
-git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-${opt_stable_version}.txt # XXX
+git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-${opt_stable_version}.txt || {
+	start_quit_dev
+	echo "No new files (grsecurity patches?) were added now (git already had them)" 
+	echo "Are you sure this is OK? That should not happen if you are really now downloading new grsecurity ! @@@"
+	echo "Are you sure there is new released (of that grsecurity version that we use, e.g. stable or stable2)?"
+	ask_quit_dev
+}
+
 git_msg="[grsec] $new_grsec ${commit_msg_extra1}${commit_msg_extra2}"
-git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-${opt_stable_version}.txt -m "$git_msg"
+echo "[AUTO] GIT: message to COMMIT now the new files (patches) is: $git_msg"
+git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-${opt_stable_version}.txt -m "$git_msg" || {
+	start_quit_dev
+	echo "The git commit failed. Maybe you do not have network or you did not set git remote set-url etc."
+	echo "You still should do a git commit with message: $git_msg"
+	echo "You can do the commit now in other console and continue here."
+	ask_quit_dev
+}
 
 echo "Added to grsec as:"
 git log HEAD^1..HEAD
