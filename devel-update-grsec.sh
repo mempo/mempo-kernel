@@ -167,6 +167,10 @@ echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or
 
 #mywait
 
+echo "[AUTP] GIT: remove all old patches first"
+git rm "$gr_path/*.patch"
+git rm "$gr_path/*.patch.sig"
+
 echo "[AUTO] I will download new grsec (to kernel-sources/grsecurity/) and I will update sources.list" ; mywait_d ;
 download || { echo "ERROR: Download failed" ; exit 1; }
 sources_list || { echo "ERROR: Sources list update failed" ; exit 2; }
