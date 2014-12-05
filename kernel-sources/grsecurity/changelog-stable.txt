@@ -1,3 +1,21 @@
+commit e9af2431bc80e5761a320f0fd0ff7390ebb067a6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 2 07:26:25 2014 -0500
+
+    change name
+
+ security/Kconfig |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c3fe56a44a2e747e512f49eed7c4a02c5e09f987
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 2 07:24:49 2014 -0500
+
+    add Hyper-V to auto-configuration
+
+ security/Kconfig |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
 commit fc12e990aeafab216e27899a3d91b8a6b62d99ce
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Nov 26 00:57:50 2014 -0500
