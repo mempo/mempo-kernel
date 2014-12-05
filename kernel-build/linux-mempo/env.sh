@@ -1,5 +1,6 @@
-#!/bin/bash
+#!/bin/bash -e
 # Do NOT call this directly, see readme. See and update build-system.txt
+# arguments:
 
 printf "%s\n" "Generating environment"
 
@@ -22,7 +23,10 @@ else
 fi
 echo "LOCAL_SEED_was_used=$LOCAL_SEED_was_used"
 
-source $(dirname $0)/env-data.sh # *** loads the static settings/configuration ***
+# *** loads the static settings/configuration ***
+mylocation="$(dirname $BASH_SOURCE)"
+source $mylocation/env-data.sh || { echo "Can not load env-data here. pwd=$PWD mylocation=$mylocation \$0=$0" ; exit 1; }
+
 # conversions etc (do not change this)
 export TIMESTAMP_RFC3339=$KERNEL_DATE
 export KERNEL_DATE_nice=$( echo $KERNEL_DATE | sed -e 's/ /_/g' )

@@ -1,3 +1,9 @@
+linux-image (linux-3.2.64-mempo-0.1.92) UNRELEASED; urgency=low
+  * grsec misc: Hyper-V,name
+  * v0.1.92-01-rc
+
+ -- mempo <mempo@mempo.org>  Fri, 04 Dec 2014 04:30:00 +0200
+
 linux-image (linux-3.2.64-mempo-0.1.91) UNRELEASED; urgency=medium
   * grsec update, harden network settings
   * v0.1.91-01-rc (not tagged in git)
