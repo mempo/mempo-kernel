@@ -56,16 +56,19 @@ if [[ "$as_bot" == true ]]; then commit_msg_extra1='[bot]'; commit_msg_extra2=$'
 
 echo ""
 echo "==============================================================="
+echo "Mempo Devel: Update Grsecurity"
+echo "==============================================================="
 echo "This script is for Mempo developers (or users wanting to hack on it)"
 echo "this will take you step by step by process to upgrade Mempo for new grsecurity kernel patch"
 echo "in few simple commands :) questions -> #mempo on irc.oftc.net or freenode or see mempo.org"
 echo ""
 echo "This is an UPDATE after grsecurity changed"
-echo "Newest vesrion grsecurity is $new_grsec"
+echo "Newest version of grsecurity is: $new_grsec"
 echo ""
 
-echo " *** this script is not finished yet, you will need to do some work manually! *** "
+echo " *** this script is NOT 100% automated YET - so you will need to do some work manually! *** "
 echo "Read README and info how to update on https://github.com/mempo/deterministic-kernel/ (or local file README.md here)" 
+mywait
 
 
 function download() { 
@@ -132,10 +135,11 @@ new_grsec=$(rsstail -u http://grsecurity.net/${opt_stable_version}_rss.php -1 | 
 url="${url_base_stable}${new_grsec}"
 gr_path='kernel-sources/grsecurity/'
 echo "new_grsec=$new_grsec is the current version"
+
 kernel_ver=$( printf '%s\n' "$new_grsec" | sed -e 's/grsecurity-3.0-\(3\.[0-9]*\.[0-9]*\).*patch/\1/g' )
 
 # echo 'grsecurity-3.0-3.2.58-201405112002.patch' | sed -e 's/grsecurity-3.0-\(3\.2\.[0-9]*\).*patch/\1/g'
-echo "kernel_ver=${kernel_ver} from new (online) grsecurity version"
+echo "kernel_ver=${kernel_ver} as autodetected from new (online) grsecurity version"
 
 if [[ "$kernel_ver" != "$kernel_general_version" ]] ; then
 	echo "The version of kernel from new (online) grsecurity version differs from the version for which this SameKernel was yet configured."
@@ -216,9 +220,9 @@ mywait
 
 # . devel-update-version.sh "$@" 
 
-echo ""
-echo ""
-echo "Change date and seed (from -6 block on bitcoin)" ; mywait_e
+#echo ""
+#echo ""
+#echo "Change date and seed (from -6 block on bitcoin)" ; mywait_e
 # vim kernel-build/linux-mempo/env-data.sh 
 
 # TODO: find out next mempo version
@@ -250,12 +254,12 @@ vim changelog
 # TODO git push
 
 
-echo ; echo "REMEMBER to also EDIT THE changelog file before commiting!" ; echo
 
 echo "Now I will run sanity checks, ok?"
 mywait
 
 bash devel-check-sanity.sh || { echo "It seems sanity checks failed? I will exit then." ; exit 102; }
 echo "Ok that is all. Thanks."
+echo ; echo "also, REMEMBER to also EDIT THE changelog file before commiting!" ; echo
 mywait
 

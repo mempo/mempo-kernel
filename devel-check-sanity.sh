@@ -9,11 +9,10 @@
 source 'support.sh' || { echo "Can not load lib" ; exit 1; }
 source 'lib-sanity.sh' || { echo "Can not load lib" ; exit 1; }
 
-echo
-echo "======================================="
-echo "Running sanity checks"
-echo "======================================="
-echo
+echo -e "$bcolor_bold $bcolor_white $bcolor_bgrblue"
+echo -e "=======================================$bcolor_eel"
+echo -e "Running sanity checks$bcolor_eel"
+echo -e "=======================================$bcolor_eel$bcolor_zero\n"
 
 opt_batch="no"
 if [[ "$1" == "batch" ]] ; then opt_batch="yes" ; fi
@@ -27,7 +26,9 @@ for file_ini in kernel-build/linux-mempo/configs/deb7/*
 do
 		printf "%s\n" "Checking file_ini: $file_ini"
 		(	
+			#echo "Executing $file_ini" ; 
 			source "$file_ini" || mistake "Can not read file_ini=$file_ini"
+
 			#echo $config_localversion_name
 			file_kernelconfig="kernel-build/linux-mempo/configs-kernel/$kernel_config_name"
 			if [[ ! -r "$file_kernelconfig" ]] ; then echo "Can not read file_kernelconfig=$file_kernelconfig"; exit 1; fi
@@ -37,6 +38,8 @@ do
 			fi
 		) || exit
 done
+
+print_ok_header "[OK] All ini files seems fine"
 
 function kernel_general_version_VALIDATE() {
     # echo "TEST $1" # XXX
@@ -86,6 +89,9 @@ function check_envdata() {
 	(
 		file_envdata="kernel-build/linux-mempo/env-data.sh"
 		file_env="kernel-build/linux-mempo/env.sh" # TODO for custom env-data from ini this needs to be modified
+		file_env_dir=$(dirname "$file_env")
+		file_envdata_dir=$(dirname "$file_envdata")
+		if [[ "$file_env_dir" != "$file_envdata_dir" ]] ; then echo "ASSERT failed different directory of env/envdata." ; exit 1 ; fi
 		echo "Checking file_envdata: $file_envdata"
 		# cat $file_envdata
 # export kernel_general_version="3.2.64" # base version (should match the one is sourcecode.list)
@@ -93,7 +99,7 @@ function check_envdata() {
 # export CURRENT_SEED='ad4b6750e1d231d7c1b99f8324063482fa585cd6f71dff8b2111a4bf6063852d' # litecoin block 683530 (*)
 # export DEBIAN_REVISION='' # see README.md how to update it on git tag, on rc and final releases
 
-
+		#echo "Executing $file_envdata" ;
 		source "$file_envdata" || mistake "Can not read file_envdata=$file_envdata"
 
 		bad_regexp_msg="The regexp self-test failed, the code of program doing the checks has a bug (also it could be bad bash version for example), PLEASE report this bug"
@@ -146,15 +152,17 @@ function check_envdata() {
 		DEBIAN_REVISION_VALIDATE " 01" q && mistake "$bad_regexp_msg"
 		DEBIAN_REVISION_VALIDATE "" q && mistake "$bad_regexp_msg"
 
-		echo "Executing $file_env"
-		source "$file_env" || mistake "Can not read file_env=$file_env"
-		echo "Checking the seed"
-		echo "len=$MEMPO_RAND_SEED_SEED_len"
+		#echo "Executing $file_env" ; 
+		source "$file_env" "$file_envdata_dir" || mistake "Can not read file_env=$file_env"
+
+		echo "Checking the seed:"
+		echo "Seed length=$MEMPO_RAND_SEED_SEED_len"
 		((MEMPO_RAND_SEED_SEED_len >= 93)) || mistake "Seed has wrong length"
 		echo "LOCAL_SEED_was_used=$LOCAL_SEED_was_used"
 		if [[ "$LOCAL_SEED_was_used" == "yes" ]] ; then 
 			((MEMPO_RAND_SEED_SEED_len >= 93+3)) || mistake "Seed has wrong length (considering the LOCAL_SEED that you are using)"
 		fi
+		echo "Seed looks fine."
 
 		echo "Done checks for file_envdata: $file_envdata"
 	) || exit 1
@@ -162,19 +170,15 @@ function check_envdata() {
 }
 
 check_envdata || exit 1
+print_ok_header "[OK] All envdata seems fine"
 
 check_sourcecode_list || exit 1
-echo "Checked source code list"
+print_ok_header "[OK] All source-code lists seem fine"
 
-echo
-echo "OK - all automatic SANIT-CHECKS checks are GOOD so far :)"
-echo
-
-echo ""
 echo "You  HAVE TO ALSO:  Check on your own:"
-echo "  * Does all kernelconfig files contain correct version of mempo"
-echo "  * Does changelog have the correct entry"
-echo "that is all."
+echo "  * Does all kernelconfig files contain correct name version of mempo like '0.1.92' did you INCREASED it if needed? See README.md"
+echo "  * Does changelog have the correct entry block for new mempo version if that was needed? See README.md"
+echo "other then that, that is all."
 
 if [[ "$opt_batch" == "no" ]] ; then
     mywait

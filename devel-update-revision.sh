@@ -51,7 +51,7 @@ echo ""
 
 echo "you can EDIT THIS if you want:"
 read -e -p "The block INDEX (short nunber): " -i "$entropy_index" entropy_index
-read -e -p "The block SEED (long random string, must be 64 0-9a-f hex characters): " -i "$entropy_seed" entropy_seed
+read -e -p "The block SEED (long random string, must be 64 characters hexdigits in ranges 0-9 a-f): " -i "$entropy_seed" entropy_seed
 echo ""
 
 newenv_date=$(date +'%Y-%m-%d %H:%M:%S')
