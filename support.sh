@@ -20,6 +20,10 @@ function show_support_info {
 }
 
 function exit_error() {
+	msg="$1" # can be empty argument, then you should had outputed the error message yourself before calling
+	if [[ -n "$msg" ]] ; then
+		echo -e "${bcolor_bgrblack}${bcolor_red}ERROR: $msg${bcolor_zero}"
+	fi
 	show_support_info
 	echo -e "${bcolor_bgrblack}${bcolor_red}Aborting.${bcolor_zero}"
 	exit 1
