@@ -214,8 +214,8 @@ echo "$version"
 git tag -v `git describe --tags`
 echo "----- 8< ------ 8< ------ 8< ---cut here--- 8< --------------------------"
 echo 
-echo -n "PRIVATE information FYI: This build was (completed) at date: " ; $date_done
-echo -n "PRIVATE information FYI: This build was done on computer=" ; $computer 
+echo -n "PRIVATE information FYI: This build was (completed) at date: " ; echo '$date_done'
+echo -n "PRIVATE information FYI: This build was done on computer=" ; echo '$computer'
 
 echo
 echo "If you see checksums line above, then please compare/publish them with other users."
