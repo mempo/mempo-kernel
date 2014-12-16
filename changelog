@@ -3,6 +3,9 @@ linux-image (linux-3.2.64-mempo-0.1.93) UNRELEASED; urgency=low
   * creating servmax - with extra high (and slow) double-checks (memory clean/poision etc)
   * increased seed and version
   * enabled ECC in desk and deskmax
+  * grsec: iommu bug, version increase
+  * new kernel used: 3.2.65
+  * v0.1.93-02-rc
 
  -- mempo <mempo@mempo.org>  Fri, 04 Dec 2014 04:30:00 +0200
 
