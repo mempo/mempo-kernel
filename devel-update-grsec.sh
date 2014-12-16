@@ -128,10 +128,11 @@ function sources_list() {
 
 echo "Loading (current/old) env data"
 source kernel-build/linux-mempo/env-data.sh
-
+echo "kernel_general_version=$kernel_general_version"
 
 echo "Checking new version of grsecurity from network"
 new_grsec=$(rsstail -u http://grsecurity.net/${opt_stable_version}_rss.php -1 | awk  '{print $2}')
+echo "new_grsec=$new_grsec"
 url="${url_base_stable}${new_grsec}"
 gr_path='kernel-sources/grsecurity/'
 echo "new_grsec=$new_grsec is the current version"
@@ -156,14 +157,15 @@ if [[ "$kernel_ver" != "$kernel_general_version" ]] ; then
 	echo "To do this, for example you can take such steps:"
 	echo ""
 	echo "  1) in $file_source change $ver_a to $ver_b (leave the checksum or edit it rigth away)"
-	echo "  2) in $file_env change $var_a to $var_b"
+	echo "  2) in $file_env change $ver_a to $ver_b"
 	echo "  3) start build with ./run.sh - it will stop after complaining about wrong checksum, write the actuall checksum into $file_source if you didn't previously"
 	echo "  3b) double check the checksum (e.g. various ISP connections etc)"
 	echo ""
 	
 	exit 101
 fi
-echo "Main kernel version is OK"
+
+print_ok_header "Main kernel version is OK"
 
 bash devel-update-revision.sh "restart" "batch" || { echo "Can not update revision"; exit 2; }
 
