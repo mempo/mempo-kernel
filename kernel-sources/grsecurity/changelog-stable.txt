@@ -1,3 +1,118 @@
+commit 72dae807fa5ee98838514b3e98893f016d312314
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 14 19:47:05 2014 -0500
+
+    propagate count type
+
+ drivers/gpu/drm/ttm/ttm_tt.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 5e14f99f5da1d757a48818411de3717e4f121aa4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 14 19:46:01 2014 -0500
+
+    compile fix
+
+ include/drm/ttm/ttm_page_alloc.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 0cd9e3b10d0ae52c4893aa8accb1c9011fbcefd5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 14 19:20:27 2014 -0500
+
+    Point the AMD IOMMU driver to the lowmem-mapped stack instead of allowing
+    it to wrongly acquire the physical address of the vmap'd kernel stack
+    under KSTACKOVERFLOW.
+    
+    Thanks to Victor <silentworks@gmail.com> for the report
+
+ drivers/iommu/amd_iommu.c |   14 ++++++++++++--
+ 1 files changed, 12 insertions(+), 2 deletions(-)
+
+commit 009d1343a7e0e21404c9aa39aae05f08e9ea56f7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 14 19:02:25 2014 -0500
+
+    backport ttm size_overflow fix
+
+ drivers/gpu/drm/ttm/ttm_page_alloc.c |   16 ++++++++--------
+ 1 files changed, 8 insertions(+), 8 deletions(-)
+
+commit a0aa6c14e7e1f4f4f59498ea2c5c3745a1d857f4
+Merge: 731b0ef a7bdd00
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 14 16:45:04 2014 -0500
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit a7bdd005ae63b9365f583e7fc6d29372780f184a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 14 16:44:52 2014 -0500
+
+    resync with PaX
+
+ arch/x86/kernel/traps.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 731b0efae7f14c75bef16ba212a830dfb584e3d6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 14 16:42:01 2014 -0500
+
+    update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit dc57f3974edd8a4ada205091f42c48d5773d6386
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 7 08:56:31 2014 -0500
+
+    compilation fix
+
+ arch/x86/kernel/traps.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ece1a66d2ea871e810f35001c97fa9e47f3b3755
+Merge: 2a8622f 778b494
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 14 16:20:50 2014 -0500
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	include/linux/string.h
+
+commit 778b4949f1e05f5b569c4596eec6f23c2d3b491f
+Merge: d8acbe5 6a367cd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 14 16:20:18 2014 -0500
+
+    Merge branch 'linux-3.2.y' into pax-stable
+    
+    Conflicts:
+    	arch/x86/kernel/entry_64.S
+    	mm/mmap.c
+    	net/mac80211/iface.c
+
+commit 2a8622fcdbfb7b0cfb763402d9de6c2cdc1f8d85
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Dec 4 20:42:21 2014 -0500
+
+    Subject: [PATCH] xfrm6: Fix transport header offset in _decode_session6.
+    
+    skb->transport_header might not be valid when we do a reverse
+    decode because the ipv6 tunnel error handlers don't update it
+    to the inner transport header. This leads to a wrong offset
+    calculation and to wrong layer 4 informations. We fix this
+    by using the size of the ipv6 header as the first offset.
+    
+    Signed-off-by: Steffen Klassert <steffen.klassert@secunet.com>
+    
+    Bug found with the size_overflow plugin
+
+ net/ipv6/xfrm6_policy.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit e9af2431bc80e5761a320f0fd0ff7390ebb067a6
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Dec 2 07:26:25 2014 -0500
