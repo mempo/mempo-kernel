@@ -1,0 +1,12 @@
+
+OPT_Y=y
+OPT_M=m
+OPT_S="some string"
+OPT_V=32
+# OPT_N is not set
+
+OPT_KEEPY=y
+OPT_KEEPM=m
+OPT_KEEPV=64
+# OPT_KEEPN is not set
+
