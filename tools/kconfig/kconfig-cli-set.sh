@@ -41,9 +41,16 @@ function change_one_setting() {
 	if [[ $V =~ .*\'.*\'* ]] ; then my_die "Do NOT use quotation markers in the value (sorry we do not support multi-word edits now yet, but it's easy to hack in just use function change_one_setting" ; fi
 	# this above regexp is just: .*\'.* meaning .*'.* so any string that contains single-quote (') character, the additional string '* at end is just to fix some source code editors that get confused here (e.g. vim in debian 7)
 	
-	sed -e "s/^# $N is not set\$/$N=$V/" < "$argument_input" > "$tempdir/new1"
-	sed -e "s/^$N=.*\$/$N=$V/" < "$tempdir/new1" > "$tempdir/new2"
-	diff "$argument_input" "$tempdir/new2"
+	if [[ $V == '-' ]] ;
+	then
+		sed -e "s/^# $N is not set\$/# $N is not set/" < "$argument_input" > "$tempdir/new1"
+		sed -e "s/^$N=.*\$/# $N is not set/" < "$tempdir/new1" > "$tempdir/new2"
+	else
+		sed -e "s/^# $N is not set\$/$N=$V/" < "$argument_input" > "$tempdir/new1"
+		sed -e "s/^$N=.*\$/$N=$V/" < "$tempdir/new1" > "$tempdir/new2"
+	fi
+
+	# diff "$argument_input" "$tempdir/new2"
 	cp "$tempdir/new2" "$argument_input"
 }
 
@@ -53,6 +60,8 @@ function change_one_setting() {
 # change_one_setting 'FOO200' 'y'
 # change_one_setting '' 'y'
 # change_one_setting 'FOO' "aa'bb"
+
+cp "$argument_input" "$tempdir/start"
 
 for pair in $*
 do
@@ -64,6 +73,8 @@ do
 	IFS="${IFS_OLD}"
 	change_one_setting "$VAR" "$VAL"
 done
+
+diff "$tempdir/start" "$argument_input"
 
 normal_exit='y'
 
