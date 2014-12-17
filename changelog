@@ -1,4 +1,10 @@
-linux-image (linux-3.2.64-mempo-0.1.93) UNRELEASED; urgency=low
+linux-image (linux-3.2.65-mempo-0.1.94) UNRELEASED; urgency=low
+  * grsec misc: force support for user extended attributes for ext2, ext3 and reiserfs
+  * v0.1.94-01-rc
+
+ -- mempo <mempo@mempo.org>  Fri, 17 Dec 2014 22:03:00 +0200
+
+linux-image (linux-3.2.65-mempo-0.1.93) UNRELEASED; urgency=low
   * improving ECC (in serv)
   * creating servmax - with extra high (and slow) double-checks (memory clean/poision etc)
   * increased seed and version
