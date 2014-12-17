@@ -1,3 +1,21 @@
+commit f0141de20a94881331289127085a3c37ee055eb1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 16 17:18:16 2014 -0500
+
+    Force support on for user extended attributes for filesystems that currently
+    don't default to on to match up with other filesystems like ext4/xfs that do.
+    
+    We'll need this to make an upcoming addition to the paid kernel packages work
+    without any additional configuration by the user.
+    
+    If there's a particular mountpoint you don't want to have user extended attributes
+    enabled on for whatever reason, the "nouser_xattr" mount option will honor it.
+
+ fs/ext2/super.c     |    8 +++-----
+ fs/ext3/super.c     |    8 +++-----
+ fs/reiserfs/super.c |    4 ++++
+ 3 files changed, 10 insertions(+), 10 deletions(-)
+
 commit 72dae807fa5ee98838514b3e98893f016d312314
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 14 19:47:05 2014 -0500
