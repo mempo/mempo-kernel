@@ -1,3 +1,245 @@
+commit 56c9ae9491243eca1455c8d5fd15a0cade6099be
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 21 17:30:42 2014 -0500
+
+    compile fix
+
+ arch/x86/kernel/espfix_64.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit e145fe4a0c6e6d977555818423c13f0384bdc76f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 21 17:27:00 2014 -0500
+
+    compile fix
+
+ arch/x86/kernel/espfix_64.c |    3 +--
+ include/linux/linkage.h     |    1 +
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 08122cf232f4d74b3d08973fc6a8bd4459d2d8f8
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Fri Dec 5 19:03:28 2014 -0800
+
+    x86, kvm: Clear paravirt_enabled on KVM guests for espfix32's benefit
+    
+    paravirt_enabled has the following effects:
+    
+     - Disables the F00F bug workaround warning.  There is no F00F bug
+       workaround any more because Linux's standard IDT handling already
+       works around the F00F bug, but the warning still exists.  This
+       is only cosmetic, and, in any event, there is no such thing as
+       KVM on a CPU with the F00F bug.
+    
+     - Disables 32-bit APM BIOS detection.  On a KVM paravirt system,
+       there should be no APM BIOS anyway.
+    
+     - Disables tboot.  I think that the tboot code should check the
+       CPUID hypervisor bit directly if it matters.
+    
+     - paravirt_enabled disables espfix32.  espfix32 should *not* be
+       disabled under KVM paravirt.
+    
+    The last point is the purpose of this patch.  It fixes a leak of the
+    high 16 bits of the kernel stack address on 32-bit KVM paravirt
+    guests.  Fixes CVE-2014-8134.
+    
+    Cc: stable@vger.kernel.org
+    Suggested-by: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+
+ arch/x86/kernel/kvm.c      |    9 ++++++++-
+ arch/x86/kernel/kvmclock.c |    1 -
+ 2 files changed, 8 insertions(+), 2 deletions(-)
+
+commit c1bd6f4031572a1c6c7241cf7e63fb0be3bb2503
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Wed Dec 17 14:48:30 2014 -0800
+
+    x86/tls: Don't validate lm in set_thread_area() after all
+    
+    It turns out that there's a lurking ABI issue.  GCC, when
+    compiling this in a 32-bit program:
+    
+    struct user_desc desc = {
+    	.entry_number    = idx,
+    	.base_addr       = base,
+    	.limit           = 0xfffff,
+    	.seg_32bit       = 1,
+    	.contents        = 0, /* Data, grow-up */
+    	.read_exec_only  = 0,
+    	.limit_in_pages  = 1,
+    	.seg_not_present = 0,
+    	.useable         = 0,
+    };
+    
+    will leave .lm uninitialized.  This means that anything in the
+    kernel that reads user_desc.lm for 32-bit tasks is unreliable.
+    
+    Revert the .lm check in set_thread_area().  The value never did
+    anything in the first place.
+    
+    Fixes: 0e58af4e1d21 ("x86/tls: Disallow unusual TLS segments")
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Acked-by: Thomas Gleixner <tglx@linutronix.de>
+    Cc: stable@vger.kernel.org # Only if 0e58af4e1d21 is backported
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Link: http://lkml.kernel.org/r/d7875b60e28c512f6a6fc0baf5714d58e7eaadbb.1418856405.git.luto@amacapital.net
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/include/asm/ldt.h |    7 +++++++
+ arch/x86/kernel/tls.c      |    6 ------
+ 2 files changed, 7 insertions(+), 6 deletions(-)
+
+commit 99b684c2de95f411e5f5605a2ed4221457910507
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Thu Dec 4 16:48:17 2014 -0800
+
+    x86/tls: Disallow unusual TLS segments
+    
+    Users have no business installing custom code segments into the
+    GDT, and segments that are not present but are otherwise valid
+    are a historical source of interesting attacks.
+    
+    For completeness, block attempts to set the L bit.  (Prior to
+    this patch, the L bit would have been silently dropped.)
+    
+    This is an ABI break.  I've checked glibc, musl, and Wine, and
+    none of them look like they'll have any trouble.
+    
+    Note to stable maintainers: this is a hardening patch that fixes
+    no known bugs.  Given the possibility of ABI issues, this
+    probably shouldn't be backported quickly.
+    
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Acked-by: H. Peter Anvin <hpa@zytor.com>
+    Cc: stable@vger.kernel.org # optional
+    Cc: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: security@kernel.org <security@kernel.org>
+    Cc: Willy Tarreau <w@1wt.eu>
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/kernel/tls.c |   22 ++++++++++++++++++++++
+ 1 files changed, 22 insertions(+), 0 deletions(-)
+
+commit 2f0fbd6f26487aedb0083b41f3f4934e07862f8b
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Thu Dec 4 16:48:16 2014 -0800
+
+    x86/tls: Validate TLS entries to protect espfix
+    
+    Installing a 16-bit RW data segment into the GDT defeats espfix.
+    AFAICT this will not affect glibc, Wine, or dosemu at all.
+    
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Acked-by: H. Peter Anvin <hpa@zytor.com>
+    Cc: stable@vger.kernel.org
+    Cc: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: security@kernel.org <security@kernel.org>
+    Cc: Willy Tarreau <w@1wt.eu>
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/kernel/tls.c |   23 +++++++++++++++++++++++
+ 1 files changed, 23 insertions(+), 0 deletions(-)
+
+commit 2e25e863b7f60a472ff9b1696adbae7ed910dc8a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Dec 21 16:32:08 2014 -0500
+
+    Fix a long-standing incompatibility between x64 UDEREF and CONFIG_PARAVIRT
+    on PCID-capable systems.  Generally it resulted in userland crashes preventing
+    boot of the system which were able to be worked around by booting with nopcid
+    and receiving a weaker UDEREF implementation.  The source of the problem
+    was paravirt-specific asm alternatives for flush_tlb_single rewriting the
+    pv_mm_ops's native code with a single invlpg.
+    
+    As of this patch, no recommendations should be made to boot with nopcid, as
+    it results in a weaker UDEREF implementation.
+
+ arch/x86/kernel/paravirt_patch_64.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit ff52bcb704eaf2c42535ef6390240d7ad82c1061
+Author: Nadav Amit <namit@cs.technion.ac.il>
+Date:   Sun Nov 2 11:54:52 2014 +0200
+
+    KVM: x86: MOV to CR3 can set bit 63
+    
+    Although Intel SDM mentions bit 63 is reserved, MOV to CR3 can have bit 63 set.
+    As Intel SDM states in section 4.10.4 "Invalidation of TLBs and
+    Paging-Structure Caches": " MOV to CR3. ... If CR4.PCIDE = 1 and bit 63 of the
+    instructionâ€™s source operand is 0 ..."
+    
+    In other words, bit 63 is not reserved. KVM emulator currently consider bit 63
+    as reserved. Fix it.
+    
+    Signed-off-by: Nadav Amit <namit@cs.technion.ac.il>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+    
+    Conflicts:
+    
+    	arch/x86/include/asm/kvm_host.h
+    	arch/x86/kvm/emulate.c
+
+ arch/x86/include/asm/kvm_host.h |    1 +
+ arch/x86/kvm/emulate.c          |    2 +-
+ arch/x86/kvm/x86.c              |    2 ++
+ 3 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 07cd66dcab9820195bb99e167c11b34ed61e4cba
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Dec 20 11:50:30 2014 -0500
+
+    force off X86_16BIT if grsecurity is enabled -- nobody cares about
+    running Windows 3.1 apps under wine, it's not worth the risk
+
+ arch/x86/Kconfig |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 8dc9f1ed790cd8cc213aee401ef257b091528ec9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 17 18:30:48 2014 -0500
+
+    make the statically allocated pud page read-only while we're at it
+
+ arch/x86/kernel/espfix_64.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 8d1d3b044d7f714045bd5788612867a2ccf9a715
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Dec 17 18:28:16 2014 -0500
+
+    Fix doublefault in espfix code when PAX_PER_CPU_PGD is enabled,
+    reported by Andy Lutomirski
+
+ arch/x86/kernel/espfix_64.c |   11 +++++++----
+ 1 files changed, 7 insertions(+), 4 deletions(-)
+
+commit 7a8c1daa8e4494ee211b54c8ae3850a4b9f1e1d1
+Author: Jan Kara <jack@suse.cz>
+Date:   Mon Dec 15 14:22:46 2014 +0100
+
+    isofs: Fix infinite looping over CE entries
+    
+    Rock Ridge extensions define so called Continuation Entries (CE) which
+    define where is further space with Rock Ridge data. Corrupted isofs
+    image can contain arbitrarily long chain of these, including a one
+    containing loop and thus causing kernel to end in an infinite loop when
+    traversing these entries.
+    
+    Limit the traversal to 32 entries which should be more than enough space
+    to store all the Rock Ridge data.
+    
+    Reported-by: P J P <ppandit@redhat.com>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/isofs/rock.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
 commit f0141de20a94881331289127085a3c37ee055eb1
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Dec 16 17:18:16 2014 -0500
