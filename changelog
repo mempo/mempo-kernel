@@ -1,3 +1,17 @@
+linux-image (linux-3.2.65-mempo-0.1.95) UNRELEASED; urgency=high
+  * grsec: critical fixes (CVE) to kvm, espfix/espfix32, nopcid, isofs, more
+  * grsec: kvm: CVE-2014-8134 fixed! espfix32
+  * grsec: kvm: x86 MOV to CR3 can set bit 63
+  * grsec: x86/tls lm set_thread_area; block bad segments; espfix
+  * grsec: UDEREF+CONFIG_PARAVIRT -nopcid flush_tlb_single pv_mm_ops invlpg
+  * grsec: espfix PAX_PER_CPU_PGD fix
+  * grsec: statically allocated pud page read-only
+  * grsec: disable X86_16BIT (breaks Windows 3.11 under wine)
+  * grsec: isofs fix
+  * v0.1.95-01-rc
+
+ -- mempo <mempo@mempo.org>  Mon, 22 Dec 2014 13:05:00 +0200
+
 linux-image (linux-3.2.65-mempo-0.1.94) UNRELEASED; urgency=low
   * grsec misc: force support for user extended attributes for ext2, ext3 and reiserfs
   * v0.1.94-01-rc
