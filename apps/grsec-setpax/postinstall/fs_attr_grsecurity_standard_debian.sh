@@ -1,15 +1,24 @@
-#!/bin/bash
+#!/bin/sh
 # This sets Grsecurity Pax flags for commonly used files on Debian.
 # see: https://wiki.debian.org/grsecurity
 # see: http://mempo.org , wiki.debian.org/Mempo - and contact us for help in case of questions.
 # (This assumes the kernel Grsecurity Pax is using file attr as flags, as e.g. in Mempo)
+# https://github.com/mempo/deterministic-kernel/tree/master/apps/grsec-setpax/postinstall/
+# e.g. in fs_attr_grsecurity_standard_debian.sh
 
-# You needed package: attr (for command setfattr)
+if [[ $(id -u) -ne 0 ]] ; then echo "Please run as root" ; exit 1 ; fi
 
-# This programs do NOT have proper protection form kernel, it is disabled to let them run!
-# mempo.org project will aim to remedy this one day by turning runtime-JIT to separated precompile
+# Assert if setfattr is installed and works
+setfattr -v > /dev/null || {
+  echo "Can not find program setfattr. You needed (usually, on Debian) to install package: attr"
+  exit 2
+}
 
-set -x
+echo "Following programs are written in a way that executes insecure operations, "
+echo "e.g. they rewrite code in runtime (JIT)."
+echo "Mempo.org project will aim to remedy this one day e.g. by optionally disabling JIT."
+echo ""
+echo "Now we will now partially DISABLE the PROTECTIONS for them so they can work until they are fixed:"
 
 setfattr -n user.pax.flags -v "rm" /usr/lib/xulrunner-*/xulrunner-stub 
 setfattr -n user.pax.flags -v "rm" /usr/lib/iceweasel/iceweasel # debian 7
