@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # This sets Grsecurity Pax flags for commonly used files on Debian.
 # see: https://wiki.debian.org/grsecurity
 # see: http://mempo.org , wiki.debian.org/Mempo - and contact us for help in case of questions.
