@@ -4,7 +4,7 @@
 # see: http://mempo.org , wiki.debian.org/Mempo - and contact us for help in case of questions.
 # (This assumes the kernel Grsecurity Pax is using file attr as flags, as e.g. in Mempo)
 # https://github.com/mempo/deterministic-kernel/tree/master/apps/grsec-setpax/postinstall/
-# e.g. in fs_attr_grsecurity_standard_debian.sh
+# e.g. in pax_flags.sh
 
 if [[ $(id -u) -ne 0 ]] ; then echo "Please run as root" ; exit 1 ; fi
 
