@@ -1,14 +1,13 @@
-#!/bin/bash 
+#!/bin/bash
+# This sets Grsecurity Pax flags for commonly used files on Debian.
 # see: https://wiki.debian.org/grsecurity
+# see: http://mempo.org , wiki.debian.org/Mempo - and contact us for help in case of questions.
+# (This assumes the kernel Grsecurity Pax is using file attr as flags, as e.g. in Mempo)
 
-# needed package: attr - install this
+# You needed package: attr (for command setfattr)
 
-# this programs do NOT have proper protection form kernel, it is disabled to let them run!
+# This programs do NOT have proper protection form kernel, it is disabled to let them run!
 # mempo.org project will aim to remedy this one day by turning runtime-JIT to separated precompile
-
-# please see also:
-# wiki.debian.org/Mempo
-# wiki.debian.org/SameKernel
 
 set -x
 
@@ -46,3 +45,5 @@ set +x
 
 # all this problems will be resolved once we have hooks that run this script when other packages are installed
 # please contact us #mempo @ irc.oftc.net and ircp2 if you can help with this                 
+
+echo "Script done. If you need go to mempo.org or debian.org or grsecurity.net" 
