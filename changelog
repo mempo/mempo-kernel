@@ -1,3 +1,10 @@
+linux-image (linux-3.2.65-mempo-0.1.96) UNRELEASED; urgency=high
+  * grsec: options related to deployment for some customers
+  * grsec: resync with PaX (details are not specified)
+  * v0.1.96-01-rc
+
+ -- mempo <mempo@mempo.org>  Wed, 31 Dec 2014 14:10:00 +0200
+
 linux-image (linux-3.2.65-mempo-0.1.95) UNRELEASED; urgency=high
   * grsec: critical fixes (CVE) to kvm, espfix/espfix32, nopcid, isofs, more
   * grsec: kvm: CVE-2014-8134 fixed! espfix32

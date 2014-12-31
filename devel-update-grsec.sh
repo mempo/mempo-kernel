@@ -190,6 +190,7 @@ echo "-------------"
 echo "[CHECK] Now we will check the GPG signature on grsecurity:"
 gpg --verify $gr_path/$new_grsec.sig || { echo "Invalid signature! If you're developer of this kernel-packaging (e.g. of Mempo or Debian kernel) then tripple-check what is going on, this is very strange!" ; exit 1 ; }
 echo "Press ENTER to continue if all is OK with signature (ctrl-c to abort)"
+mywait
 read _
 
 echo "Commiting the new grsec ($new_grsec) files to git in one commit:"
