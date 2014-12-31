@@ -1,3 +1,34 @@
+commit f2986d3f727a4a226a2b73b96e185a0cbae32288
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 30 23:57:25 2014 -0500
+
+    resync with PaX
+
+ arch/x86/kernel/entry_64.S |   10 +++++-----
+ arch/x86/kvm/emulate.c     |    2 +-
+ 2 files changed, 6 insertions(+), 6 deletions(-)
+
+commit d5d88b95dc4e700e694fe96816a83c008e865c67
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Dec 27 17:24:20 2014 -0500
+
+    remove the %preun step, we don't want to remove old kernels installed from the paid kernel service
+
+ scripts/package/mkspec |    7 -------
+ 1 files changed, 0 insertions(+), 7 deletions(-)
+
+commit cc567a0ec5edd4ec396ec7926e1a9df48ada4926
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Dec 23 23:28:21 2014 -0500
+
+    invoke new-kernel-pkg directly instead of using installkernel, which fixes some
+    issues beta testers experienced with the new paid kernel service.
+    
+    suggested by a sponsor
+
+ scripts/package/mkspec |   17 +++++++++++------
+ 1 files changed, 11 insertions(+), 6 deletions(-)
+
 commit 56c9ae9491243eca1455c8d5fd15a0cade6099be
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Dec 21 17:30:42 2014 -0500
