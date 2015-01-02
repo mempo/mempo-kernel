@@ -1,3 +1,155 @@
+commit eb2c0a0021b1ce8a9f877aa380d1b5873d232fab
+Author: Jan Kara <jack@suse.cz>
+Date:   Thu Sep 4 16:15:51 2014 +0200
+
+    udf: Make udf_read_inode() and udf_iget() return error
+    
+    Currently __udf_read_inode() wasn't returning anything and we found out
+    whether we succeeded reading inode by checking whether inode is bad or
+    not. udf_iget() returned NULL on failure and inode pointer otherwise.
+    Make these two functions properly propagate errors up the call stack and
+    use the return value in callers.
+    
+    Signed-off-by: Jan Kara <jack@suse.cz>
+    
+    Conflicts:
+    
+    	fs/udf/super.c
+
+ fs/udf/inode.c   |   99 +++++++++++++++++++++++++-----------------------------
+ fs/udf/namei.c   |   22 +++++-------
+ fs/udf/super.c   |   72 ++++++++++++++++++++++-----------------
+ fs/udf/udfdecl.h |    1 -
+ 4 files changed, 96 insertions(+), 98 deletions(-)
+
+commit cde4c9834629a063ab39d606cc61b735a57341eb
+Author: Jan Kara <jack@suse.cz>
+Date:   Fri Dec 19 14:27:55 2014 +0100
+
+    udf: Check component length before reading it
+    
+    Check that length specified in a component of a symlink fits in the
+    input buffer we are reading. Also properly ignore component length for
+    component types that do not use it. Otherwise we read memory after end
+    of buffer for corrupted udf image.
+    
+    Reported-by: Carl Henrik Lunde <chlunde@ping.uio.no>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/udf/symlink.c |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
+
+commit 4901723ff94fa2e1da789f24abb8598071a15476
+Author: Jan Kara <jack@suse.cz>
+Date:   Thu Dec 18 22:37:50 2014 +0100
+
+    udf: Check path length when reading symlink
+    
+    Symlink reading code does not check whether the resulting path fits into
+    the page provided by the generic code. This isn't as easy as just
+    checking the symlink size because of various encoding conversions we
+    perform on path. So we have to check whether there is still enough space
+    in the buffer on the fly.
+    
+    CC: stable@vger.kernel.org
+    Reported-by: Carl Henrik Lunde <chlunde@ping.uio.no>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+    
+    Conflicts:
+    
+    	fs/udf/dir.c
+    	fs/udf/symlink.c
+
+ fs/udf/dir.c     |    3 ++-
+ fs/udf/namei.c   |    3 ++-
+ fs/udf/symlink.c |   45 ++++++++++++++++++++++++++++++++++++---------
+ fs/udf/udfdecl.h |    3 ++-
+ fs/udf/unicode.c |   28 ++++++++++++++++------------
+ 5 files changed, 58 insertions(+), 24 deletions(-)
+
+commit bcac5b9ecb07f540878ae65bd955193795c276d4
+Author: Jan Kara <jack@suse.cz>
+Date:   Fri Dec 19 12:21:47 2014 +0100
+
+    udf: Verify symlink size before loading it
+    
+    UDF specification allows arbitrarily large symlinks. However we support
+    only symlinks at most one block large. Check the length of the symlink
+    so that we don't access memory beyond end of the symlink block.
+    
+    CC: stable@vger.kernel.org
+    Reported-by: Carl Henrik Lunde <chlunde@gmail.com>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/udf/symlink.c |   17 +++++++++++++----
+ 1 files changed, 13 insertions(+), 4 deletions(-)
+
+commit 2e3b3d6033e7fc145bccad33ba3899f968e6cc87
+Author: Jan Kara <jack@suse.cz>
+Date:   Fri Dec 19 12:03:53 2014 +0100
+
+    udf: Verify i_size when loading inode
+    
+    Verify that inode size is sane when loading inode with data stored in
+    ICB. Otherwise we may get confused later when working with the inode and
+    inode size is too big.
+    
+    CC: stable@vger.kernel.org
+    Reported-by: Carl Henrik Lunde <chlunde@ping.uio.no>
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/udf/inode.c |   14 ++++++++++++++
+ 1 files changed, 14 insertions(+), 0 deletions(-)
+
+commit fe0706647ef89092fe98ebfc5cd24f2f11d41af9
+Author: Jan Kara <jack@suse.cz>
+Date:   Thu Dec 18 17:26:10 2014 +0100
+
+    isofs: Fix unchecked printing of ER records
+    
+    We didn't check length of rock ridge ER records before printing them.
+    Thus corrupted isofs image can cause us to access and print some memory
+    behind the buffer with obvious consequences.
+    
+    Reported-and-tested-by: Carl Henrik Lunde <chlunde@ping.uio.no>
+    CC: stable@vger.kernel.org
+    Signed-off-by: Jan Kara <jack@suse.cz>
+
+ fs/isofs/rock.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 6b0d4654592f127bfedb7afb992ff3ebf5b4220a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 1 09:23:42 2015 -0500
+
+    compile fix
+
+ fs/udf/inode.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit 0fd452435279b1fb6cc47a5b04ac6fff6d06eb42
+Merge: f2986d3 f531dba
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 1 09:06:40 2015 -0500
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	arch/x86/kernel/tls.c
+    	fs/udf/inode.c
+    	include/linux/dcache.h
+
+commit f531dba1bb6dce85eda2444a6ae670865c696b6c
+Merge: a7bdd00 ac4619ec
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Jan 1 09:03:34 2015 -0500
+
+    Merge branch 'linux-3.2.y' into pax-stable
+    
+    Conflicts:
+    	fs/libfs.c
+
 commit f2986d3f727a4a226a2b73b96e185a0cbae32288
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Dec 30 23:57:25 2014 -0500
