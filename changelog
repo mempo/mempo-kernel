@@ -1,4 +1,13 @@
-linux-image (linux-3.2.65-mempo-0.1.96) UNRELEASED; urgency=high
+linux-image (linux-3.2.65-mempo-0.1.97) UNRELEASED; urgency=high
+  * grsec: isofs, udf security fixes
+  * pax flags script here is signed
+  * v0.1.97-01-rc
+  * added missing files from commit; seed update
+  * v0.1.97-02-rc
+
+ -- mempo <mempo@mempo.org>  Wed, 31 Dec 2014 14:10:00 +0200
+
+linux-image (linux-3.2.65-mempo-0.1.96) UNRELEASED; urgency=medium
   * grsec: options related to deployment for some customers
   * grsec: resync with PaX (details are not specified)
   * v0.1.96-01-rc
