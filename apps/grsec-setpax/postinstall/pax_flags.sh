@@ -9,7 +9,7 @@
 if [[ $(id -u) -ne 0 ]] ; then echo "Please run as root" ; exit 1 ; fi
 
 # Assert if setfattr is installed and works
-setfattr -v > /dev/null || {
+setfattr --version > /dev/null || {
   echo "Can not find program setfattr. You needed (usually, on Debian) to install package: attr"
   exit 2
 }
