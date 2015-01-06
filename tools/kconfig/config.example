@@ -1,0 +1,17 @@
+# This is example input file, run test.sh to generate and check new version of it
+
+OPT_Y1=n
+# OPT_Y2 is not set
+OPT_M=y
+OPT_N=y
+OPT_S=old
+OPT_L="old long string"
+OPT_V1024=32
+
+OPT_KEEPY=y
+OPT_KEEPM=m
+OPT_KEEPV=64
+OPT_KEEPS=keepstring
+OPT_KEEPL="keep long string"
+# OPT_KEEPN is not set
+
