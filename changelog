@@ -4,7 +4,7 @@ linux-image (linux-3.2.66-mempo-0.1.98) UNRELEASED; urgency=high
 
  -- mempo <mempo@mempo.org>  Tue, 06 Jan 2015 11:30:00 +0200
 
-linux-image (linux-3.2.65-mempo-0.1.97) UNRELEASED; urgency=high
+linux-image (linux-3.2.66-mempo-0.1.97) UNRELEASED; urgency=high
   * grsec: isofs, udf security fixes
   * pax flags script here is signed
   * v0.1.97-01-rc
