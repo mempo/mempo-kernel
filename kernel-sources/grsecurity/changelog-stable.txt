@@ -1,3 +1,71 @@
+commit 9759066f743d84a8f7faeec2600d864fa0b3c663
+Merge: 293330c a63b181
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 5 18:18:42 2015 -0500
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	arch/x86/kernel/espfix_64.c
+
+commit a63b181acea3b68bfb509aa9d566c05f29d82ace
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jan 5 18:16:35 2015 -0500
+
+    Update to pax-linux-3.2.66-test163.patch:
+    - added a temporary workaround for a few size overflow false positives when REFCOUNT was disabled until the new plugin is ready, by Mathias Krause <mathias.krause@secunet.com>
+    - preliminary fix by Steffen Klassert (http://marc.info/?l=linux-netdev&m=141768340108789) for an upstream bug in the ipv6 tunnel code caught by the size overflow plugin, reported by Alexander Wetzel (https://forums.grsecurity.net/viewtopic.php?f=1&t=4083) and Colton Reeder (https://bugs.gentoo.org/show_bug.cgi?id=529352)
+    - fixed a few REFCOUNT accessors on arm/sparc
+    - fixed a few section mismatches for CONSTIFY
+    - fixed a (probably harmless) integer underflow in ttm_page_pool_free, caught by the size overflow plugin, reported by hunger
+    - fixed a REFCOUNT false positive in ftrace
+    - fixed ESPFIX crash under per-cpu PGD configs (KERNEXEC/UDEREF on amd64), reported by Andy Lutomirski <luto@amacapital.net>
+    - constified a few variables
+    - removed superfluous section attr on espfix_pud_page, reported by spender
+
+ arch/arm/include/asm/atomic.h        |    2 +-
+ arch/sparc/include/asm/atomic_64.h   |    4 ++--
+ arch/x86/include/asm/atomic.h        |    4 ++--
+ arch/x86/kernel/entry_64.S           |   10 +++++-----
+ arch/x86/kernel/espfix_64.c          |   13 +++++++------
+ arch/x86/kvm/emulate.c               |    2 +-
+ drivers/gpu/drm/ttm/ttm_page_alloc.c |   16 ++++++++--------
+ drivers/net/can/dev.c                |    2 +-
+ drivers/net/can/vcan.c               |    2 +-
+ drivers/net/dummy.c                  |    2 +-
+ drivers/net/ifb.c                    |    2 +-
+ drivers/net/macvtap.c                |    2 +-
+ drivers/net/tun.c                    |    2 +-
+ include/asm-generic/atomic-long.h    |    2 +-
+ include/drm/ttm/ttm_page_alloc.h     |    2 +-
+ include/linux/linkage.h              |    1 +
+ include/linux/sched.h                |    2 +-
+ kernel/trace/ftrace.c                |    4 ++--
+ kernel/trace/trace_functions_graph.c |    4 ++--
+ net/8021q/vlan_netlink.c             |    2 +-
+ net/bridge/br_netlink.c              |    2 +-
+ net/caif/chnl_net.c                  |    2 +-
+ net/ieee802154/6lowpan.c             |    2 +-
+ net/ipv6/xfrm6_policy.c              |    2 +-
+ 24 files changed, 45 insertions(+), 43 deletions(-)
+
+commit 293330cf03806f4cbd887e76e557089b3722fbaa
+Merge: eb2c0a0 574ca55
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 4 21:30:56 2015 -0500
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit 574ca556bcef707872bfc8c02c43d1a33f5bee13
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 4 19:09:32 2015 -0500
+
+    Update to pax-linux-3.2.66-test162.patch:
+    - fixed kernel stack corruption in iret fault handling under RANDKSTACK/amd64, triggered by Andy Lutomirski's linux-clock-tests suite (sigreturn_32)
+
+ arch/x86/kernel/traps.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
 commit eb2c0a0021b1ce8a9f877aa380d1b5873d232fab
 Author: Jan Kara <jack@suse.cz>
 Date:   Thu Sep 4 16:15:51 2014 +0200
