@@ -6,18 +6,16 @@ Deterministic kernel build scripts, for Linux, mainly for Debian for now.
 This scripts will build kernel in deterministic way, and also apply our default 
 settings and patches. 
 
-It will also use grsecurity patch to create secure hardened grsecurity/pax kernel (optional).
+It will also use Grsecurity patch to create secure hardened grsecurity/pax kernel (optional).
 
+How to build
+====================
+See doc/build-system.txt
 
-Dependencies for build:
-```
-apt-get install faketime time git build-essential libncurses5-dev libncursesw5-dev kernel-package md5deep gcc-4.7-plugin-dev g++ make time automake pkg-config flex
-```
-
-https://wiki.debian.org/SameKernel
-https://wiki.debian.org/Mempo
-
-READ all details here in files in doc/ especially in doc/build-system.txt
+How to use
+====================
+As end user who just wishes to run a Grsecurity kernel on Debian,
+see http://deb.mempo.org (check the GPG key as given below).
 
 Security
 ====================
@@ -27,7 +25,8 @@ _READ FILE security.txt here for list of known existing and past problems._
 You should verify data with both github.com by https/SSL or SSH downloads
 and you should check git tag -v _tagname_ e.g.:   git tag -v v0.1.26-rc3
 to see if tag is signed by: pgp key 45953F23 rfree-mempo, pubkey here in doc/
-full id: 21A5 9D31 7421 F02E C3C3  81F3 4623 E8F7 4595 3F23
+full id: 
+21A5 9D31 7421 F02E C3C3  81F3 4623 E8F7 4595 3F23
 
 Donations address for some people that will help this project (and entire Mempo
 project) is here in doc/donations.txt, make sure you obtained this information
