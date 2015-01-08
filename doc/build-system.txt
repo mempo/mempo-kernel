@@ -1,30 +1,59 @@
 
+
+SOURCE: This document is from https://github.com/mempo/deterministic-kernel/ - doc/build-system.txt
+TOPIC: This document is the definitive description how to build Mempo Kernel (grsecurity kernel) 
+
 *** This document here is most definitive. ***
 
-Also first see README.md file.
+Also first see README.md file here.
 
 Use this document, it is most definitive (how ever also check other sources if they would happen
 to have additional remarks sometimes)
+* http:///mempo.org , http://deb.mempo.org - for the contact
 * read additional info on http://wiki.debian.org/Mempo/SameKernel
 * QUESTIONS - then contact us: http://wiki.debian.org/Mempo/Mempo
 * QUESTIONS: chat with us on IRC on #mempo on irc.oftc.net or best on anonymous irc2p 
   (geti2p.net), or irc.freenode.org. And WAIT for THE REPLY 48 hours. Repeat question.
 * source code: https://github.com/mempo/ . Check always the GPG signature.
 
-=== As the user ===
+=== End Users ===
 
-To simply use the mempo kernels, download them from deb.mempo.org (or .i2p) as compiled
-binary .deb files; 
-Consult section "Variants" below.
+For End Users - to simply use the mempo kernels in your Debian/distro, download them from deb.mempo.org (or .i2p) as compiled
+binary .deb files and follow instructions there.
+Consult section "Variants" below for kernel choice.
 
 To build them from sources just start ./run-flavour.sh "deskmax" or similar, but first
 you need to install few tools. The build script should stop and tell you what to do.
 
-=== How to prepare new upgrade ===
+=== Developers of Kernel Packing sources ==
 
-This is for co-developers who wish to prepare a new version of mempo (e.g. when new grsecurity
-is out).
-Read info in README.md (and rest of this document here).
+For developers who make source of kernel package,
+and mempo developers who prepare update of kernel.
+
+Read info in README.md (and rest of this document here)
+how to update source when new code is released.
+
+=== Builders of the Kernel Package ===
+
+To build the .deb files, there are two ways:
+
+1) currently you should use a small script, available at:
+git: https://github.com/mempo/mempobot
+
+There you will find scripts in mempo-tools/kernelbuild/,
+run the script mempo-tools/kernelbuild/download-and-build-all.sh
+(from it's directory) as argument pass name of git repository to use,
+e.g.:
+cd ~/mempo-tools/kernelbuild/ && download-and-build-all.sh mempo
+
+It will download that github, check git gpg signature, and build all flavours.
+
+2) or instead, download (or unpack) the sources of this project e.g. from
+https://github.com/mempo/deterministc-kernel/
+and here/there run:
+./run-flavour.sh "deb7/deskmax"
+where "deb7/deskmax" is name of kernel flavour, see table here (or the script download-and-build-all.sh)
+for other choices.
 
 === How to have local random seed e.g. with other randstruct ===
 
@@ -60,37 +89,38 @@ Variants of kernel config (not all are yet implemented):
     MempoBox - desktop running on selected hardware. Like Desk but all not used drivers can be removed making things MUCH more secure, easy and fast (to build/test).
     MempoBunker - server running on selected hardware, like ServMax.
 
-,------,--------,-------,------------,--------,------------,
-| Done | Target |For    | Also works | Kernel |  Variant   | 
-| yet? | Arch   |Debian | with       |        |            |
-|------+--------+-------+------------+--------+------------|
-| wip  | x86_64 | Deb7  |            | 3.2.x  | ServMax    |
-| YES! | x86_64 | Deb7  |            | 3.2.x  | Serv       |
-| YES! | x86_64 | Deb7  |            | 3.2.x  | Desk       |
-| YES! | x86_64 | Deb7  |            | 3.2.x  | DeskMax    |
-| wip  | x86_64 | Deb7  |            | 3.2.x  | Weak       |
-| wip  | x86_64 | Deb7  |            | 3.2.x  | WeakXen    |
-| wip  | x86_64 | Deb7  |            | 3.2.x  | Weaker     |
-|------+--------+-------+------------+--------+------------|
-|  p?  | i386   | Deb7  |            | 3.2.x  | ServMax    |
-|------+--------+-------+------------+--------+------------|
-|      | x86_64 | Deb8  | Deb7       | 3.14.x | ServMax    |
-|      | x86_64 | Deb8  | Deb7       | 3.14.x | Serv       |
-|  F?  | x86_64 | Deb8  | Deb7       | 3.14.x | Desk       |
-|  F?  | x86_64 | Deb8  | Deb7       | 3.14.x | DeskMax    |
-|      | x86_64 | Deb8  | Deb7       | 3.14.x | Weak       |
-|      | x86_64 | Deb8  | Deb7       | 3.14.x | WeakXen    |
-|      | x86_64 | Deb8  | Deb7       | 3.14.x | Weaker     |
-|------+--------+-------+------------+--------+------------|
-|  p   | Arm11  | RPian |            | ?      | ServMax    |
-|  p   | Arm11  | RPian |            | ?      | Desk       |
-|------+--------+-------+------------+--------+------------|
-| p = planned in not so far away future                    |
-| F = works, in a fork (ask user kocka on IRC)             |
-| wip = in progress                                        |
-| RPian = raspbian                                         |
-| if nothing is written - then it's planned later          |
-,----------------------------------------------------------,
+,------,--------,-------,------------,--------,------------,----------------,
+| Done | Target |For    | Also works | Kernel |  Variant   | Full Name for  |
+| yet? | Arch   |Debian | with       |        |            | run-flavour.sh |
+|------+--------+-------+------------+--------+------------+----------------|
+| YES! | x86_64 | Deb7  |            | 3.2.x  | ServMax    | deb7/servmax   |
+| YES! | x86_64 | Deb7  |            | 3.2.x  | Serv       | deb7/serv      |
+| YES! | x86_64 | Deb7  |            | 3.2.x  | Desk       | deb7/desk      |
+| YES! | x86_64 | Deb7  |            | 3.2.x  | DeskMax    | deb7/deskmax   |
+| wip  | x86_64 | Deb7  |            | 3.2.x  | Weak       |                |
+| wip  | x86_64 | Deb7  |            | 3.2.x  | WeakXen    |                |
+| wip  | x86_64 | Deb7  |            | 3.2.x  | Weaker     |                |
+|------+--------+-------+------------+--------+------------|                |
+|  p?  | i386   | Deb7  |            | 3.2.x  | ServMax    |                |
+|  p?  | i386   | Deb7  |            | 3.2.x  | Desk       |                |
+|------+--------+-------+------------+--------+------------|                |
+|      | x86_64 | Deb8  | Deb7       | 3.14.x | ServMax    |                |
+|      | x86_64 | Deb8  | Deb7       | 3.14.x | Serv       |                |
+|  F?  | x86_64 | Deb8  | Deb7       | 3.14.x | Desk       |                |
+|  F?  | x86_64 | Deb8  | Deb7       | 3.14.x | DeskMax    |                |
+|      | x86_64 | Deb8  | Deb7       | 3.14.x | Weak       |                |
+|      | x86_64 | Deb8  | Deb7       | 3.14.x | WeakXen    |                |
+|      | x86_64 | Deb8  | Deb7       | 3.14.x | Weaker     |                |
+|------+--------+-------+------------+--------+------------|                |
+|  p   | Arm11  | RPian |            | ?      | ServMax    |                |
+|  p   | Arm11  | RPian |            | ?      | Desk       |                |
+|------+--------+-------+------------+--------+------------+----------------|
+| p = planned in not so far away future                                     |
+| F = works, in a fork (ask user kocka on IRC)                              |
+| wip = in progress                                                         |
+| RPian = raspbian                                                          |
+| if nothing is written - then it's planned later                           |
+,---------------------------------------------------------------------------'
 
 
 === How build works ===

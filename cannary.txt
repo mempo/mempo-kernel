@@ -1,0 +1,29 @@
+
+This is standard Testimony (this should be signed again for each release, 
+as a part of the text that is GPG signed, e.g. in gpg git tag comment
+visible by git tag -v, not just as one of the files).
+
+I hereby freely say that I am not, and I never was, and I do not suspect 
+to be in foreseeable future, under ANY form of NDA, gag order, 
+so-called 'national "security" letters', nor ANY influence, that could 
+in any way affect following verification text and following testimony 
+till end of this text:
+
+The source code that I provide here, and provided in the past (e.g. in the 
+git version that is signed with git tag containing this testimony) is to my 
+knowledge free of any form of exploits, backdoors, security weakness, nor does 
+it contain anything about what I can not freely speak.
+
+I am under law jurisdiction: Europea/Poland (Influenced/subjected 
+also by: European Union, and USA).
+
+Always remember to check GPG signatures starting from root of trust, 
+write down checksums too, if in doubt check sources yourself.
+
+Builds/development/signature are done (at least) on: secure linux computer, 
+not air-gapped.
+
+Source code parts that are NOT audited by me are: kernel sources, 
+grsecurity patch sources (but our scripts do check if they are properly
+GPG signed by their authors - the scripts are seen here).
+
