@@ -7,11 +7,12 @@ pwd_normal=$PWD # save starting top-dir
 
 source 'support.sh' || { echo "Can not load lib" ; exit 1; }
 
-
 flavour="$1"
 version=$( git describe --tags )
 computer=$HOSTNAME
 date_start=$( date -u +%s )
+
+good_readlink_HOME="/homebig/kernelbuild/" # this changes with versions/releases, see doc/build.txt , bookmark [home_readlink]. backlink: if you would remove/mov this line, update doc/build.txt as it references us.
 
 # set -x 
 mkdir -p kernel-sources/kernel
@@ -72,6 +73,20 @@ good_dir='/home/kernelbuild/deterministic-kernel'
 if [[ $PWD != "$good_dir" ]] ; then
 	echo ; echo "WARNING: wrong directory '$PWD' should be '$good_dir'." ; warn_env ;	ask_quit;
 fi
+
+echo " * HOME=$HOME"
+good_home="/home/kernelbuild" # this is mostly required to test readlink $HOME
+if [[ "$HOME" != "$good_home" ]] ; then
+	echo ; echo "WARNING: your \$HOME directory also should be '$good_home'
+	/"; warn_env ; ask_quit;
+fi
+
+readlink_HOME=$(readlink "$HOME")
+echo " * readlink HOME=$readlink_HOME"
+if [[ "$readlink_HOME" != "$good_readlink_HOME" ]] ; then
+	echo ; echo "WARNING: your readlink \$HOME directory also should be '$good_readlink_HOME' . Please see doc/build.txt for description how to fix/fake this properly, look for bookmark [home_readlink] there."; warn_env ; ask_quit;
+fi
+
 
 echo "" ; echo "Tools: checking prerequisites..."
 DPKG_VER=$(dpkg-query -W --showformat='${Version}\n' dpkg)

@@ -1,6 +1,6 @@
 
 
-SOURCE: This document is from https://github.com/mempo/deterministic-kernel/ - doc/build-system.txt
+SOURCE: This document is from https://github.com/mempo/deterministic-kernel/ - doc/build.txt
 TOPIC: This document is the definitive description how to build Mempo Kernel (grsecurity kernel) 
 
 *** This document here is most definitive. ***
@@ -15,6 +15,10 @@ to have additional remarks sometimes)
 * QUESTIONS: chat with us on IRC on #mempo on irc.oftc.net or best on anonymous irc2p 
   (geti2p.net), or irc.freenode.org. And WAIT for THE REPLY 48 hours. Repeat question.
 * source code: https://github.com/mempo/ . Check always the GPG signature.
+
+=== Verification ===
+
+For users/developers who wish to repeat the build process to confirm that it really does match the published checksum - read the paragraph "Verification-Details" below.
 
 === End Users ===
 
@@ -204,4 +208,55 @@ Additional users:
 BOTBUILD - observes github (or other source) and triggers the build process when new version
 BOTSAY   - observes github (or other source) and announces new version to various systems
 
+=== Verification-Details ===
+
+This is for users/developers who wish to repeat the build process to confirm that it really does match the published checksum. 
+
+The goal of this script is that the resulting .deb are identical.
+
+Since somewhere before version afair 0.1.50 at least, it is possible to confirm the builds, but there are some quirks sometimes.
+
+You need to fullfil many conditions for the build to give exact identical result.
+Sometimes, you are not warned by some detail (that we overlooked) and this is why you are getting other checksum.
+Read this section carefully to know about all this pitfalls.
+In time, all quirks will be verified so verification will be even easier.
+
+* First, read details of building as in http://wiki.debian.org/SameKernel/
+especially the #build section.
+
+* [libc] libc version must be identical to the one used in build. Versions since early version (around v0.1.50 afair) check for that detail for you.
+
+* [libz] lib z / -dev version must be identical. Check for that was added at some point.
+
+* [home_readlink] Not only the $PWD must be identical: /home/kernelbuild, but in addition the real name, e.g. readpath /home/kernelbuild must also be identical. 
+Some of the officially released kernels (on http://deb.mempo.org/ and previously in archives) 
+might require that the readpath is /homebig/kernelbuild/ 
+or /home2/kernelbuild/
+
+Check for that is being added now (in special tag for version v0.1.98, so should be normal part of v0.1.99 and the expected path is on top of run-flavour.sh).
+
+See difference between unpacked files to find out what is the real path.
+If you see there /homebig (or /home2) then you must create identical setup.
+If you do not have a separate partition for that, this can be "faked" with mount -o bind.
+For example, as root:
+
+mkdir /home/fakehome/ 
+mv -i /home/kernelbuild/ /home/fakehome/   # move real data
+mkdir /homebig
+mount /home/fakehome/ /homebig  -o bind   # the bind
+unlink /home/kernelbuild   # remove old link
+ln -s /homebig/kernelbuild /home/kernelbuild
+echo "CHECK:" ; readlink /home/kernelbuild
+echo "Should say that this is in example /homebig/kernelbuild or /home/kernelbuild - the readlink directory that you want to fake"
+
+So /home/kernelbuild will be a symlink into /homebig/kernelbuild , and in that directory 
+you will create/download all the files e.g. mempobot or deterministic-kernel. 
+
+Once you have the condition that:
+	$HOME is /home/kernelbuild 
+	and readlink $HOME is /homebig/kernelbuild
+then home / readlink home situation is solved, and you should
+enter that directory and execute the normal build procesdure (so e.g. for v0.1.98 it would be to run mempobot script download-and-build-all.sh as described above). 
+
+Please appologize for this problem, was not expecting that some build tools not only save directory/pwd in metadata but even readlink/realname of it, and took some time to get around to add check for it in the scripts.
 

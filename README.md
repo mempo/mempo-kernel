@@ -10,7 +10,7 @@ It will also use Grsecurity patch to create secure hardened grsecurity/pax kerne
 
 How to build
 ====================
-See doc/build-system.txt
+See doc/build.txt
 
 How to use
 ====================
@@ -43,7 +43,7 @@ TRUST CHAIN currently:
 updating this project
 ====================
 
-First of, read the details in doc/build-system.txt and rest of doc/ folder!
+First of, read the details in doc/build.txt and rest of doc/ folder!
 
 Maintainers of this project should do following in reaction to new version of codes:
 
