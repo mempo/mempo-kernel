@@ -1,3 +1,10 @@
+
+linux-image (linux-3.2.66-mempo-0.1.99) UNRELEASED; urgency=low
+  * grsec tiny update (compiler warning) - nothing usable according to changelog
+  * v0.1.99-01-rc
+
+ -- mempo <mempo@mempo.org>  Tue, 11 Jan 2015 17:25:00 +0200
+
 linux-image (linux-3.2.66-mempo-0.1.98) UNRELEASED; urgency=high
   * grsec and pax fixes
   * v0.1.98-01-rc
