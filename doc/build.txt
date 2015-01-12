@@ -37,7 +37,18 @@ and mempo developers who prepare update of kernel.
 Read info in README.md (and rest of this document here)
 how to update source when new code is released.
 
+=== Build Preparation ===
+
+If you wish to build the kernel, then you need to prepare toolset.
+
+The wiki page https://wiki.debian.org/SameKernel#Build describes what to apt-get first, how to get custom dpkg.
+
+All needed materials, source code, scripts, other keys, key IDs etc - will be signed, you MUST check if this data is correctly signed, either by Debian.org project or by the key used by Mempo project. 
+
+
 === Builders of the Kernel Package ===
+
+First see: Build Preparation.
 
 To build the .deb files, there are two ways:
 
@@ -228,12 +239,21 @@ especially the #build section.
 
 * [libz] lib z / -dev version must be identical. Check for that was added at some point.
 
-* [home_readlink] Not only the $PWD must be identical: /home/kernelbuild, but in addition the real name, e.g. readpath /home/kernelbuild must also be identical. 
+* [ncurses] (check for this problem was added in v0.1.98-01-release-verify2) libncursesw5-dev is needed. In version 0.1.98 it was discovered during audit that computer without that library was producing other checksum (e.g. in the headers. So for 0.1.98 (in git revision tagged ...) a check is added for libncursesw5-dev in version 5.9-10.
+Without it, checksums were:
+a22738c75b78ae7ac77202fd3873bac6fa54ab997c4aeb5fffbc6137cb53bddf  linux-headers-3.2.66-grsec-mempo.servmax.0.1.98_01_amd64.deb
+232086c2b1791f4ea2d22d2162bb9097b69bbac14693240c6fe32c82edab5452  linux-headers-3.2.66-grsec-mempo.zero.0.1.98_01_amd64.deb
+da5e198761ed0b3f6aa1d2a04c6d95b73f30a143a01809a7b70bd55bc5103de8  linux-headers-3.2.66-grsec-mempo.deskmax.0.1.98_01_amd64.deb
+77cfc569ad5d60cd6910708dff7b2c41aad10b584a5bfe13179847d637d5df85  linux-headers-3.2.66-grsec-mempo.desk.0.1.98_01_amd64.deb
+de88bc57aa42b3c8bbd8868697d2bbfc2359c22694f188a0b45c3545be72f7e0  linux-headers-3.2.66-grsec-mempo.serv.0.1.98_01_amd64.deb
+other then that (and the [home_readlink] fixed in git tag v0.1.98-01-release-verify1) the image deb files should be identical despite other state of this library.
+
+* [home_readlink] (check for this problem was added in v0.1.98-01-release-verify1) Not only the $PWD must be identical: /home/kernelbuild, but in addition the real name, e.g. readpath /home/kernelbuild must also be identical. 
 Some of the officially released kernels (on http://deb.mempo.org/ and previously in archives) 
 might require that the readpath is /homebig/kernelbuild/ 
 or /home2/kernelbuild/
 
-Check for that is being added now (in special tag for version v0.1.98, so should be normal part of v0.1.99 and the expected path is on top of run-flavour.sh).
+Check for that is being added now (in special tag v0.1.98-01-release-verify1 for version v0.1.98, so should be normal part of v0.1.99 and the expected path is on top of run-flavour.sh).
 
 See difference between unpacked files to find out what is the real path.
 If you see there /homebig (or /home2) then you must create identical setup.

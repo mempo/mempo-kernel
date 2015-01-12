@@ -2,6 +2,17 @@ linux-image (linux-3.2.66-mempo-0.1.98) UNRELEASED; urgency=high
   * grsec and pax fixes
   * v0.1.98-01-rc
 
+  * added cannary (in signed git tag)
+  * v0.1.98-01-release-doc1 - this is just doc update, same .deb, same seed, revision
+
+  * added check for $HOME symlink (see doc/build.txt) [home_readlink] 
+  * the resulting .deb files should be identical to v0.1.98-01-rc if you manualy fixed this problems
+  * v0.1.98-01-release-verify1 - NOT a separate release (same seed, revision, etc)
+
+  * added check for libncursesw5-dev version (see doc/build.txt) [ncurses]
+  * the resulting .deb files should be identical to v0.1.98-01-rc if you manualy fixed this problems
+  * v0.1.98-01-release-verify2 - NOT a separate release (same seed, revision etc)
+
  -- mempo <mempo@mempo.org>  Tue, 06 Jan 2015 11:30:00 +0200
 
 linux-image (linux-3.2.66-mempo-0.1.97) UNRELEASED; urgency=high

@@ -104,6 +104,14 @@ require_exact_ver "gcc" "4:4.7.2-1"
 require_exact_ver "gcc-4.7" "4.7.2-5"
 require_exact_ver "gcc-4.7-plugin-dev" "4.7.2-5"
 
+# ii  libncurses5:amd64                                 5.9-10
+# ii  libncurses5-dev                                   5.9-10
+# libncursesw5-dev must be NOT installed for builds <= v0.1.98 (since some time)
+
+require_exact_ver 'libncurses5:amd64' '5.9-10'
+require_exact_ver 'libncurses5-dev' '5.9-10'
+require_exact_ver 'libncursesw5-dev' '5.9-10'
+
 if [[ "$count_lib_error_exact" -gt 0 ]] ; then
 	echo ; echo "ERROR: you seem to have wrong version of some library as listed above."
 	echo "If you have older version then needed, then simply updating the system should help"
