@@ -1,3 +1,12 @@
+commit 3f4ac907f2f59cbcaeaeedbea222241309d28b0b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jan 11 09:46:33 2015 -0500
+
+    squelch a harmless compiler warning
+
+ drivers/iommu/amd_iommu.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 9759066f743d84a8f7faeec2600d864fa0b3c663
 Merge: 293330c a63b181
 Author: Brad Spengler <spender@grsecurity.net>
