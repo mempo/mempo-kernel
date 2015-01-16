@@ -1,9 +1,19 @@
 
+linux-image (linux-3.2.66-mempo-0.2) UNRELEASED; urgency=medium
+  * grsec fix dma-on-stack; view /proc/pid/mem,fd,cmdline for d tasks
+  * increased major version to 0.2
+  * switching to increase only the release number, retaining same kernel version name 0.2
+  * 3 digit revision number, starting at 101
+  * v0.2-101-rc
+
+ -- mempo <mempo@mempo.org>  Fri, 16 Jan 2015 04:10:00 +0200
+
 linux-image (linux-3.2.66-mempo-0.1.100) UNRELEASED; urgency=medium
   * grsec fix dma-on-stack; view /proc/pid/mem,fd,cmdline for d tasks
   * v0.1.100-01-rc
+	* not fully released (will be not uploaded to repo)
 
- -- mempo <mempo@mempo.org>  Tue, 11 Jan 2015 17:25:00 +0200
+ -- mempo <mempo@mempo.org>  Fri, 16 Jan 2015 04:10:00 +0200
 
 linux-image (linux-3.2.66-mempo-0.1.99) UNRELEASED; urgency=low
   * grsec tiny update (compiler warning) - nothing usable according to changelog

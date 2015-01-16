@@ -32,9 +32,9 @@ do
 			#echo $config_localversion_name
 			file_kernelconfig="kernel-build/linux-mempo/configs-kernel/$kernel_config_name"
 			if [[ ! -r "$file_kernelconfig" ]] ; then echo "Can not read file_kernelconfig=$file_kernelconfig"; exit 1; fi
-			config_localversion_name_from_config=$( sed -n 's/^CONFIG_LOCALVERSION="-\(.*\)\.[0-9]\+\.[0-9]\+\.[0-9]\+"/\1/p' "$file_kernelconfig" )
+			config_localversion_name_from_config=$( sed -n 's/^CONFIG_LOCALVERSION="-\(.*\)\.[0-9]\+\.[0-9]\+"/\1/p' "$file_kernelconfig" )
 			if [[ "$config_localversion_name_from_config" != "$config_localversion_name" ]] ; then
-				mistake "The config read from the config file ($file_kernelconfig) is $config_localversion_name_from_config and it differs from the name specified in ini file ($file_ini) that is $config_localversion_name"; 
+				mistake "The localversion_name from the config file ($file_kernelconfig) is ($config_localversion_name_from_config) and it differs from the name specified in ini file ($file_ini) that is ($config_localversion_name)"; 
 			fi
 		) || exit
 done
@@ -55,8 +55,8 @@ function CURRENT_SEED_VALIDATE() {
 }
 
 function DEBIAN_REVISION_VALIDATE() {
-	if [[ "$1" =~ ^[0-9]{2}$ ]] ; then 
-		if [[ "$1" != "00" ]] ; then return 0 ; fi
+	if [[ "$1" =~ ^[0-9]{3}$ ]] ; then 
+		if [[ "$1" != "000" ]] ; then return 0 ; fi # do not use zero, start from at least value of 1
 	fi
 	if [[ "$2" != "q" ]] ; then echo "Failed regexp for string: [$1]" ; fi
 	return 1
@@ -143,14 +143,15 @@ function check_envdata() {
 		CURRENT_SEED_VALIDATE "" q && mistake "$bad_regexp_msg"
 
 		DEBIAN_REVISION_VALIDATE "$DEBIAN_REVISION" || mistake "bad debian revision"
-		DEBIAN_REVISION_VALIDATE "00" q && mistake "$bad_regexp_msg"
-		DEBIAN_REVISION_VALIDATE "001" q && mistake "$bad_regexp_msg"
-		DEBIAN_REVISION_VALIDATE "1" q && mistake "$bad_regexp_msg"
-		DEBIAN_REVISION_VALIDATE "0" q && mistake "$bad_regexp_msg"
-		DEBIAN_REVISION_VALIDATE "0x" q && mistake "$bad_regexp_msg"
-		DEBIAN_REVISION_VALIDATE "01 " q && mistake "$bad_regexp_msg"
-		DEBIAN_REVISION_VALIDATE " 01" q && mistake "$bad_regexp_msg"
-		DEBIAN_REVISION_VALIDATE "" q && mistake "$bad_regexp_msg"
+		DEBIAN_REVISION_VALIDATE "000" q && mistake "$bad_regexp_msg (zero)"
+		DEBIAN_REVISION_VALIDATE "0001" q && mistake "$bad_regexp_msg (too long)"
+		DEBIAN_REVISION_VALIDATE "01" q && mistake "$bad_regexp_msg (too short)"
+		DEBIAN_REVISION_VALIDATE "1" q && mistake "$bad_regexp_msg (too short)"
+		DEBIAN_REVISION_VALIDATE "0" q && mistake "$bad_regexp_msg (too short and zero)"
+		DEBIAN_REVISION_VALIDATE "0x" q && mistake "$bad_regexp_msg (not number)"
+		DEBIAN_REVISION_VALIDATE "01 " q && mistake "$bad_regexp_msg (spaces at end)"
+		DEBIAN_REVISION_VALIDATE " 01" q && mistake "$bad_regexp_msg (spaces at beginning)"
+		DEBIAN_REVISION_VALIDATE "" q && mistake "$bad_regexp_msg (empty)"
 
 		#echo "Executing $file_env" ; 
 		source "$file_env" "$file_envdata_dir" || mistake "Can not read file_env=$file_env"
