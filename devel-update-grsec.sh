@@ -203,7 +203,7 @@ git add $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-${opt_sta
 
 git_msg="[grsec] $new_grsec ${commit_msg_extra1}${commit_msg_extra2}"
 echo "[AUTO] GIT: message to COMMIT now the new files (patches) is: $git_msg"
-git commit $gr_path/$new_grsec $gr_path/$new_grsec.sig $gr_path/changelog-${opt_stable_version}.txt -m "$git_msg" || {
+git commit $gr_path/ $gr_path/* -m "$git_msg" || {
 	start_quit_dev
 	echo "The git commit failed. Maybe you do not have network or you did not set git remote set-url etc."
 	echo "You still should do a git commit with message: $git_msg"
