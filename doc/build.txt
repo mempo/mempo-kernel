@@ -93,14 +93,22 @@ E.g. in most secure mode things are slower, Xen is blocked, Wine is blocked, mos
 
 Variants of kernel config (not all are yet implemented):
 
+- first time using grsec --> try Desk
+- you need sound card --> then also choose Desk.
+- else --> do you need graphical video mode --> then choose DeskMax (you can try also Serv/ServMax)
+- else --> if you need just text mode (or video works for you here) then use ServMax. Does it work fast enough?
+- too slow --> if it works too slowly, use Serv.
+
     Desk - this is the current variant (previously named good). It turns out all protections (especially in recent versions) except ioport/kmem blocks and [since 2014.08.21] except some options that are considered too restrictive for desktop, e.g. without some proc restrictions that block sound system etc.
     DeskMax - [since 2014.08.21] (previously Desk had this role basically) this is the spartan desktop, allows ioport/kmem (as long as it's needed for most gfx cards) but blocks everything else e.g. even sound support possibly
     Serv - for servers mostly this will also turn on ioport/kmem, meaning that kernel will be extremely strongly protected from being damaged by other programs or most parts of kernel. Desktops can use this too but will need a fix to X server and require open good gfx drivers.
     ServMax - same but could turn on various "paranoid" options, extra double checking, extra asserts...
+
     Weak - that will be a mode that is not as secure. It will be more compatible or faster then Desktop
     WeakXen - takes all steps needed to allow Xen (and wine?) at cost of lowering kernel protection
     Weaker - takes normal kernel and just turns on the low-cost simple protections, for full speed and compatibility, e.g. like hiding all processes of other users, adding some loggin and other "why not this isn't harming even most not-pro users".
 		NoProtect - vanilla kernel with default settings and no additional protection in comparsion to standard kernel (only upside is that it is deterministc build)
+
     MempoBox - desktop running on selected hardware. Like Desk but all not used drivers can be removed making things MUCH more secure, easy and fast (to build/test).
     MempoBunker - server running on selected hardware, like ServMax.
 

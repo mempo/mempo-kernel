@@ -25,20 +25,9 @@ _READ FILE security.txt here for list of known existing and past problems._
 You should verify data with both github.com by https/SSL or SSH downloads
 and you should check git tag -v _tagname_ e.g.:   git tag -v v0.1.26-rc3
 to see if tag is signed by: pgp key 45953F23 rfree-mempo, pubkey here in doc/
-full id: 
-21A5 9D31 7421 F02E C3C3  81F3 4623 E8F7 4595 3F23
 
-Donations address for some people that will help this project (and entire Mempo
-project) is here in doc/donations.txt, make sure you obtained this information
-from trusted source! It should be also PGP signed.
-
-TRUST CHAIN currently:
- * in future we will release very-high trusted master pgp key to sign everything else, once secure
- enough computer is ready to use.
- * github.com/mempo/ is medium-high security (used by SSH from quite secured computer)
- * pgp key 45953F23 is medium-high security (will be replaced leter)
- * mempo.org website currently is low-medium security (just a rented server)!
- * wiki.debian.org/ is nice but very-low, ANYONE can edit it!
+*Do read* the doc/pgp.txt.sig file that is signed version of doc/pgp.txt;
+Public key files are in doc/ too.
 
 updating this project
 ====================

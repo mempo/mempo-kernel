@@ -25,6 +25,12 @@ Workaround: change config to enable more grsecurity protections, remove CONFIG_X
 Status: wip
 -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+INFO: There were various problems making it a bit harder to confirm checksum of the
+reproducible build due to various details, they are described in other places here.
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
 (*) when using the default settings as delivered here,
 targeting amd64 (and building also on amd64 no crossbuild),
 using debian stable ( with additional remarks as described by us on 
