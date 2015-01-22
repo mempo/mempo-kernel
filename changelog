@@ -1,3 +1,9 @@
+linux-image (linux-3.2.66-mempo-0.2_102) UNRELEASED; urgency=medium
+  * grsec: s2io snprintf; ip:memleak,ipv6,MTU,atomic fragments
+  * updated mempo maintainer scripts to increase revision
+  * v0.2-102-rc
+
+ -- mempo <mempo@mempo.org>  Thu, 22 Jan 2015 06:03:00 +0200
 
 linux-image (linux-3.2.66-mempo-0.2) UNRELEASED; urgency=medium
   * grsec fix dma-on-stack; view /proc/pid/mem,fd,cmdline for d tasks

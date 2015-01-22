@@ -15,7 +15,7 @@ arg_batch=$2 # nothing, or "batch", if batch then we are called from other scrip
 # and other data that might be useful (the old data before we will overwrite it)
 
 echo "Loading current data to start with"
-. kernel-build/linux-mempo/env-data.sh
+source kernel-build/linux-mempo/env-data.sh
 kernel_ver="$kernel_general_version"
 echo "We have kernel_ver=$kernel_ver"
 # TODO assert correct format
@@ -58,11 +58,18 @@ newenv_date=$(date +'%Y-%m-%d %H:%M:%S')
 
 case $arg_metod in
 "restart")
-		newenv_rev='01'
+		newenv_rev='001'
+		echo "WARNING now you should not restart revisions as we switched to using the same mempo kernel number eg 0.2"
+		echo "Press ENTER to continue if you are sure this is ok"
+		read _
   ;;
 "increase")
-	echo "Increase revision, please enter revision like 02:" # TODO auto
-	read newenv_rev
+	echo "Increase revision"
+	DEBIAN_REVISION_NEW_int=$((DEBIAN_REVISION+1)) # increase but as integer e.g. 7
+	DEBIAN_REVISION_NEW="$( printf "%03d\n" "$DEBIAN_REVISION_NEW_int" )" # convert back to padded string like 007
+	newenv_rev="$DEBIAN_REVISION_NEW"
+	echo "Increased revision from $DEBIAN_REVISION to $DEBIAN_REVISION_NEW"
+	#read newenv_rev
 	;;
 *)
 	echo "Error, method $arg_metod" ; exit 2

@@ -167,7 +167,7 @@ fi
 
 print_ok_header "Main kernel version is OK"
 
-bash devel-update-revision.sh "restart" "batch" || { echo "Can not update revision"; exit 2; }
+bash devel-update-revision.sh "increase" "batch" || { echo "Can not update revision"; exit 2; }
 
 echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" ; mywait 
 
