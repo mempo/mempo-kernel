@@ -1,3 +1,86 @@
+commit f16802f0823a3a303b18789c57a4b7c35449174a
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Mon Jan 19 22:34:51 2015 +0300
+
+    s2io: use snprintf() as a safety feature
+    
+    "sp->desc[i]" has 25 characters.  "dev->name" has 15 characters.  If we
+    used all 15 characters then the sprintf() would overflow.
+    
+    I changed the "sprintf(sp->name, "%s Neterion %s"" to snprintf(), as
+    well, even though it can't overflow just to be consistent.
+    
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/neterion/s2io.c |   11 ++++++++---
+ 1 files changed, 8 insertions(+), 3 deletions(-)
+
+commit 2e4a361a46dab6bc80f948e4dda9c100d8550adb
+Author: Willem de Bruijn <willemb@google.com>
+Date:   Thu Jan 15 13:18:40 2015 -0500
+
+    ip: zero sockaddr returned on error queue
+    
+    The sockaddr is returned in IP(V6)_RECVERR as part of errhdr. That
+    structure is defined and allocated on the stack as
+    
+        struct {
+                struct sock_extended_err ee;
+                struct sockaddr_in(6)    offender;
+        } errhdr;
+    
+    The second part is only initialized for certain SO_EE_ORIGIN values.
+    Always initialize it completely.
+    
+    An MTU exceeded error on a SOCK_RAW/IPPROTO_RAW is one example that
+    would return uninitialized bytes.
+    
+    Signed-off-by: Willem de Bruijn <willemb@google.com>
+    
+    ----
+    
+    Also verified that there is no padding between errhdr.ee and
+    errhdr.offender that could leak additional kernel data.
+    Acked-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/ipv4/ip_sockglue.c
+    	net/ipv6/datagram.c
+    
+    Conflicts:
+    
+    	net/ipv6/datagram.c
+
+ net/ipv4/ip_sockglue.c |    9 +++------
+ net/ipv6/datagram.c    |   10 +++-------
+ 2 files changed, 6 insertions(+), 13 deletions(-)
+
+commit 81b2008552c0bb59b762bec69a0e5e4922baba24
+Author: Hagen Paul Pfeifer <hagen@jauu.net>
+Date:   Thu Jan 15 22:34:25 2015 +0100
+
+    ipv6: stop sending PTB packets for MTU < 1280
+    
+    Reduce the attack vector and stop generating IPv6 Fragment Header for
+    paths with an MTU smaller than the minimum required IPv6 MTU
+    size (1280 byte) - called atomic fragments.
+    
+    See IETF I-D "Deprecating the Generation of IPv6 Atomic Fragments" [1]
+    for more information and how this "feature" can be misused.
+    
+    [1] https://tools.ietf.org/html/draft-ietf-6man-deprecate-atomfrag-generation-00
+    
+    Signed-off-by: Fernando Gont <fgont@si6networks.com>
+    Signed-off-by: Hagen Paul Pfeifer <hagen@jauu.net>
+    Acked-by: Hannes Frederic Sowa <hannes@stressinduktion.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv6/route.c |    7 ++-----
+ 1 files changed, 2 insertions(+), 5 deletions(-)
+
 commit 9840c41643e27ad6593d7cb9c5015bf64ee769ec
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Jan 14 22:48:11 2015 -0500
