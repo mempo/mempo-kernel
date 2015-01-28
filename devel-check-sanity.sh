@@ -32,7 +32,7 @@ do
 			#echo $config_localversion_name
 			file_kernelconfig="kernel-build/linux-mempo/configs-kernel/$kernel_config_name"
 			if [[ ! -r "$file_kernelconfig" ]] ; then echo "Can not read file_kernelconfig=$file_kernelconfig"; exit 1; fi
-			config_localversion_name_from_config=$( sed -n 's/^CONFIG_LOCALVERSION="-\(.*\)\.[0-9]\+\.[0-9]\+"/\1/p' "$file_kernelconfig" )
+			config_localversion_name_from_config=$( sed -n 's/^CONFIG_LOCALVERSION="-\(.*\)\.[0-9]\+\.[0-9]\+\.[0-9]\+"/\1/p' "$file_kernelconfig" )
 			if [[ "$config_localversion_name_from_config" != "$config_localversion_name" ]] ; then
 				mistake "The localversion_name from the config file ($file_kernelconfig) is ($config_localversion_name_from_config) and it differs from the name specified in ini file ($file_ini) that is ($config_localversion_name)"; 
 			fi
@@ -55,7 +55,7 @@ function CURRENT_SEED_VALIDATE() {
 }
 
 function DEBIAN_REVISION_VALIDATE() {
-	if [[ "$1" =~ ^[0-9]{3}$ ]] ; then 
+	if [[ "$1" =~ ^[0-9]{3}$ ]] ; then
 		if [[ "$1" != "000" ]] ; then return 0 ; fi # do not use zero, start from at least value of 1
 	fi
 	if [[ "$2" != "q" ]] ; then echo "Failed regexp for string: [$1]" ; fi
