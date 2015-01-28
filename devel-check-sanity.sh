@@ -176,6 +176,14 @@ print_ok_header "[OK] All envdata seems fine"
 check_sourcecode_list || exit 1
 print_ok_header "[OK] All source-code lists seem fine"
 
+echo -e "$bcolor_bold $bcolor_white $bcolor_bgrblue"
+echo -e "=======================================$bcolor_eel"
+echo -e "Running sanity checks$bcolor_eel"
+echo -e "$bcolor_eel$bcolor_zero\n"
+
+bash ./prepare-toolchain.sh || exit 1
+print_ok_header "Sanity check ended"
+
 echo "You  HAVE TO ALSO:  Check on your own:"
 echo "  * Does all kernelconfig files contain correct name version of mempo like '0.1.92' did you INCREASED it if needed? See README.md"
 echo "  * Does changelog have the correct entry block for new mempo version if that was needed? See README.md"

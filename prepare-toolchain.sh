@@ -75,10 +75,8 @@ ls -ld "$dpkg_info_target"
 echo "-----------------------------"
 echo "Version of gcc and C libraries (embed in binaries - affecting build-id)"
 
-count_lib_error_exact=0
-count_lib_error_tool=0
-
 function require_exact_ver() { # ($name,$ver_needed)
+	# IN/OUT: this method increases global variables count_lib_error_exact , count_lib_error_tool ; the caller should zero them 
 	name=$1
 	ver_needed=$2
 	ver_now=$( LC_ALL=C dpkg -s $name | grep 'Version' | head -n 1 | sed -e "s/^Version: \([^ ]*\)$/\1/" ) 
@@ -90,40 +88,31 @@ function require_exact_ver() { # ($name,$ver_needed)
 	echo " * $name: now $ver_now (need $ver_needed) $msg"
 }
 
-# (for p in libc6 gcc gcc-4.7 gcc-4.7-plugin-dev gcc-4.4-doc ; do dpkg -l $p ; done ; gcc --version ; gcc-4.7 --version) | egrep "gcc|libc"
-# ii  libc6:amd64                      2.13-38+deb7u1                amd64        Embedded GNU C Library: Shared libraries
-# ii  gcc                              4:4.7.2-1                     amd64        GNU C compiler
-# ii  gcc-4.7                          4.7.2-5                       amd64        GNU C compiler
-# ii  gcc-4.7-plugin-dev               4.7.2-5                       amd64        Files for GNU GCC plugin development.
-# (no gcc-4.4-doc)
-# gcc (Debian 4.7.2-5) 4.7.2
-# gcc-4.7 (Debian 4.7.2-5) 4.7.2
+function check_versions() {
+	count_lib_error_exact=0
+	count_lib_error_tool=0
 
-require_exact_ver "libc6" "2.13-38+deb7u6"
-require_exact_ver "gcc" "4:4.7.2-1"
-require_exact_ver "gcc-4.7" "4.7.2-5"
-require_exact_ver "gcc-4.7-plugin-dev" "4.7.2-5"
+	require_exact_ver "libc6" "2.13-38+deb7u6"
+	require_exact_ver "gcc" "4:4.7.2-1"
+	require_exact_ver "gcc-4.7" "4.7.2-5"
+	require_exact_ver "gcc-4.7-plugin-dev" "4.7.2-5"
+	require_exact_ver 'libncurses5:amd64' '5.9-10'
+	require_exact_ver 'libncurses5-dev' '5.9-10'
+	require_exact_ver 'libncursesw5-dev' '5.9-10'
 
-# ii  libncurses5:amd64                                 5.9-10
-# ii  libncurses5-dev                                   5.9-10
-# libncursesw5-dev must be NOT installed for builds <= v0.1.98 (since some time)
-
-require_exact_ver 'libncurses5:amd64' '5.9-10'
-require_exact_ver 'libncurses5-dev' '5.9-10'
-require_exact_ver 'libncursesw5-dev' '5.9-10'
-
-if [[ "$count_lib_error_exact" -gt 0 ]] ; then
-	echo ; echo "ERROR: you seem to have wrong version of some library as listed above."
-	echo "If you have older version then needed, then simply updating the system should help"
-	echo "If you have newer version - then you are probably checking some older version of our kernel,"
-	echo "then try to get new our newest kernel, kernel script."
-	echo "If you really want to verify old kernel then you need to obtain the older version to get identical deb files"
-	echo "(or continue, and verify the .deb by hand by unpacking and comparing files)"
-	echo ""
- 	echo "In theory you could also write script to override the name/version that is embed in generated elf files"
-	echo "during the build. See also this: https://wiki.debian.org/SameKernel/#bug2 or ask us at #mempo"
-	ask_quit;
-fi
+	if [[ "$count_lib_error_exact" -gt 0 ]] ; then
+		echo ; echo "ERROR: you seem to have wrong version of some library as listed above."
+		echo "If you have older version then needed, then simply updating the system should help"
+		echo "If you have newer version - then you are probably checking some older version of our kernel,"
+		echo "then try to get new our newest kernel, kernel script."
+		echo "If you really want to verify old kernel then you need to obtain the older version to get identical deb files"
+		echo "(or continue, and verify the .deb by hand by unpacking and comparing files)"
+		echo ""
+		echo "In theory you could also write script to override the name/version that is embed in generated elf files"
+		echo "during the build. See also this: https://wiki.debian.org/SameKernel/#bug2 or ask us at #mempo"
+		ask_quit;
+	fi
+}
 
 
 # deprecated tests - to remove later?
