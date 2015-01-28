@@ -1,6 +1,5 @@
-
 -----------------------------------------------------------
-Cannary v2: this is standard Testimony (this should be signed again for 
+Cannary v2.1: this is standard Testimony (this should be signed again for 
 each release, as a part of the text that is GPG signed, e.g. in gpg git 
 tag comment visible by git tag -v, not just as one of the files).
 
@@ -22,9 +21,9 @@ Always remember to check GPG signatures starting from root of trust,
 write down checksums too, if in doubt check sources yourself.
 
 Builds/development/signature are done (at least) on: 
-[ secured linux computer, NOT air-gapped. ]
+[ computer IFCCS_00003_1::medium certified by mempo.org ]
+see http://mempo.org/#IFCCS_00003_1
 
 Source code parts that are *NOT* audited by me, include especially: 
 * the vanilla kernel sources (but script checks the GPG of it's author)
 * grsecurity patch sources (but script checks the GPG of it's author)
-
