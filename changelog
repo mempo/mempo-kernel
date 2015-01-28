@@ -5,6 +5,7 @@ linux-image (linux-3.2.66-mempo-0.2.103) UNRELEASED; urgency=medium
   * updated seed again
   * v0.2.103-200-rc
   * require library 2.13-38+deb7u7 that Debian now has for CVE-2015-0235
+  * v0.2.103-201-rc
 
  -- mempo <mempo@mempo.org>  Wed, 28 Jan 2015 09:33:00 +0200
 
