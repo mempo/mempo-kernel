@@ -181,7 +181,7 @@ echo -e "=======================================$bcolor_eel"
 echo -e "Running sanity checks$bcolor_eel"
 echo -e "$bcolor_eel$bcolor_zero\n"
 
-bash ./prepare-toolchain.sh || exit 1
+bash ./prepare-toolchain.sh "onlylib" || exit 1
 print_ok_header "Sanity check ended"
 
 echo "You  HAVE TO ALSO:  Check on your own:"

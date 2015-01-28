@@ -1,75 +1,77 @@
 #!/bin/bash
 
 # Test do we have needed tool chain programs 
+# argument 1 can be word "onlylib", in such case we are checking only some libraries
 
 source support.sh
+source dpkg-vercomp.sh
 
 all_ok=1 # is ok so far
 
-echo "Looking for tools"
-source dpkg-vercomp.sh
+arg1="$1"
 
-echo "-----------------------------"
-echo "Dpkg - loading (setting PATH for) local version"
-PATH="$HOME/.local/bin:$PATH" # dpkg
-export PERL5LIB="$HOME/.local/share/perl5" # dpkg needs this
+function prepare_and_also_check_dpkg_version {
+	echo "-----------------------------"
+	echo "Dpkg - loading (setting PATH for) local version"
+	PATH="$HOME/.local/bin:$PATH" # dpkg
+	export PERL5LIB="$HOME/.local/share/perl5" # dpkg needs this
 #export DH_AUTOSCRIPTDIR="$HOME/.local/usr/share/debhelper/autoscripts"
 
-echo "Testing dpkg version"
-echo " * testing with PATH=$PATH"
-tools_dpkg_which=$(which dpkg)
-tools_dpkg_ver=$( $tools_dpkg_which --version | head -n 1 | sed -e 's/.*program version \([^ ]*\).*/\1/' )
-tools_dpkg_vermempo=$( echo $tools_dpkg_ver | sed -e 's/.*-mempo\([0-9+a-zA-Z.]*\).*/\1/g' )
-if [[ $tools_dpkg_vermempo == $tools_dpkg_ver ]] ; then tools_dpkg_vermempo="0.0.0.0.0.NONE"; echo "WARNING: no mempo version detected in dpkg, you are not using mempo version of dpkg" ; fi ;
+	echo "Testing dpkg version"
+	echo " * testing with PATH=$PATH"
+	tools_dpkg_which=$(which dpkg)
+	tools_dpkg_ver=$( $tools_dpkg_which --version | head -n 1 | sed -e 's/.*program version \([^ ]*\).*/\1/' )
+	tools_dpkg_vermempo=$( echo $tools_dpkg_ver | sed -e 's/.*-mempo\([0-9+a-zA-Z.]*\).*/\1/g' )
+	if [[ $tools_dpkg_vermempo == $tools_dpkg_ver ]] ; then tools_dpkg_vermempo="0.0.0.0.0.NONE"; echo "WARNING: no mempo version detected in dpkg, you are not using mempo version of dpkg" ; fi ;
 # | head -n 1 | sed -e 's/.*program version \([^ ]*\).*/\1/' | sed -e 's/.*-mempo\([0-9.]*\).*/\1/g'
 
-export tools_dpkg_which
-export tools_dpkg_ver
-export tools_dpkg_vermempo
+	export tools_dpkg_which
+	export tools_dpkg_ver
+	export tools_dpkg_vermempo
 
-ver_have=$tools_dpkg_vermempo ; ver_need="0.1.24.10"
-vercomp $ver_have $ver_need
-case $? in
-  2) echo ; echo "ERROR: dpkg mempo version is bad (too old?)"
-		echo "We have mempo-version=$ver_have (from dpkg ver $tools_dpkg_ver) while we need mempo-version=$ver_need" ; 
-		echo "You probably did not install our special dpkg version, or you use too old version of it."
-		echo "Please see information on https://wiki.debian.org/SameKernel/#dpkg how to install the required version."  
-		echo "Usually it should be enough to install the speciall dpkg only locally as user (does not require root) so it should be very easy."
-		ask_quit;
-	;;
-esac
-echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo) needed=$ver_need" ; echo ;
+	ver_have=$tools_dpkg_vermempo ; ver_need="0.1.24.10"
+	vercomp $ver_have $ver_need
+	case $? in
+		2) echo ; echo "ERROR: dpkg mempo version is bad (too old?)"
+			echo "We have mempo-version=$ver_have (from dpkg ver $tools_dpkg_ver) while we need mempo-version=$ver_need" ; 
+			echo "You probably did not install our special dpkg version, or you use too old version of it."
+			echo "Please see information on https://wiki.debian.org/SameKernel/#dpkg how to install the required version."  
+			echo "Usually it should be enough to install the speciall dpkg only locally as user (does not require root) so it should be very easy."
+			ask_quit;
+		;;
+	esac
+	echo " * Using $tools_dpkg_which with version $tools_dpkg_ver (mempo version $tools_dpkg_vermempo) needed=$ver_need" ; echo ;
 
-mkdir -p "$HOME/.local/var/lib/dpkg/" # normally should be done by local instalation of dpkg; this allows to run without local dpkg (just a quick test run, which will
+	mkdir -p "$HOME/.local/var/lib/dpkg/" # normally should be done by local instalation of dpkg; this allows to run without local dpkg (just a quick test run, which will
 # NOT work correctly probably - e.g. will not be a SameKernel giving same binary build)
 
-echo "Link dpkg status"
-dpkg_status_target="$HOME/.local/var/lib/dpkg/status"
-[ -e "$dpkg_status_target" ] && rm -rf "$dpkg_status_target"
-if [ -e "$dpkg_status_target" ] ; then 
-	echo "ERROR: failed to remove old dpkg status $dpkg_status_target"
-	exit 2
-fi
-if ! ln -s /var/lib/dpkg/status "$dpkg_status_target"; then
-	echo "ERROR: Could not link dpkg status"
-	exit 2
-fi
+	echo "Link dpkg status"
+	dpkg_status_target="$HOME/.local/var/lib/dpkg/status"
+	[ -e "$dpkg_status_target" ] && rm -rf "$dpkg_status_target"
+	if [ -e "$dpkg_status_target" ] ; then 
+		echo "ERROR: failed to remove old dpkg status $dpkg_status_target"
+		exit 2
+	fi
+	if ! ln -s /var/lib/dpkg/status "$dpkg_status_target"; then
+		echo "ERROR: Could not link dpkg status"
+		exit 2
+	fi
 
-echo "Link dpkg info"
-dpkg_info_target="$HOME/.local/var/lib/dpkg/info" 
-[ -e "$dpkg_info_target" ] && rm -rf "$dpkg_info_target" # (is a file, but still -rf)
-if [ -e "$dpkg_info_target" ] ; then
-	echo "ERROR: failed to remove old dpkg info $dpkg_info_target"
-	exit 2
-fi
-if ! ln -s /var/lib/dpkg/info "$dpkg_info_target"; then
-	echo "ERROR: Could not link dpkg info"
-	exit 2
-fi
-ls -ld "$dpkg_info_target"
+	echo "Link dpkg info"
+	dpkg_info_target="$HOME/.local/var/lib/dpkg/info" 
+	[ -e "$dpkg_info_target" ] && rm -rf "$dpkg_info_target" # (is a file, but still -rf)
+	if [ -e "$dpkg_info_target" ] ; then
+		echo "ERROR: failed to remove old dpkg info $dpkg_info_target"
+		exit 2
+	fi
+	if ! ln -s /var/lib/dpkg/info "$dpkg_info_target"; then
+		echo "ERROR: Could not link dpkg info"
+		exit 2
+	fi
+	ls -ld "$dpkg_info_target"
 
-echo "-----------------------------"
-echo "Version of gcc and C libraries (embed in binaries - affecting build-id)"
+} # prepare_and_also_check_dpkg_version
+
 
 function require_exact_ver() { # ($name,$ver_needed)
 	# IN/OUT: this method increases global variables count_lib_error_exact , count_lib_error_tool ; the caller should zero them 
@@ -108,48 +110,26 @@ function check_versions() {
 		echo "during the build. See also this: https://wiki.debian.org/SameKernel/#bug2 or ask us at #mempo"
 		ask_quit;
 	fi
+
+	echo "Done checking libs"
 }
 
+function check_library_version {
+	echo "-----------------------------"
+	echo "Version of gcc and various C libraries (embed in binaries - affecting build-id)"
+	check_versions
+}
 
-# deprecated tests - to remove later?
-if false ; then
+check_library_version
 
-touch testfile.txt
-tar --mtime "2013-12-24 23:59:01" --sort-input  -c -f testfile.tar testfile.txt
-exitcode=$?
-rm -f testfile.txt ; rm -f testfile.tar
-
-if [[ 0 == "$exitcode" ]]  ; then
-	echo "Ok, the global tar supports extended options"
+if [[ "$arg1" == "onlylib" ]] ; then
+	echo "Checked only the libraries, exiting now before checking other things (e.g. dpkg version)"
+	exit 0 # <<<<---- exit ok
 fi
 
-if [[ 0 != "$exitcode" ]]  ; then
-  PATH="$HOME/.local/usr/bin/:$PATH"
-	echo "Trying with other PATH=$PATH"
+prepare_and_also_check_dpkg_version || { echo "dpkg version failed" ; exit 2; }
 
-	touch testfile.txt
-	tar --mtime "2013-12-24 23:59:01" --sort-input  -c -f testfile.tar testfile.txt
-	exitcode=$?
-	rm -f testfile.txt ; rm -f testfile.tar
 
-	if [[ 0 == "$exitcode" ]]  ; then
-		echo "Ok, the tar supports extended options"
-	else
-		echo "" ; echo "ERROR:"
-		echo "Can not find extended tar with support for --sort-input"
-		echo "Please install it from: "
-		echo "  https://github.com/mempo/mempo-deb/ once this is ready, or while not available use:"
-		echo "  https://github.com/mempo/various/tree/master/tar once this is ready, or while not available use:"
-		exit_error # error
-	fi
-fi
 
-# TODO test also /opt/ and /usr/local/ ?
-
-echo "Final PATH=$PATH"
-
-# export FAKETIME_TIME="$TIMESTAMP_RFC3339" ; # '1970-12-30 18:00:01'
-
-fi
 
 
