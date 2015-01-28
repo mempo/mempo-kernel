@@ -1,3 +1,9 @@
+linux-image (linux-3.2.66-mempo-0.2_103) UNRELEASED; urgency=medium
+  * grsec: ping, net:sctp, kvm x86, x86 tls and ldt fixes
+  * v0.2-103-rc
+
+ -- mempo <mempo@mempo.org>  Wed, 28 Jan 2015 09:33:00 +0200
+
 linux-image (linux-3.2.66-mempo-0.2_102) UNRELEASED; urgency=medium
   * grsec: s2io snprintf; ip:memleak,ipv6,MTU,atomic fragments
   * updated mempo maintainer scripts to increase revision

@@ -1,3 +1,278 @@
+commit 46d784468156a0712d4973b03d7cd6448834851e
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Thu Jan 22 11:27:59 2015 -0800
+
+    x86, tls: Interpret an all-zero struct user_desc as "no segment"
+    
+    The Witcher 2 did something like this to allocate a TLS segment index:
+    
+            struct user_desc u_info;
+            bzero(&u_info, sizeof(u_info));
+            u_info.entry_number = (uint32_t)-1;
+    
+            syscall(SYS_set_thread_area, &u_info);
+    
+    Strictly speaking, this code was never correct.  It should have set
+    read_exec_only and seg_not_present to 1 to indicate that it wanted
+    to find a free slot without putting anything there, or it should
+    have put something sensible in the TLS slot if it wanted to allocate
+    a TLS entry for real.  The actual effect of this code was to
+    allocate a bogus segment that could be used to exploit espfix.
+    
+    The set_thread_area hardening patches changed the behavior, causing
+    set_thread_area to return -EINVAL and crashing the game.
+    
+    This changes set_thread_area to interpret this as a request to find
+    a free slot and to leave it empty, which isn't *quite* what the game
+    expects but should be close enough to keep it working.  In
+    particular, using the code above to allocate two segments will
+    allocate the same segment both times.
+    
+    According to FrostbittenKing on Github, this fixes The Witcher 2.
+    
+    If this somehow still causes problems, we could instead allocate
+    a limit==0 32-bit data segment, but that seems rather ugly to me.
+    
+    Fixes: 41bdc78544b8 x86/tls: Validate TLS entries to protect espfix
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Cc: stable@vger.kernel.org
+    Cc: torvalds@linux-foundation.org
+    Link: http://lkml.kernel.org/r/0cb251abe1ff0958b8e468a9a9a905b80ae3a746.1421954363.git.luto@amacapital.net
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+ arch/x86/include/asm/desc.h |   13 +++++++++++++
+ arch/x86/kernel/tls.c       |   25 +++++++++++++++++++++++--
+ 2 files changed, 36 insertions(+), 2 deletions(-)
+
+commit fbfda9617d4e349cb55343f5b265db7ada6b28f9
+Author: Andy Lutomirski <luto@amacapital.net>
+Date:   Thu Jan 22 11:27:58 2015 -0800
+
+    x86, tls, ldt: Stop checking lm in LDT_empty
+    
+    32-bit programs don't have an lm bit in their ABI, so they can't
+    reliably cause LDT_empty to return true without resorting to memset.
+    They shouldn't need to do this.
+    
+    This should fix a longstanding, if minor, issue in all 64-bit kernels
+    as well as a potential regression in the TLS hardening code.
+    
+    Fixes: 41bdc78544b8 x86/tls: Validate TLS entries to protect espfix
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Andy Lutomirski <luto@amacapital.net>
+    Cc: torvalds@linux-foundation.org
+    Link: http://lkml.kernel.org/r/72a059de55e86ad5e2935c80aa91880ddf19d07c.1421954363.git.luto@amacapital.net
+    Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
+
+ arch/x86/include/asm/desc.h |    9 ++-------
+ 1 files changed, 2 insertions(+), 7 deletions(-)
+
+commit 512a4bad2a5fff934aa1855ba0fa64cd5357733b
+Author: Nadav Amit <namit@cs.technion.ac.il>
+Date:   Thu Jan 1 23:11:11 2015 +0200
+
+    KVM: x86: SYSENTER emulation is broken
+    
+    SYSENTER emulation is broken in several ways:
+    1. It misses the case of 16-bit code segments completely (CVE-2015-0239).
+    2. MSR_IA32_SYSENTER_CS is checked in 64-bit mode incorrectly (bits 0 and 1 can
+       still be set without causing #GP).
+    3. MSR_IA32_SYSENTER_EIP and MSR_IA32_SYSENTER_ESP are not masked in
+       legacy-mode.
+    4. There is some unneeded code.
+    
+    Fix it.
+    
+    Cc: stable@vger.linux.org
+    Signed-off-by: Nadav Amit <namit@cs.technion.ac.il>
+    Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+    
+    Conflicts:
+    
+    	arch/x86/kvm/emulate.c
+    
+    Conflicts:
+    
+    	arch/x86/kvm/emulate.c
+
+ arch/x86/kvm/emulate.c |   23 +++++++----------------
+ 1 files changed, 7 insertions(+), 16 deletions(-)
+
+commit 7a964f0b7ee8c4641cc39ea736e551e24f3fddba
+Author: Daniel Borkmann <dborkman@redhat.com>
+Date:   Thu Jan 22 18:26:54 2015 +0100
+
+    net: sctp: fix slab corruption from use after free on INIT collisions
+    
+    When hitting an INIT collision case during the 4WHS with AUTH enabled, as
+    already described in detail in commit 1be9a950c646 ("net: sctp: inherit
+    auth_capable on INIT collisions"), it can happen that we occasionally
+    still remotely trigger the following panic on server side which seems to
+    have been uncovered after the fix from commit 1be9a950c646 ...
+    
+    [  533.876389] BUG: unable to handle kernel paging request at 00000000ffffffff
+    [  533.913657] IP: [<ffffffff811ac385>] __kmalloc+0x95/0x230
+    [  533.940559] PGD 5030f2067 PUD 0
+    [  533.957104] Oops: 0000 [#1] SMP
+    [  533.974283] Modules linked in: sctp mlx4_en [...]
+    [  534.939704] Call Trace:
+    [  534.951833]  [<ffffffff81294e30>] ? crypto_init_shash_ops+0x60/0xf0
+    [  534.984213]  [<ffffffff81294e30>] crypto_init_shash_ops+0x60/0xf0
+    [  535.015025]  [<ffffffff8128c8ed>] __crypto_alloc_tfm+0x6d/0x170
+    [  535.045661]  [<ffffffff8128d12c>] crypto_alloc_base+0x4c/0xb0
+    [  535.074593]  [<ffffffff8160bd42>] ? _raw_spin_lock_bh+0x12/0x50
+    [  535.105239]  [<ffffffffa0418c11>] sctp_inet_listen+0x161/0x1e0 [sctp]
+    [  535.138606]  [<ffffffff814e43bd>] SyS_listen+0x9d/0xb0
+    [  535.166848]  [<ffffffff816149a9>] system_call_fastpath+0x16/0x1b
+    
+    ... or depending on the the application, for example this one:
+    
+    [ 1370.026490] BUG: unable to handle kernel paging request at 00000000ffffffff
+    [ 1370.026506] IP: [<ffffffff811ab455>] kmem_cache_alloc+0x75/0x1d0
+    [ 1370.054568] PGD 633c94067 PUD 0
+    [ 1370.070446] Oops: 0000 [#1] SMP
+    [ 1370.085010] Modules linked in: sctp kvm_amd kvm [...]
+    [ 1370.963431] Call Trace:
+    [ 1370.974632]  [<ffffffff8120f7cf>] ? SyS_epoll_ctl+0x53f/0x960
+    [ 1371.000863]  [<ffffffff8120f7cf>] SyS_epoll_ctl+0x53f/0x960
+    [ 1371.027154]  [<ffffffff812100d3>] ? anon_inode_getfile+0xd3/0x170
+    [ 1371.054679]  [<ffffffff811e3d67>] ? __alloc_fd+0xa7/0x130
+    [ 1371.080183]  [<ffffffff816149a9>] system_call_fastpath+0x16/0x1b
+    
+    With slab debugging enabled, we can see that the poison has been overwritten:
+    
+    [  669.826368] BUG kmalloc-128 (Tainted: G        W     ): Poison overwritten
+    [  669.826385] INFO: 0xffff880228b32e50-0xffff880228b32e50. First byte 0x6a instead of 0x6b
+    [  669.826414] INFO: Allocated in sctp_auth_create_key+0x23/0x50 [sctp] age=3 cpu=0 pid=18494
+    [  669.826424]  __slab_alloc+0x4bf/0x566
+    [  669.826433]  __kmalloc+0x280/0x310
+    [  669.826453]  sctp_auth_create_key+0x23/0x50 [sctp]
+    [  669.826471]  sctp_auth_asoc_create_secret+0xcb/0x1e0 [sctp]
+    [  669.826488]  sctp_auth_asoc_init_active_key+0x68/0xa0 [sctp]
+    [  669.826505]  sctp_do_sm+0x29d/0x17c0 [sctp] [...]
+    [  669.826629] INFO: Freed in kzfree+0x31/0x40 age=1 cpu=0 pid=18494
+    [  669.826635]  __slab_free+0x39/0x2a8
+    [  669.826643]  kfree+0x1d6/0x230
+    [  669.826650]  kzfree+0x31/0x40
+    [  669.826666]  sctp_auth_key_put+0x19/0x20 [sctp]
+    [  669.826681]  sctp_assoc_update+0x1ee/0x2d0 [sctp]
+    [  669.826695]  sctp_do_sm+0x674/0x17c0 [sctp]
+    
+    Since this only triggers in some collision-cases with AUTH, the problem at
+    heart is that sctp_auth_key_put() on asoc->asoc_shared_key is called twice
+    when having refcnt 1, once directly in sctp_assoc_update() and yet again
+    from within sctp_auth_asoc_init_active_key() via sctp_assoc_update() on
+    the already kzfree'd memory, which is also consistent with the observation
+    of the poison decrease from 0x6b to 0x6a (note: the overwrite is detected
+    at a later point in time when poison is checked on new allocation).
+    
+    Reference counting of auth keys revisited:
+    
+    Shared keys for AUTH chunks are being stored in endpoints and associations
+    in endpoint_shared_keys list. On endpoint creation, a null key is being
+    added; on association creation, all endpoint shared keys are being cached
+    and thus cloned over to the association. struct sctp_shared_key only holds
+    a pointer to the actual key bytes, that is, struct sctp_auth_bytes which
+    keeps track of users internally through refcounting. Naturally, on assoc
+    or enpoint destruction, sctp_shared_key are being destroyed directly and
+    the reference on sctp_auth_bytes dropped.
+    
+    User space can add keys to either list via setsockopt(2) through struct
+    sctp_authkey and by passing that to sctp_auth_set_key() which replaces or
+    adds a new auth key. There, sctp_auth_create_key() creates a new sctp_auth_bytes
+    with refcount 1 and in case of replacement drops the reference on the old
+    sctp_auth_bytes. A key can be set active from user space through setsockopt()
+    on the id via sctp_auth_set_active_key(), which iterates through either
+    endpoint_shared_keys and in case of an assoc, invokes (one of various places)
+    sctp_auth_asoc_init_active_key().
+    
+    sctp_auth_asoc_init_active_key() computes the actual secret from local's
+    and peer's random, hmac and shared key parameters and returns a new key
+    directly as sctp_auth_bytes, that is asoc->asoc_shared_key, plus drops
+    the reference if there was a previous one. The secret, which where we
+    eventually double drop the ref comes from sctp_auth_asoc_set_secret() with
+    intitial refcount of 1, which also stays unchanged eventually in
+    sctp_assoc_update(). This key is later being used for crypto layer to
+    set the key for the hash in crypto_hash_setkey() from sctp_auth_calculate_hmac().
+    
+    To close the loop: asoc->asoc_shared_key is freshly allocated secret
+    material and independant of the sctp_shared_key management keeping track
+    of only shared keys in endpoints and assocs. Hence, also commit 4184b2a79a76
+    ("net: sctp: fix memory leak in auth key management") is independant of
+    this bug here since it concerns a different layer (though same structures
+    being used eventually). asoc->asoc_shared_key is reference dropped correctly
+    on assoc destruction in sctp_association_free() and when active keys are
+    being replaced in sctp_auth_asoc_init_active_key(), it always has a refcount
+    of 1. Hence, it's freed prematurely in sctp_assoc_update(). Simple fix is
+    to remove that sctp_auth_key_put() from there which fixes these panics.
+    
+    Fixes: 730fc3d05cd4 ("[SCTP]: Implete SCTP-AUTH parameter processing")
+    Signed-off-by: Daniel Borkmann <dborkman@redhat.com>
+    Acked-by: Vlad Yasevich <vyasevich@gmail.com>
+    Acked-by: Neil Horman <nhorman@tuxdriver.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/sctp/associola.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit 1301d30706a83116f0c74659878d291fc6608a0e
+Author: subashab@codeaurora.org <subashab@codeaurora.org>
+Date:   Fri Jan 23 22:26:02 2015 +0000
+
+    ping: Fix race in free in receive path
+    
+    An exception is seen in ICMP ping receive path where the skb
+    destructor sock_rfree() tries to access a freed socket. This happens
+    because ping_rcv() releases socket reference with sock_put() and this
+    internally frees up the socket. Later icmp_rcv() will try to free the
+    skb and as part of this, skb destructor is called and which leads
+    to a kernel panic as the socket is freed already in ping_rcv().
+    
+    -->|exception
+    -007|sk_mem_uncharge
+    -007|sock_rfree
+    -008|skb_release_head_state
+    -009|skb_release_all
+    -009|__kfree_skb
+    -010|kfree_skb
+    -011|icmp_rcv
+    -012|ip_local_deliver_finish
+    
+    Fix this incorrect free by cloning this skb and processing this cloned
+    skb instead.
+    
+    This patch was suggested by Eric Dumazet
+    
+    Signed-off-by: Subash Abhinov Kasiviswanathan <subashab@codeaurora.org>
+    Cc: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/ping.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit 27e359f049d7304d2e306ca97db6e89eb1255586
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 27 18:31:25 2015 -0500
+
+    Make it easier to work with inherited subjects that change roles.
+    If a subject of the same name of the current inherited subject
+    exists in the role being changed to with a similar object
+    in it that would trigger inheritance on execution of the current process'
+    binary, then we'll use that subject instead of the normal one obtained
+    through lookup.
+    
+    See:
+    https://forums.grsecurity.net/viewtopic.php?f=3&t=4129
+    
+    Conflicts:
+    
+    	grsecurity/gracl_policy.c
+
+ grsecurity/gracl.c        |   42 ++++++++++++++++++++++++++++++------------
+ grsecurity/gracl_policy.c |   10 +++++-----
+ 2 files changed, 35 insertions(+), 17 deletions(-)
+
 commit f16802f0823a3a303b18789c57a4b7c35449174a
 Author: Dan Carpenter <dan.carpenter@oracle.com>
 Date:   Mon Jan 19 22:34:51 2015 +0300
