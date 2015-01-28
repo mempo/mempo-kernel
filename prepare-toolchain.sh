@@ -4,23 +4,19 @@
 
 source support.sh
 
-all_ok=1
+all_ok=1 # is ok so far
 
 echo "Looking for tools"
-
 source dpkg-vercomp.sh
 
 echo "-----------------------------"
-echo "Dpkg"
-#PATH="$HOME/.local/bin:$PATH"
-#PATH="$HOME/.local/usr/bin:$PATH"
+echo "Dpkg - loading (setting PATH for) local version"
 PATH="$HOME/.local/bin:$PATH" # dpkg
 export PERL5LIB="$HOME/.local/share/perl5" # dpkg needs this
 #export DH_AUTOSCRIPTDIR="$HOME/.local/usr/share/debhelper/autoscripts"
-#export PERL5LIB="$HOME/.local/usr/share/perl5:$PERL5LIB"
 
-echo " * testing with PATH=$PATH"
 echo "Testing dpkg version"
+echo " * testing with PATH=$PATH"
 tools_dpkg_which=$(which dpkg)
 tools_dpkg_ver=$( $tools_dpkg_which --version | head -n 1 | sed -e 's/.*program version \([^ ]*\).*/\1/' )
 tools_dpkg_vermempo=$( echo $tools_dpkg_ver | sed -e 's/.*-mempo\([0-9+a-zA-Z.]*\).*/\1/g' )

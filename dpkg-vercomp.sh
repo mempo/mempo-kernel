@@ -1,6 +1,8 @@
 #!/bin/bash
 # http://stackoverflow.com/questions/4023830/bash-how-compare-two-strings-in-version-format
 
+# A script to compare version/release of packages
+
 vercomp () {
 	a=$(printf "%s\n" "$1" | sed -e 's/\+/\./g')
 	b=$(printf "%s\n" "$2" | sed -e 's/\+/\./g')
