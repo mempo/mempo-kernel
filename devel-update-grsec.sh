@@ -166,9 +166,6 @@ if [[ "$kernel_ver" != "$kernel_general_version" ]] ; then
 	exit 101
 fi
 
-print_ok_header "Main kernel version is OK"
-
-bash devel-update-revision.sh "restart" "batch" || { echo "Can not update revision"; exit 2; }
 
 function update_kernel_version {
 	for kconfig in kernel-build/linux-mempo/configs-kernel/*.kernel-config 
@@ -176,9 +173,9 @@ function update_kernel_version {
 		echo
 		temp=$( mktemp -t "kconfXXXXXX" )
 		echo "Updating: $kconfig with temp=$temp"
-		cat "$kconfig" | gawk 'BEGIN{ FS="="  } $1=="CONFIG_LOCALVERSION" { match($2,/"(-mempo)\.(desk)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)"/,a) ; print $1 "=" "\"" a[1] "." a[2] "." a[3] "." a[4] "." (a[5]+1) "\"" ; next } { print $0 } ' > "$temp"
+		cat "$kconfig" | gawk 'BEGIN{ FS="="  } $1=="CONFIG_LOCALVERSION" { match($2,/"(-mempo)\.([^.]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)"/,a) ; print $1 "=" "\"" a[1] "." a[2] "." a[3] "." a[4] "." (a[5]+1) "\"" ; next } { print $0 } ' > "$temp"
 		echo "Diff:"
-		diff -Nuar "$kconfig" "$temp" || echo "Diff err?"
+		diff -Nuar "$kconfig" "$temp" || { : ; } # why diff is non-zero exit?
 		cp -v "$temp" "$kconfig"
 	done
 	echo "Loop done"
@@ -186,6 +183,11 @@ function update_kernel_version {
 
 echo "Updating kernel version"
 update_kernel_version
+
+print_ok_header "Main kernel version is OK"
+
+bash devel-update-revision.sh "restart" "batch" || { echo "Can not update revision"; exit 2; }
+
 
 echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" ; mywait 
 
