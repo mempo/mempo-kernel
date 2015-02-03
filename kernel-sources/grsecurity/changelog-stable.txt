@@ -1,3 +1,49 @@
+commit d14bff6a2ee562e886a34069980ae2c6956fdd24
+Author: Florian Westphal <fw@strlen.de>
+Date:   Wed Jan 28 10:56:04 2015 +0100
+
+    ppp: deflate: never return len larger than output buffer
+    
+    When we've run out of space in the output buffer to store more data, we
+    will call zlib_deflate with a NULL output buffer until we've consumed
+    remaining input.
+    
+    When this happens, olen contains the size the output buffer would have
+    consumed iff we'd have had enough room.
+    
+    This can later cause skb_over_panic when ppp_generic skb_put()s
+    the returned length.
+    
+    Reported-by: Iain Douglas <centos@1n6.org.uk>
+    Signed-off-by: Florian Westphal <fw@strlen.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ppp/ppp_deflate.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 8dbb050410cd847d7e34cb058f71ce30f8b91310
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 2 17:43:03 2015 -0500
+
+    Backport fix for CVE-2015-1420:
+    http://marc.info/?l=linux-kernel&m=142247707318982&w=2
+    
+    Though it requires CAP_DAC_READ_SEARCH and (additionally in grsec)
+    cannot be performed in a chroot
+
+ fs/fhandle.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit bea8d87e4fd8c70bd96aeaa09378fde6852efe44
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Feb 2 16:57:54 2015 -0500
+
+    Backport from PaX patch:
+    - fixed cc-ldoption to work with the HJL fork of binutils, reported by Rogelio M. Serrano Jr.
+
+ scripts/Kbuild.include |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 46d784468156a0712d4973b03d7cd6448834851e
 Author: Andy Lutomirski <luto@amacapital.net>
 Date:   Thu Jan 22 11:27:59 2015 -0800
