@@ -208,6 +208,7 @@ sums_short="$(echo $sums_short_eol)" # flatten it into one line with no /n
 
 savelater_basedir="$HOME/test/" # save there the files for later reference, each in unique directory e.g. to compare between builds of same version
 savelater_dir="$savelater_basedir/$version/$flavour/$date_start/"
+mkdir -p $savelater_dir
 
 
 cd $pwd_normal
@@ -215,6 +216,8 @@ cd $pwd_normal
 echo "Will save this uniquie build results for later reference: $savelater_dir"
 mkdir -p "$savelater_dir" 
 cp -var kernel-build/linux-mempo/*.deb  "$savelater_dir"
+cp -var --backup=t kernel-build/linux-mempo/vmlinux  "$savelater_dir"
+cp -var --backup=t kernel-build/linux-mempo/linux-*/vmlinux  "$savelater_dir"
 echo "The directory with duplicates of built files (saved for later reference) has following size (you can delete it if you are not comparing kernels)"
 du -sh "$savelater_basedir"
 

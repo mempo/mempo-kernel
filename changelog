@@ -1,5 +1,12 @@
+linux-image (linux-3.2.66-mempo-0.2.104) UNRELEASED; urgency=medium
+  * grsec: CVE-2015-1420; ppp sec fix; toolchain detail
+  * CONFIG_SCHED_OMIT_FRAME_POINTER=n to debug some problems
+  * builders: saving to ~/test/ also the vmlinux (requirest testing)
+  * developers: the update grsec script increases kernel local subversion
+  * v0.2-104-rc
 
-TODO
+ -- mempo <mempo@mempo.org>  Wed, 28 Jan 2015 09:33:00 +0200
+
 
 linux-image (linux-3.2.66-mempo-0.2.103) UNRELEASED; urgency=medium
   * grsec: ping, net:sctp, kvm x86, x86 tls and ldt fixes
