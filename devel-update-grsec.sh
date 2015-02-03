@@ -2,6 +2,7 @@
 # using rss to get newest version of gr, rsstail must be installed!
 
 source 'support.sh' || { echo "Can not load lib" ; exit 1; }
+source 'lib-ifccs_00004.sh' || { echo "Can not load lib lib-ifccs_00004.sh" ; exit 1; }
 
 opt_stable_version="stable" # the 3.2 kernel was "stable2" untill 2014-06-23, now it's "stable". 
 
@@ -172,16 +173,13 @@ bash devel-update-revision.sh "restart" "batch" || { echo "Can not update revisi
 function update_kernel_version {
 	for kconfig in kernel-build/linux-mempo/configs-kernel/*.kernel-config 
 	do
-		temp=$( mktemp "kconfXXXXXX" )
+		echo
+		temp=$( mktemp -t "kconfXXXXXX" )
 		echo "Updating: $kconfig with temp=$temp"
 		cat "$kconfig" | gawk 'BEGIN{ FS="="  } $1=="CONFIG_LOCALVERSION" { match($2,/"(-mempo)\.(desk)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)"/,a) ; print $1 "=" "\"" a[1] "." a[2] "." a[3] "." a[4] "." (a[5]+1) "\"" ; next } { print $0 } ' > "$temp"
 		echo "Diff:"
 		diff -Nuar "$kconfig" "$temp" || echo "Diff err?"
-		echo "Cp"
-		cp "$temp" "$kconfig"
-		echo "rm"
-		rm "$temp"
-		echo "Ok"
+		cp -v "$temp" "$kconfig"
 	done
 	echo "Loop done"
 }
