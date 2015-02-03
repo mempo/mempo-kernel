@@ -7,7 +7,7 @@ echo "==============================================================="
 echo "Updating revision / seed"
 echo ""
 
-arg_metod=$1
+arg_metod=$1 # "increase" or "restart"
 
 arg_batch=$2 # nothing, or "batch", if batch then we are called from other script so do not act as all is done (e.g. calls sanity checks), the caller should
 

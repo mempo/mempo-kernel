@@ -114,6 +114,13 @@ function check_versions() {
 	echo "Done checking libs"
 }
 
+function check_misc {
+	if [[ "$TMPDIR" != "" ]] ; then
+		echo "Variable TMPDIR is not as expected";
+		ask_quit
+	fi
+}
+
 function check_library_version {
 	echo "-----------------------------"
 	echo "Version of gcc and various C libraries (embed in binaries - affecting build-id)"

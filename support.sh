@@ -7,16 +7,11 @@
 source "$(dirname $BASH_SOURCE)/bashcolors.sh" || { echo 'Can not load bashcolors.sh' ; exit 1 ; }
 
 function show_support_info {
-	echo "**************************************************"
-	echo -e "${bcolor_yellow}${bcolor_bgrblack}It seems there was some problem, as written above?${bcolor_zero}"
 	echo ""
 	echo "SUPPORT: for help, see https://wiki.debian.org/Mempo#contact"
-	echo "check for common errors here: read FAQ: https://wiki.debian.org/SameKernel/#FAQ"
-	echo "LOCAL-COPY of part of help pages, doc and FAQ is located here in directory doc-mirror/ !"
-	echo "See #mempo on irc.oftc.net or freenode or irc2p - ask question, wait up to 24 hours, we will reply!"
-	echo "also freenet on FMS boards: linux or mempo (remember to solve captchas) we reply in 1-3 days."
-	echo "also http://mempo.org"
-	echo "( write down all entire messages, last 20-50 lines of text, this will help to solve your issue )"
+	echo "  check for common errors here: read FAQ: https://wiki.debian.org/SameKernel/#FAQ"
+	echo "  See #mempo on irc.oftc.net or freenode or irc2p - ask question, wait up to 24 hours, we will reply!"
+	echo "  also freenet on FMS boards: linux or mempo (1-3 days) also reddit /r/mempo and http://mempo.org/"
 }
 
 function exit_error() {
@@ -52,7 +47,7 @@ function ask_quit() {
 		:
 	else
 		echo "***************************************************************************************"
-		echo -e "${bcolor_bgrblack}${bcolor_yellow}!!! Due to above-mentioned problems, this script will probably not work, e.g. produce other checksums${bcolor_zero}"
+		echo -e "${bcolor_bgrblack}${bcolor_yellow}!!! Due to above-mentioned problems, this script will probably not work correctly${bcolor_zero}"
 		echo "***************************************************************************************"
 	fi
 

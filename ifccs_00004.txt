@@ -1,0 +1,84 @@
+
+IFCCS-00004
+
+ID: IFCCS_00004_0
+Name: for-UNIX secure scripting
+Purpose: Secure way to operate with files, environment, system for scripting and programs
+Date: 2015-02-03 00:00:00 UTC
+Status: Work in progress
+Authors: Members of IFCCS (International Free Computers and Crypto Standards).
+
+This document defines various issues.
+
+=== SECTION A ===
+Temporary files in /tmp/user.bob/.
+
+=== SECTION A 1 ===
+Tempfile name.
+
+Scripts shall store temporary data inside of directory e.g.:
+/tmp/user.bob/ with chmod 700
+with respect to env $TMPDIR1; 
+Assuming TMPDIR1=/tmp and USER=bob we recommend to create temporary files:
+/tmp/user.bob/mc-bob
+/tmp/user.bob/orbit-bob
+/tmp/user.bob/kde-bob
+
+Instead creating them directly in base TMPDIR1 like /tmp/. 
+For following reasons:
+creating files like
+/tmp/mc-bob
+/tmp/kde-bob
+allows other users of system to:
+1) read his files if the umask permissions are too open, which is default on many systems (e.g. Debian)
+2) see the list of files and metadata, allowing to find out user activity (that he runs program mc, and date/time)
+which lowers privacy/security of said user. 
+
+Proposed solution:
+each script implementing IFCCS_00004 MUST choose a newtmpdir variable:
+
+TMPDIR1=$TMPDIR
+if TMPDIR1 is empty then set it to "/tmp". If it contained trailing "/" then remove it
+(but leave it as "/" if that was the entire string "/").
+
+newtmpdir="$TMPDIR1/user.$USER" where $USER is the system user name of system user,
+*however* if the TMPDIR1 already ends in string "/user.$USER" then 
+we MUST NOT define newtmpdir in above way, but instead we MUST use newtmpdir="$TMPDIR1"
+because it already is as recommended - to avoid loop like /tmp/user.bob/user.bob
+
+When the name $newtmpdir is decided, rest of the script should use it for creating temporary files
+e.g. by setting the variable TMPDIR to that value from now on (that rule above will prevent wrong recursion).
+
+For operating system, it should allow users to set such TMPDIR for themselves on each process start.
+
+*TODO* user UID transition.
+Currently EUID change is not supported when process needs access to temporary files created before change.
+
+Future idea is to plan in advance about EUID change, e.g.: from root to www-data, process could create
+/tmp/users.root/www-data/
+write there temporary files while running as root and keep reading them as www-data
+/tmp/users.root/                    = chmod 755, chown root, chgrp root
+/tmp/users.root/www-data            = chmod 770, chown root, chgrp www-data
+and files there could be eg:
+/tmp/users.root/www-data/start      = chmod 740, chown root, chgrp www-data (root writes, www reads)
+/tmp/users.root/www-data/wwwlog     = chmod 460, chown root, chgrp www-data (www writes, root reads on exit)
+
+
+*TODO* for even more complicated cases e.g. with 3 various users, 
+or inner-process communication among them, 
+we could use:
+/tmp/useraction.root/mylog/ where mylog is application name like "mc-" or "kde-",
+and rights for certain users to access these files could be granted with facl / setfacl.
+Hopefuly this scenarious would be not often needed for /tmp/ files.
+
+=== SECTION A 2 ===
+Tempfile permissions and access.
+
+The $newtmpdir directory MUST have permissions 700 (and not special/sticky bit), 
+and must be owned by the UID of the user running given script/program.
+*TODO* cases with user transitions.
+
+The $newtmpdir directory SHOULD NOT be removed on script/program end to avoid any race conditions with other processes.
+How ever of course given script/process should clean up his files inside $newtmpdir normally.
+
+

@@ -167,7 +167,27 @@ fi
 
 print_ok_header "Main kernel version is OK"
 
-bash devel-update-revision.sh "increase" "batch" || { echo "Can not update revision"; exit 2; }
+bash devel-update-revision.sh "restart" "batch" || { echo "Can not update revision"; exit 2; }
+
+function update_kernel_version {
+	for kconfig in kernel-build/linux-mempo/configs-kernel/*.kernel-config 
+	do
+		temp=$( mktemp "kconfXXXXXX" )
+		echo "Updating: $kconfig with temp=$temp"
+		cat "$kconfig" | gawk 'BEGIN{ FS="="  } $1=="CONFIG_LOCALVERSION" { match($2,/"(-mempo)\.(desk)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)"/,a) ; print $1 "=" "\"" a[1] "." a[2] "." a[3] "." a[4] "." (a[5]+1) "\"" ; next } { print $0 } ' > "$temp"
+		echo "Diff:"
+		diff -Nuar "$kconfig" "$temp" || echo "Diff err?"
+		echo "Cp"
+		cp "$temp" "$kconfig"
+		echo "rm"
+		rm "$temp"
+		echo "Ok"
+	done
+	echo "Loop done"
+}
+
+echo "Updating kernel version"
+update_kernel_version
 
 echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" ; mywait 
 
