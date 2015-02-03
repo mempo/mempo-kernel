@@ -167,6 +167,9 @@ if [[ "$kernel_ver" != "$kernel_general_version" ]] ; then
 fi
 
 
+print_ok_header "Main kernel version is OK"
+
+
 function update_kernel_version {
 	for kconfig in kernel-build/linux-mempo/configs-kernel/*.kernel-config 
 	do
@@ -177,6 +180,7 @@ function update_kernel_version {
 		echo "Diff:"
 		diff -Nuar "$kconfig" "$temp" || { : ; } # why diff is non-zero exit?
 		cp -v "$temp" "$kconfig"
+		rm "$temp"
 	done
 	echo "Loop done"
 }
@@ -184,7 +188,12 @@ function update_kernel_version {
 echo "Updating kernel version"
 update_kernel_version
 
-print_ok_header "Main kernel version is OK"
+echo "The version CONFIG_LOCALVERSION was automatically updated." ; mywait_e
+# TODO: find update version name in .config
+vim kernel-build/linux-mempo/configs-kernel/*.kernel-config
+grep "CONFIG_LOCALVERSION" kernel-build/linux-mempo/configs-kernel/*.kernel-config
+echo "^------------- DOES THIS LOOK OK, this are the versions from config file. (edit them now in other window if not correct and press ENTER when done)"
+read _
 
 bash devel-update-revision.sh "restart" "batch" || { echo "Can not update revision"; exit 2; }
 
@@ -252,12 +261,6 @@ mywait
 echo ""
 echo ""
 cat changelog  | grep -B 1 -A 4 linux-image | head -n 4
-echo "Update version CONFIG_LOCALVERSION to mempo version" ; mywait_e
-# TODO: find update version name in .config
-vim kernel-build/linux-mempo/configs-kernel/*.kernel-config
-grep "CONFIG_LOCALVERSION" kernel-build/linux-mempo/configs-kernel/*.kernel-config
-echo "^------------- DOES THIS LOOK OK, this are the versions from config file. (edit them now in other window if not correct and press ENTER when done)"
-read _
 
 
 # TODO generate new block for new mempo version,
