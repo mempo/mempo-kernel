@@ -9,6 +9,8 @@ linux-image (linux-3.2.66-mempo-0.2.104) UNRELEASED; urgency=medium
   * v0.2.104-001-more1
   * fixed name of the added debug kernel: insecuregrsoff (it would not build before)
   * v0.2.104-001-more1fix2
+  * fixed now actually
+  * v0.2.104-001-more1fix3
 
  -- mempo <mempo@mempo.org>  Wed, 28 Jan 2015 09:33:00 +0200
 
