@@ -4,6 +4,8 @@ linux-image (linux-3.2.66-mempo-0.2.104) UNRELEASED; urgency=medium
   * builders: saving to ~/test/ also the vmlinux (requirest testing)
   * developers: the update grsec script increases kernel local subversion
   * v0.2-104-rc
+  * created options: grsoff.ini and deskmaxdbg for debug. Keeping same version/release.
+  * v0.2-104-rc-more1
 
  -- mempo <mempo@mempo.org>  Wed, 28 Jan 2015 09:33:00 +0200
 
