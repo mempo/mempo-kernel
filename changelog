@@ -1,6 +1,8 @@
 linux-image (linux-3.2.66-mempo-0.2.105) UNRELEASED; urgency=high
   * grsec: fix rcu lock imbalance upstream bug
   * v0.2.105-001-rc
+  * deskmaxdbg was not building (was asking config), fixed. Not changing revision/seeds, use this one for that
+  * v0.2.105-001-rc-deskmaxdbg-fix
 
  -- mempo <mempo@mempo.org>  Thu, 05 Feb 2015 17:55:00 +0200
 
