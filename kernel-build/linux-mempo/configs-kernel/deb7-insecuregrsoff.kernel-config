@@ -62,11 +62,7 @@ CONFIG_IRQ_WORK=y
 CONFIG_EXPERIMENTAL=y
 CONFIG_INIT_ENV_ARG_LIMIT=32
 CONFIG_CROSS_COMPILE=""
-<<<<<<< HEAD:kernel-build/linux-mempo/configs-kernel/deb7-insecuregrsoff.kernel-config
-CONFIG_LOCALVERSION="-mempo.insecuregrsoff.0.2.104"
-=======
-CONFIG_LOCALVERSION="-mempo.INSECUREgrsOFF.0.2.105"
->>>>>>> 0x20c24/master:kernel-build/linux-mempo/configs-kernel/deb7-INSECUREgrsOFF.kernel-config
+CONFIG_LOCALVERSION="-mempo.insecuregrsoff.0.2.106"
 # CONFIG_LOCALVERSION_AUTO is not set
 CONFIG_HAVE_KERNEL_GZIP=y
 CONFIG_HAVE_KERNEL_BZIP2=y
