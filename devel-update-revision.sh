@@ -59,9 +59,9 @@ newenv_date=$(date +'%Y-%m-%d %H:%M:%S')
 case $arg_metod in
 "restart")
 		newenv_rev='001'
-		echo "WARNING now you should not restart revisions as we switched to using the same mempo kernel number eg 0.2"
-		echo "Press ENTER to continue if you are sure this is ok"
-		read _
+		# echo "WARNING now you should not restart revisions as we switched to using the same mempo kernel number eg 0.2"
+		# echo "Press ENTER to continue if you are sure this is ok"
+		# read _
   ;;
 "increase")
 	echo "Increase revision"

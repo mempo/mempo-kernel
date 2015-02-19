@@ -1,3 +1,10 @@
+linux-image (linux-3.2.66-mempo-0.2.107) UNRELEASED; urgency=high
+  * grsec: wireshark JIT BPF hardening crash!; request_key/put_key infoleak!
+  * devel script update: we want to reset revisions again: so no warning
+  * v0.2.107-001-rc
+
+ -- mempo <mempo@mempo.org>  Thu, 19 Feb 2015 03:10:00 +0200
+
 linux-image (linux-3.2.66-mempo-0.2.106) UNRELEASED; urgency=high
   * grsec: NET infoleak rds!!! NET sctp race! fs/cifs infoleak! bug() printing; boot crash: #536514,Xen
   * v0.2.106-001-rc
