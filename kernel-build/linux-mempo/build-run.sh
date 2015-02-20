@@ -5,9 +5,11 @@
 # linuxdir = linux-3.2.48   used to create linux-3.2.48.tar file name,
 # dir names etc.
 
-echo "The wrapping build script" # this is the outer script, calling the main script
-
 source ../../support.sh
+
+print_ok_header "Build run wrapper"
+flavour="$1"
+echo "The wrapping build script. flavour=$flavour.ini" # this is the outer script, calling the main script
 
 echo "Loading env.sh"
 source env.sh
@@ -20,9 +22,16 @@ rm -rf $dir
 
 out="mempo-report-$kernel_general_name-5.txt"
 
+ini_file="./configs/$flavour.ini" ; echo "ini_file=$ini_file"
+source "$ini_file"  || { echo "ERROR can not load the ini_file=$ini_file (for flavour=$flavour) in PWD=$PWD, ABORTING" ; exit_error ; }
+echo "kernel_config_name=$kernel_config_name"
+export kernel_config_name
+export config_localversion_name
+export kernel_patch_id_filter
+
 echo ""
 echo "=== PATCH ======================================"
-bash patch.sh "$linuxdir" || { echo "ERROR: in the patch.sh step" ; exit_error ; }
+bash patch.sh "$linuxdir" "$@" || { echo "ERROR: in the patch.sh step" ; exit_error ; }
 
 echo ""
 echo "=== BUILD ======================================"

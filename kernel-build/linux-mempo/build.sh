@@ -11,7 +11,8 @@ if [ -z "$linuxdir" ] ; then
 	echo "ERROR undefined linuxdir." ; exit_error
 fi
 
-echo "Building linuxdir=$linuxdir"
+print_ok_header "Build"
+echo "Building linuxdir=$linuxdir flavour=$flavour"
 
 # TODO
 # echo "Creating sources info"
@@ -65,9 +66,6 @@ pwd_here=$PWD
 	echo "$sources_id"
 	echo "$sources_id" > "../sources_id.txt"
 
-	ini_file="../configs/$flavour.ini"
-	echo "ini_file=$ini_file"
-	source "$ini_file"  || { echo "ERROR can not load the ini_file=$ini_file (for flavour=$flavour) in PWD=$PWD, ABORTING" ; exit_error ; }
 	echo "kernel_config_name=$kernel_config_name"
 
 	# TODO check if config_name is plain [a-zA-Z0-9] and >0 length

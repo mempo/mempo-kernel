@@ -3,6 +3,9 @@
 
 source ../../support.sh
 
+print_ok_header "Patch"
+echo "kernel_config_name=$kernel_config_name"
+
 linuxdir="$1"
 if [ -z "$linuxdir" ] ; then
 	echo "ERROR undefined linuxdir." ; exit_error
@@ -15,7 +18,7 @@ if [ -d "$linuxdir" ] ; then
 	exit_error
 fi
 
-echo "Unpacking/patching sources: $linuxfile"
+echo "Unpacking/patching sources: $linuxfile, using filter kernel_patch_id_filter=$kernel_patch_id_filter"
 tar -xf "$linuxfile" || { echo "Can not unpack linuxfile=$linuxfile" ; exit_error; }
 
 (
@@ -24,7 +27,7 @@ tar -xf "$linuxfile" || { echo "Can not unpack linuxfile=$linuxfile" ; exit_erro
 
 	mkdir -p ../buildlog || { echo "ERROR can not create buildlog"; exit_error; }
 
-	while IFS=, read -r kind reserved1 reserved2 subdir filename hash_type hash localdir
+	egrep $kernel_patch_id_filter ../sourcecode.list | while IFS=, read -r kind reserved1 reserved2 subdir filename hash_type hash localdir
 	do
 		if [ "$kind" == "P" ] ; then
 			echo -n " # patching with: ${filename}... "
@@ -32,7 +35,7 @@ tar -xf "$linuxfile" || { echo "Can not unpack linuxfile=$linuxfile" ; exit_erro
 				|| { echo "ERROR: Patch failed ($filename). " ; exit_error ; }
 			echo " DONE ($filename)"
 		fi
-	done < ../sourcecode.list
+	done
 	echo "Done patching"
 )
 err=$? ; if [[ $err != 0 ]] ; then exit_error $err; fi

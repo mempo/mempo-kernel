@@ -156,7 +156,7 @@ download-and-build-all.sh
 		github clone
 		check github gpg signature with help of git-gpg-check (our program)
 		go to the downloaded sources of eg https://github.com/mempo/deterministic-kernel.git and there:
-			./run-flavour.sh "deskmax"
+			./run-flavour.sh "deb7/deskmax"
 				load env-data
 				check preconditions like UID, PWD, disk free
 				prepare-toolchain.sh
@@ -167,10 +167,10 @@ download-and-build-all.sh
 					build-run.sh "deb7/deskmax" - starts the build since now sources are fully ready
 						it sets export linuxdir="linux-3.2.64"
 						patch.sh "linux-3.2.64"
-							build.sh - calls the actuall build
-								set various env variables and settings to get reproducible build
-								in faketime (and nice etc) call:
-									make-kpkg
+						build.sh - calls the actuall build
+							set various env variables and settings to get reproducible build
+							in faketime (and nice etc) call:
+								make-kpkg
 
 
 === Build and RELEASE (distribute) system for use in mempo. ===
