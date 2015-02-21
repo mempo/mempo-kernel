@@ -1,4 +1,4 @@
-V,ID_kernel_vanilla_ID,x,kernel,linux-3.2.66.tar,sha256,49268e647ea9a8732cc6afc949dea2d77a2956653ae0f65e22f7279b3035f9d4,./
-P,ID_grsecurity_main_ID,x,grsecurity,grsecurity-3.0-3.2.66-201502181907.patch,sha256,b254b1ddb1570fd665164ec84c79a2c15c5061c15dd785d795cfb9daf9f04937,./tmp-path/
+V,ID_kernel_vanilla_ID,x,kernel,linux-3.2.67.tar,sha256,1c2c3c8aadbfc3bb059aa7f47ec8f2360fe270a4f041f2b49046381c1519cfd7,./
+P,ID_grsecurity_main_ID,x,grsecurity,grsecurity-3.0-3.2.67-201502200807.patch,sha256,76bf33c897dfdbf81b22e2b9995e13dbc5f21e00742a800f5e6b0837a7864d10,./tmp-path/
 P,ID_mempo_grsec_ID,x,mempo,grsecurity-3.0-3.2.55-201402152203-mempo-extra.patch,sha256,a8e81062e44ea899af688a326aaebcfd86d759da69b39f6ed66b7a8e7bcf9a8d,./tmp-path/
 P,ID_mempo_determ_ID,x,mempo,linux-3.2.57-grsec-deterministic-build.patch,sha256,aca4001855c4c822c78aee90acc8706a3ffb3b5e4d42f07b4ffe827190d77d59,./tmp-path/
