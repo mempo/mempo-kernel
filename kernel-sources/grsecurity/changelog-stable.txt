@@ -1,3 +1,132 @@
+commit 1614915a5e2ef3f03a5bbf00c7845a86d59dc442
+Merge: eb6b485 4d586f9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 20 07:41:07 2015 -0500
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	mm/mmap.c
+
+commit 4d586f9144673f9fa204a7b849444134895d4c62
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 20 07:38:45 2015 -0500
+
+    revert broken upstream stack accounting code
+
+ mm/mmap.c |    2 --
+ 1 files changed, 0 insertions(+), 2 deletions(-)
+
+commit eb6b485501b7937798b98a0526c9b7efacbdc46a
+Merge: 25f33c2 f0eb7bf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 20 07:38:34 2015 -0500
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	fs/udf/dir.c
+    	mm/mmap.c
+
+commit f0eb7bfc24988bf0ab6fdb76ff3605a251eff502
+Merge: 307172b fd62350
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 20 07:31:03 2015 -0500
+
+    Update to pax-linux-3.2.67-test165.patch:
+    - fixed a few integer type mixups that failed the size overflow checks
+    - increased the early pcpu dynamic slots to survive boot with allyesconfig
+    - fixed potential boot crash when applying alternatives under KERNEXEC/i386
+    - fixed potential integer truncation bug in xlate_dev_mem_ptr under PAE/i386
+    - fail gcc plugins a bit more gracefully on gcc-5
+    - fixed a few shellcheck.net warnings in gcc-plugin.sh
+    - fixed kernel oops caused by accessing invalid virtual addresses via /dev/[k]mem under USERCOPY, reported by minipli
+    - added preliminary support for gcc-5 to gcc-common.h and the constify plugin
+    
+    Merge branch 'linux-3.2.y' into pax-stable
+    
+    Conflicts:
+    	arch/x86/vdso/vma.c
+    	fs/dcache.c
+    	mm/memory.c
+    	net/ipv4/tcp_output.c
+
+commit 25f33c2df1477edbf35b18ef53367d1697b614ca
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 19 21:43:28 2015 -0500
+
+    compile fix
+
+ grsecurity/grsec_chroot.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit fc508f05156fa529dd2f71d7ad85e088d2c29bc6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 19 20:48:10 2015 -0500
+
+    compile fix
+
+ fs/fs_struct.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit 43bbfb1faa88404081967f9b73f8b2c789fc3ccd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 27 19:51:21 2015 -0500
+
+    compile fix for GRKERNSEC_CHROOT_RENAME
+
+ fs/dcache.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit ad4f3b52c64e1f82d9204e90187ec1e45c740045
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 19 20:03:59 2015 -0500
+
+    add some extra enforcement that only forward jumps are permitted
+
+ arch/x86/net/bpf_jit_comp.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
+
+commit ba02e7c5a70374f5890aa0f5ad83092d2a2bbdbf
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Feb 19 19:47:08 2015 -0500
+
+    Properly fix relative (un)conditional jumps with GRKERNSEC_JIT_HARDEN so that we
+    don't land into our added breakpoint instructions
+
+ arch/x86/net/bpf_jit_comp.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit b93889dc063e44437fd75b25a4fefaffa6f075b0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jan 27 17:44:11 2015 -0500
+
+    Add GRKERNSEC_CHROOT_RENAME -- no one reported any problems with my posted
+    patch, so let's introduce the more secure version
+    
+    Conflicts:
+    
+    	include/linux/grsecurity.h
+    
+    Conflicts:
+    
+    	fs/fs_struct.c
+    	grsecurity/grsec_chroot.c
+    	include/linux/grsecurity.h
+
+ fs/dcache.c                |    1 +
+ fs/fs_struct.c             |    7 +++-
+ fs/namei.c                 |    8 ++++
+ grsecurity/Kconfig         |   16 ++++++++
+ grsecurity/grsec_chroot.c  |   82 ++++++++++++++++++++++++++++++++++++++++++++
+ grsecurity/grsec_init.c    |    4 ++
+ grsecurity/grsec_sysctl.c  |    9 +++++
+ include/linux/dcache.h     |    3 ++
+ include/linux/grinternal.h |    1 +
+ include/linux/grmsg.h      |    1 +
+ include/linux/grsecurity.h |    5 +++
+ 11 files changed, 136 insertions(+), 1 deletions(-)
+
 commit da4e988d0eef8c1e2eaba9470049aec58c6ad4d9
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Feb 18 17:48:15 2015 -0500
