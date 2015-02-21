@@ -3,6 +3,8 @@ linux-image (linux-3.2.67-mempo-0.2.108) UNRELEASED; urgency=high
   * grsec: JIT/BPF fixes again; many pax fixes; locking fixes?
   * flavour vanilladbg for testing without grsec patch
   * v0.2.108-001-rc
+  * updated configuration: rename in chroot (grsec)
+  * v0.2.108-002-rc
 
  -- mempo <mempo@mempo.org>  Sun, 21 Feb 2015 01:10:00 +0200
 
