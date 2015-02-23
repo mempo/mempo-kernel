@@ -1,3 +1,8 @@
+linux-image (linux-3.2.67-mempo-0.2.109) UNRELEASED; urgency=medium
+  * grsec: 3.1 (64bit inodes gradm); fixes
+  * devel script update for grsec 3.1
+  * v0.2.109-001-rc
+
 linux-image (linux-3.2.67-mempo-0.2.108) UNRELEASED; urgency=high
   * kernel version update to 3.2.67
   * grsec: JIT/BPF fixes again; many pax fixes; locking fixes?
