@@ -3,6 +3,8 @@ linux-image (linux-3.2.67-mempo-0.2.109) UNRELEASED; urgency=medium
   * devel script update for grsec 3.1
   * v0.2.109-001-rc
 
+ -- mempo <mempo@mempo.org>  Mon, 23 Feb 2015 03:00:00 +0200
+
 linux-image (linux-3.2.67-mempo-0.2.108) UNRELEASED; urgency=high
   * kernel version update to 3.2.67
   * grsec: JIT/BPF fixes again; many pax fixes; locking fixes?
