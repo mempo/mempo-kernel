@@ -5,6 +5,8 @@ linux-image (linux-3.2.67-mempo-0.2.108) UNRELEASED; urgency=high
   * v0.2.108-001-rc
   * updated configuration: rename in chroot (grsec)
   * v0.2.108-002-rc
+  * vanilladbg config corrected.
+  * v0.2.108-002-rc-vanilladbg1 (no change in seed)
 
  -- mempo <mempo@mempo.org>  Sun, 21 Feb 2015 01:10:00 +0200
 
