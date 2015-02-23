@@ -1,3 +1,66 @@
+commit 591d1e124e23119ba7ac837049ec926b81027078
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 22 11:36:26 2015 -0500
+
+    use compat_u64 in the compat code
+
+ include/linux/gracl_compat.h |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 3ad8ef598deeac0b1023d2235fb3e2aa5f91de3c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 22 09:48:42 2015 -0500
+
+    Require version 3.1 gradm to load RBAC
+
+ grsecurity/gracl_compat.c |    3 +--
+ grsecurity/gracl_policy.c |    3 +--
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+commit 929a3359b424a4e27abe7584c2180eb72f95a1bb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 22 08:54:26 2015 -0500
+
+    use div_u64_rem for 32-bit archs
+
+ include/linux/gracl.h |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 76cbe6847478796139d1a25b1a0993a48665fa2f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 22 07:37:57 2015 -0500
+
+    compile fix when grsec is disabled
+
+ grsecurity/grsec_disabled.c |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
+commit 6acea99126791882cdf990aa581726c449164a91
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Feb 22 07:25:43 2015 -0500
+
+    Add support for 64-bit inodes: as this breaks compatibility with gradm, bump
+    the grsecurity version to 3.1
+
+ fs/namei.c                   |    8 ++--
+ grsecurity/gracl.c           |   65 +++++++++++++++++++++++++----------------
+ grsecurity/gracl_policy.c    |    6 ++--
+ grsecurity/gracl_segv.c      |   17 +++++++++--
+ grsecurity/grsec_disabled.c  |    4 +-
+ include/linux/gracl.h        |   14 ++++----
+ include/linux/gracl_compat.h |    6 ++--
+ include/linux/grsecurity.h   |    5 ++-
+ 8 files changed, 76 insertions(+), 49 deletions(-)
+
+commit 743d5c1d30694671da6492b8aef89172ed30dd48
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 20 17:58:04 2015 -0500
+
+    clamp RLIMIT_NOFILE based on sysctl instead of enforcing a 1024 limit in userland
+
+ grsecurity/gracl.c |   19 ++++++++++++++++---
+ 1 files changed, 16 insertions(+), 3 deletions(-)
+
 commit 1614915a5e2ef3f03a5bbf00c7845a86d59dc442
 Merge: eb6b485 4d586f9
 Author: Brad Spengler <spender@grsecurity.net>
