@@ -1,3 +1,79 @@
+commit 0edd2805942f355b5b357d4d3b9ed169a0789355
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Feb 27 08:18:24 2015 -0500
+
+    Fix a PAX_REFCOUNT false positive on the threads_handled statistic field
+    
+    Conflicts:
+    
+    	kernel/irq/manage.c
+
+ include/linux/irqdesc.h |    2 +-
+ kernel/irq/manage.c     |    2 +-
+ kernel/irq/spurious.c   |    2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 5b72f696461c6a084c739c02cc41da0e7d885ae4
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Sat Feb 21 22:19:57 2015 -0500
+
+    autofs4 copy_dev_ioctl(): keep the value of ->size we'd used for allocation
+    
+    X-Coverup: just ask spender
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/autofs4/dev-ioctl.c |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit 760430f3efa04fde7fe36735e136aeef9ae5303c
+Author: Sasha Levin <sasha.levin@oracle.com>
+Date:   Tue Apr 8 16:04:11 2014 -0700
+
+    autofs4: check dev ioctl size before allocating
+    
+    There wasn't any check of the size passed from userspace before trying
+    to allocate the memory required.
+    
+    This meant that userspace might request more space than allowed,
+    triggering an OOM.
+    
+    Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+    Signed-off-by: Ian Kent <raven@themaw.net>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/autofs4/dev-ioctl.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit b490d57dd5c7beb00025afe37b9e78b954c856a5
+Author: Sasha Levin <sasha.levin@oracle.com>
+Date:   Fri Jan 23 20:47:00 2015 -0500
+
+    net: llc: use correct size for sysctl timeout entries
+    
+    The timeout entries are sizeof(int) rather than sizeof(long), which
+    means that when they were getting read we'd also leak kernel memory
+    to userspace along with the timeout values.
+    
+    Signed-off-by: Sasha Levin <sasha.levin@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/llc/sysctl_net_llc.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 2292e135c382b70cc66eb0d53cd8b4181ff4bea2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Feb 25 18:07:08 2015 -0500
+
+    Disable a near-stack-overflow BUG() on x64 where we have
+    GRKERNSEC_KSTACKOVERFLOW to use instead.  Works around a rarely reported issue
+    where it seems for some driver we're executing a copy_*_user on a debug
+    stack instead of on the process stack.
+
+ fs/exec.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 591d1e124e23119ba7ac837049ec926b81027078
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Feb 22 11:36:26 2015 -0500
