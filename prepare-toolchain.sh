@@ -90,7 +90,7 @@ function check_versions() {
 	count_lib_error_exact=0
 	count_lib_error_tool=0
 
-	require_exact_ver "libc6" "2.13-38+deb7u7"
+	require_exact_ver "libc6" "2.13-38+deb7u8"
 	require_exact_ver "gcc" "4:4.7.2-1"
 	require_exact_ver "gcc-4.7" "4.7.2-5"
 	require_exact_ver "gcc-4.7-plugin-dev" "4.7.2-5"
