@@ -1,8 +1,15 @@
+linux-image (linux-3.2.68-mempo-0.2.111) UNRELEASED; urgency=high
+  * new kernel used: 3.2.68
+  * grsec: net dest_net,cb size; ret_from_fork 32/64; ping; SLAB_USERCOPY; powerpc-latent;
+  * v0.2.111-001-rc
+
+ -- mempo <mempo@mempo.org>  Sun, 8 Mar 2015 01:00:00 +0200
+
 linux-image (linux-3.2.67-mempo-0.2.110) UNRELEASED; urgency=high
   * grsec: net/llc memleak! stackoverflow! autofs4 OOM; threads_handled
   * v0.2.110-001-rc
 
- -- mempo <mempo@mempo.org>  Mon, 28 Sat 2015 19:45:00 +0200
+ -- mempo <mempo@mempo.org>  Mon, 28 Feb 2015 19:45:00 +0200
 
 linux-image (linux-3.2.67-mempo-0.2.109) UNRELEASED; urgency=medium
   * grsec: 3.1 (64bit inodes gradm); fixes
