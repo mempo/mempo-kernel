@@ -1,3 +1,114 @@
+commit 5364315c426b0ead29ca879fbab7b7fffd1588c2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 9 18:26:00 2015 -0400
+
+    Fix compilation with plugins, reported by Kamil Kaczkowski.  Apparently the version
+    of gcc 4.6.4 being shipped with some distros is different from that produced by
+    source builds in that it places the c-common.h header file in a different directory.
+    We'll now choose the path used by distros for compatibility reasons.
+
+ tools/gcc/gcc-common.h |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 832270da1a613c1086b9fd8032663d81fdf48051
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 9 18:24:39 2015 -0400
+
+    Backport "console: Fix console name size mismatch" from Peter Hurley
+
+ kernel/printk.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 691c644c696ef5bab09d73364f36f70d02f63676
+Author: Jiri Slaby <jslaby@suse.cz>
+Date:   Fri Feb 27 18:40:31 2015 +0100
+
+    tty: fix up atime/mtime mess, take four
+    
+    This problem was taken care of three times already in
+    * b0de59b5733d18b0d1974a060860a8b5c1b36a2e (TTY: do not update
+      atime/mtime on read/write),
+    * 37b7f3c76595e23257f61bd80b223de8658617ee (TTY: fix atime/mtime
+      regression), and
+    * b0b885657b6c8ef63a46bc9299b2a7715d19acde (tty: fix up atime/mtime
+      mess, take three)
+    
+    But it still misses one point. As John Paul correctly points out, we
+    do not care about setting date. If somebody ever changes wall
+    time backwards (by mistake for example), tty timestamps are never
+    updated until the original wall time passes.
+    
+    So check the absolute difference of times and if it large than "8
+    seconds or so", always update the time. That means we will update
+    immediatelly when changing time. Ergo, CAP_SYS_TIME can foul the
+    check, but it was always that way.
+    
+    Thanks John for serving me this so nicely debugged.
+    
+    Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+    Reported-by: John Paul Perry <john_paul.perry@alcatel-lucent.com>
+    Cc: <stable@vger.kernel.org> # all, as b0b885657 was backported
+    Acked-by: Linus Torvalds <torvalds@linux-foundation.org>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/tty/tty_io.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 6f455c2bd5d38281ccb9e330a313b31c43c90142
+Author: Al Viro <viro@ZenIV.linux.org.uk>
+Date:   Sat Mar 7 21:08:46 2015 +0000
+
+    sunrpc: fix braino in ->poll()
+    
+    POLL_OUT isn't what callers of ->poll() are expecting to see; it's
+    actually __SI_POLL | 2 and it's a siginfo code, not a poll bitmap
+    bit...
+    
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+    Cc: stable@vger.kernel.org
+    Cc: Bruce Fields <bfields@fieldses.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ net/sunrpc/cache.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 7c14b1325c66059a4b14b8cf620d1717b078d205
+Author: Johan Hovold <johan@kernel.org>
+Date:   Wed Mar 4 10:39:06 2015 +0100
+
+    TTY: fix tty_wait_until_sent on 64-bit machines
+    
+    Fix overflow bug in tty_wait_until_sent on 64-bit machines, where an
+    infinite timeout (0) would be passed to the underlying tty-driver's
+    wait_until_sent-operation as a negative timeout (-1), causing it to
+    return immediately.
+    
+    This manifests itself for example as tcdrain() returning immediately,
+    drivers not honouring the drain flags when setting terminal attributes,
+    or even dropped data on close as a requested infinite closing-wait
+    timeout would be ignored.
+    
+    The first symptom  was reported by Asier LLANO who noted that tcdrain()
+    returned prematurely when using the ftdi_sio usb-serial driver.
+    
+    Fix this by passing 0 rather than MAX_SCHEDULE_TIMEOUT (LONG_MAX) to the
+    underlying tty driver.
+    
+    Note that the serial-core wait_until_sent-implementation is not affected
+    by this bug due to a lucky chance (comparison to an unsigned maximum
+    timeout), and neither is the cyclades one that had an explicit check for
+    negative timeouts, but all other tty drivers appear to be affected.
+    
+    Fixes: 1da177e4c3f4 ("Linux-2.6.12-rc2")
+    Cc: stable <stable@vger.kernel.org>	# v2.6.12
+    Reported-by: ZIV-Asier Llano Palacios <asier.llano@cgglobal.com>
+    Signed-off-by: Johan Hovold <johan@kernel.org>
+    Reviewed-by: Peter Hurley <peter@hurleysoftware.com>
+    Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+
+ drivers/tty/tty_ioctl.c |   12 +++++++++---
+ 1 files changed, 9 insertions(+), 3 deletions(-)
+
 commit 1f70370902c9390c3e779a7bd733e59253611d51
 Merge: 48adb39 b53a4ac
 Author: Brad Spengler <spender@grsecurity.net>
