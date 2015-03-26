@@ -1,3 +1,16 @@
+commit 25a83e0374bad9573e80786c13cf12475d911400
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 25 16:53:50 2015 -0400
+
+    Revert an incorrect fix from Dan Rosenberg for a btrfs heap overflow which
+    preserved the vulnerability in some cases.
+    https://lkml.org/lkml/2011/2/9/147
+    
+    Thanks to eswierk from the forums for spotting this!
+
+ fs/btrfs/ioctl.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
 commit 7accd898dbf156b5350cdca7f70c81311b9957c9
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Mar 18 21:45:42 2015 -0400
