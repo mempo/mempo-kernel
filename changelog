@@ -1,3 +1,10 @@
+linux-image (linux-3.2.68-mempo-0.2.114) UNRELEASED; urgency=high
+  * grsec: Revert an incorrect fix for a btrfs heap overflow
+  * v0.2.114-001-rc
+
+ -- mempo <mempo@mempo.org>  Thu, 26 Mar 2015 21:53:00 +0200
+
+
 linux-image (linux-3.2.68-mempo-0.2.113) UNRELEASED; urgency=high
   * grsec: mem corrupt: AF_UNIX, ib_umem_get, rts5139, sysctl_net_core, isdn icn, inet_diag, rds/iw_rdma.c
   * grsec: size_overflow hash, gcc 4.6 compilation, USERCOPY false positive
