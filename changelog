@@ -1,3 +1,9 @@
+linux-image (linux-3.2.68-mempo-0.2.115) UNRELEASED; urgency=high
+  * grsec: nla_memcpy, netlink kmemleak; boot option sysfs, abrt-hook-cpp
+  * v0.2.115-001-rc
+
+ -- mempo <mempo@mempo.org>  Wed, 01 Apr 2015 01:45:00 +0200
+
 linux-image (linux-3.2.68-mempo-0.2.114) UNRELEASED; urgency=high
   * grsec: Revert an incorrect fix for a btrfs heap overflow
   * v0.2.114-001-rc
