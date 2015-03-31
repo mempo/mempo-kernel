@@ -1,3 +1,82 @@
+commit eec6d0e71c80d1fb0f2418bef0930736d2b1c8aa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 31 17:14:21 2015 -0400
+
+    add an additional guard against negative copy lengths on nla_memcpy as
+    signed integers are being used with the expectation that they will always
+    be positive.
+
+ lib/nlattr.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit e2b3eb19b7b27e6542c47c9979fb97a7b5b72509
+Author: Jiri Benc <jbenc@redhat.com>
+Date:   Sun Mar 29 16:05:28 2015 +0200
+
+    netlink: pad nla_memcpy dest buffer with zeroes
+    
+    This is especially important in cases where the kernel allocs a new
+    structure and expects a field to be set from a netlink attribute. If such
+    attribute is shorter than expected, the rest of the field is left containing
+    previous data. When such field is read back by the user space, kernel memory
+    content is leaked.
+    
+    Signed-off-by: Jiri Benc <jbenc@redhat.com>
+    Acked-by: Thomas Graf <tgraf@suug.ch>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ lib/nlattr.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 065c1756ef21185008ece2c75e2e3a3e0fe6b583
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 30 20:57:48 2015 -0400
+
+    compile fix
+
+ init/main.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 1dd318c8b7225895a4f9b8e55bbc325369cd3aaa
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Mar 30 23:28:01 2015 -0400
+
+    Add a boot-time parameter to disable GRKERNSEC_SYSFS_RESTRICT.
+    
+    To disable it at boot time (when compiled into the kernel), use
+    grsec_sysfs_restrict=0
+    on the kernel commandline
+    
+    Conflicts:
+    
+    	Documentation/kernel-parameters.txt
+    	fs/debugfs/inode.c
+    	fs/sysfs/dir.c
+
+ Documentation/kernel-parameters.txt |    4 ++++
+ fs/debugfs/inode.c                  |   15 ++++++++++-----
+ fs/sysfs/dir.c                      |    6 ++++++
+ init/main.c                         |   10 ++++++++++
+ 4 files changed, 30 insertions(+), 5 deletions(-)
+
+commit 425f1f2051bcbd81181dc77af511a7ec74a45b8d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 25 18:40:53 2015 -0400
+
+    Add allowance for /usr/libexec/abrt-hook-cpp to be executed as a usermode helper, as observed on some cPanel systems
+
+ kernel/kmod.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit d8146886b870a2c72eca4c48842fa444fb1da7fb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Mar 25 18:36:57 2015 -0400
+
+    update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
 commit 25a83e0374bad9573e80786c13cf12475d911400
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Wed Mar 25 16:53:50 2015 -0400
