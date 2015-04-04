@@ -1,3 +1,100 @@
+commit 798dc8036640b1e950095d9e3850f906b93adc36
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 17:36:28 2015 -0400
+
+    fix typo
+
+ kernel/trace/ring_buffer.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ba24a613272baf988cc7c73d9fce42e75dc1f636
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 17:25:47 2015 -0400
+
+    backport:
+    - fixed some REFCOUNT false positives in the tracing ring buffer code, reported by metarox (https://forums.grsecurity.net/viewtopic.php?f=3&t=4186)
+
+ kernel/trace/ring_buffer.c |   12 ++++++------
+ 1 files changed, 6 insertions(+), 6 deletions(-)
+
+commit 75bdf38048377ce8bfd0ab24d66af39156c7248c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 09:38:13 2015 -0400
+
+    move backported cpu check
+
+ arch/x86/kernel/cpu/common.c |   20 ++++++++++----------
+ 1 files changed, 10 insertions(+), 10 deletions(-)
+
+commit d08d78ee07545b194e2be3e3f6177b1614f0f6cc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 09:29:48 2015 -0400
+
+    update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
+
+commit aba4ad6f4d69a6a6c8bbd36e5e3e09dc300410d2
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 08:57:55 2015 -0400
+
+    update size_overflow hash
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit 57a8a7ec36812bf64d043c0df171c03bafb2541f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 08:28:06 2015 -0400
+
+    compile fix
+
+ arch/x86/kernel/cpu/common.c |    4 ----
+ 1 files changed, 0 insertions(+), 4 deletions(-)
+
+commit 8d71a5684d4d64a8c9332c20d60fb24eb722e76b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 08:17:32 2015 -0400
+
+    Backport fix for crash with old PAGEEXEC method and PSE, reported by Merlin
+
+ arch/x86/kernel/cpu/common.c |   10 ++++++++++
+ 1 files changed, 10 insertions(+), 0 deletions(-)
+
+commit d26a970bc14a1cf9305a927cd39fdc973f832640
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 08:03:59 2015 -0400
+
+    update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    8 ++++++--
+ 1 files changed, 6 insertions(+), 2 deletions(-)
+
+commit ca92e78bdd6e85b3ec771c9b815dd0a480a8f475
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 2 08:02:11 2015 -0400
+
+    fix the infiniband vuln properly, since nobody seems to know how
+    access_ok actually works and that it's the correct fix here
+
+ arch/sparc/include/asm/uaccess_32.h  |    1 +
+ arch/sparc/include/asm/uaccess_64.h  |    5 +++++
+ drivers/infiniband/core/uverbs_cmd.c |    3 +++
+ 3 files changed, 9 insertions(+), 0 deletions(-)
+
+commit b1317682ea1b680491e3939895e0b084e11d975a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Mar 31 19:15:03 2015 -0400
+
+    backport a fix for the skb_gso_segment() null pointer deref fixed
+    in upstream commit 330966e501ffe282d7184fde4518d5e0c24bc7f8 but never
+    queued up for any -stable fixes apparently.
+
+ net/netfilter/nf_queue.c |    2 +-
+ net/xfrm/xfrm_output.c   |    2 ++
+ 2 files changed, 3 insertions(+), 1 deletions(-)
+
 commit eec6d0e71c80d1fb0f2418bef0930736d2b1c8aa
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Mar 31 17:14:21 2015 -0400
