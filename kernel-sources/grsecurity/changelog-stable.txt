@@ -1,3 +1,232 @@
+commit 87f3e57baff74dc19fe69e50b1804fc2d233ee1c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 22:56:35 2015 -0400
+
+    fix escaping of unix domain paths added in previous patch
+
+ net/unix/af_unix.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 86fbe5640b869ea4fb966382a07af30b185fbbc6
+Author: Sowmini Varadhan <sowmini.varadhan@oracle.com>
+Date:   Wed Apr 8 12:33:47 2015 -0400
+
+    RDS: make sure not to loop forever inside rds_send_xmit
+    
+    If a determined set of concurrent senders keep the send queue full,
+    we can loop forever inside rds_send_xmit.  This fix has two parts.
+    
+    First we are dropping out of the while(1) loop after we've processed a
+    large batch of messages.
+    
+    Second we add a generation number that gets bumped each time the
+    xmit bit lock is acquired.  If someone else has jumped in and
+    made progress in the queue, we skip our goto restart.
+    
+    Original patch by Chris Mason.
+    
+    Signed-off-by: Sowmini Varadhan <sowmini.varadhan@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/rds/connection.c |    1 +
+ net/rds/rds.h        |    1 +
+ net/rds/send.c       |   33 +++++++++++++++++++++++++++++++--
+ 3 files changed, 33 insertions(+), 2 deletions(-)
+
+commit 1b06d848eefdf56df8fda3a3b84ebb9dda322657
+Author: Stephan Mueller <smueller@chronox.de>
+Date:   Thu Mar 12 09:17:51 2015 +0100
+
+    crypto: aesni - fix memory usage in GCM decryption
+    
+    The kernel crypto API logic requires the caller to provide the
+    length of (ciphertext || authentication tag) as cryptlen for the
+    AEAD decryption operation. Thus, the cipher implementation must
+    calculate the size of the plaintext output itself and cannot simply use
+    cryptlen.
+    
+    The RFC4106 GCM decryption operation tries to overwrite cryptlen memory
+    in req->dst. As the destination buffer for decryption only needs to hold
+    the plaintext memory but cryptlen references the input buffer holding
+    (ciphertext || authentication tag), the assumption of the destination
+    buffer length in RFC4106 GCM operation leads to a too large size. This
+    patch simply uses the already calculated plaintext size.
+    
+    In addition, this patch fixes the offset calculation of the AAD buffer
+    pointer: as mentioned before, cryptlen already includes the size of the
+    tag. Thus, the tag does not need to be added. With the addition, the AAD
+    will be written beyond the already allocated buffer.
+    
+    Note, this fixes a kernel crash that can be triggered from user space
+    via AF_ALG(aead) -- simply use the libkcapi test application
+    from [1] and update it to use rfc4106-gcm-aes.
+    
+    Using [1], the changes were tested using CAVS vectors to demonstrate
+    that the crypto operation still delivers the right results.
+    
+    [1] http://www.chronox.de/libkcapi.html
+    
+    CC: Tadeusz Struk <tadeusz.struk@intel.com>
+    Cc: stable@vger.kernel.org
+    Signed-off-by: Stephan Mueller <smueller@chronox.de>
+    Signed-off-by: Herbert Xu <herbert@gondor.apana.org.au>
+
+ arch/x86/crypto/aesni-intel_glue.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 7a98a4581392b190f805dd4befd2a1d7f999b0d0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 17:46:33 2015 -0400
+
+    Revert this for the time being -- I want to more closely match
+    the original behavior if possible, so it needs a little more
+    work.
+    
+    This reverts commit dfe78d5f846ab72aa6d51911cf93cb5f07d4d03b.
+
+ fs/exec.c                   |    9 ++++++-
+ fs/proc/array.c             |    2 +-
+ grsecurity/gracl.c          |   44 ++++++++++++++++++++++++++++++++++++++++++
+ grsecurity/gracl_res.c      |   45 -------------------------------------------
+ grsecurity/grsec_disabled.c |   13 ------------
+ include/linux/sched.h       |    7 +----
+ kernel/acct.c               |    3 --
+ kernel/fork.c               |    2 +-
+ kernel/posix-cpu-timers.c   |    5 ++-
+ mm/mmap.c                   |    5 ++-
+ 10 files changed, 61 insertions(+), 74 deletions(-)
+
+commit baa51a476eca7e76e8f31ef32e17504918f42718
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 17:46:24 2015 -0400
+
+    Revert "fix typo"
+    
+    This reverts commit fb5a8dfe9a3061c5709941111d5d3f0f13ed96fc.
+
+ grsecurity/gracl_res.c      |    4 ++--
+ grsecurity/grsec_disabled.c |    4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit eb75529c98f16078376edb71a12f98e85da744f0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 17:46:11 2015 -0400
+
+    Revert "compile fix"
+    
+    This reverts commit 70e84614b1fc0aa75de8abb24f50b478f96ef28d.
+
+ grsecurity/gracl_res.c |    1 -
+ 1 files changed, 0 insertions(+), 1 deletions(-)
+
+commit cc5b3b25743b9328242ff8e111660297d72d0379
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 17:44:48 2015 -0400
+
+    make the usermodehelper message more generic about paths
+
+ kernel/kmod.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit fc4b31888ba6e1ea852382091ebda6a433f72cfb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 17:34:32 2015 -0400
+
+    Prevent /proc/net/unix from containing newlines or tabs in filenames
+    as used in:
+    http://seclists.org/oss-sec/2015/q2/143
+
+ net/unix/af_unix.c |   19 +++++++++++++++++--
+ 1 files changed, 17 insertions(+), 2 deletions(-)
+
+commit fd3797577bfa896e6b3ff4bf884fcf783f2c4133
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Apr 14 17:13:02 2015 -0400
+
+    Backport gcc plugin changes from 3.14
+
+ scripts/gcc-plugin.sh                          |    2 +-
+ tools/gcc/.gitignore                           |    1 +
+ tools/gcc/colorize_plugin.c                    |    7 +-
+ tools/gcc/gcc-common.h                         |  149 +++++++++++++++++++++++-
+ tools/gcc/latent_entropy_plugin.c              |    3 +-
+ tools/gcc/size_overflow_plugin/size_overflow.h |   10 +-
+ tools/gcc/stackleak_plugin.c                   |    3 +-
+ 7 files changed, 164 insertions(+), 11 deletions(-)
+
+commit 70e84614b1fc0aa75de8abb24f50b478f96ef28d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 13 19:44:37 2015 -0400
+
+    compile fix
+
+ grsecurity/gracl_res.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit fb5a8dfe9a3061c5709941111d5d3f0f13ed96fc
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 13 19:43:36 2015 -0400
+
+    fix typo
+
+ grsecurity/gracl_res.c      |    4 ++--
+ grsecurity/grsec_disabled.c |    4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit dfe78d5f846ab72aa6d51911cf93cb5f07d4d03b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 13 19:23:01 2015 -0400
+
+    Modify the resource handling of RBAC so that it doesn't actually
+    modify the user-visible resource limits.  We now won't have to
+    copy the entire rlimit array on each exec or have any special
+    handing for setting rlimits via a subject.  Since most kernel
+    code is now using rlimit() and variants, we place ourselves
+    there to provide a minimum of the process' original limit
+    and RBAC's mandatory limits.  This also removes the exception
+    of RBAC's resource handling being capable of providing higher
+    resource limits than normally possible for a given process.
+
+ fs/exec.c                   |    9 +------
+ fs/proc/array.c             |    2 +-
+ grsecurity/gracl.c          |   44 ------------------------------------------
+ grsecurity/gracl_res.c      |   45 +++++++++++++++++++++++++++++++++++++++++++
+ grsecurity/grsec_disabled.c |   13 ++++++++++++
+ include/linux/sched.h       |    7 ++++-
+ kernel/acct.c               |    3 ++
+ kernel/fork.c               |    2 +-
+ kernel/posix-cpu-timers.c   |    5 +--
+ mm/mmap.c                   |    5 +--
+ 10 files changed, 74 insertions(+), 61 deletions(-)
+
+commit f36775fad604e617564de12c2a6707203512c9cd
+Author: Joe Perches <joe@perches.com>
+Date:   Mon Mar 23 18:01:35 2015 -0700
+
+    selinux: fix sel_write_enforce broken return value
+    
+    Return a negative error value like the rest of the entries in this function.
+    
+    Cc: <stable@vger.kernel.org>
+    Signed-off-by: Joe Perches <joe@perches.com>
+    Acked-by:  Stephen Smalley <sds@tycho.nsa.gov>
+    [PM: tweaked subject line]
+    Signed-off-by: Paul Moore <pmoore@redhat.com>
+
+ security/selinux/selinuxfs.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit a94607d737d77dad48c24abe27e097846b540f42
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 13 07:43:01 2015 -0400
+
+    Allow usermodehelper executions from /usr/bin/ for distros plagued
+    by Lennart's bikeshedding, as reported in
+    https://bugs.archlinux.org/task/44568
+
+ kernel/kmod.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 798dc8036640b1e950095d9e3850f906b93adc36
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Thu Apr 2 17:36:28 2015 -0400
