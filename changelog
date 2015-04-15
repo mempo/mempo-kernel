@@ -3,6 +3,7 @@ linux-image (linux-3.2.68-mempo-0.2.117) UNRELEASED; urgency=high
   * grsec: RDS: make sure not to loop forever inside rds_send_xmit;
   * grsec: Backport gcc plugin changes from 3.14; RBAC resource handling modification
   * grsec: Allow usermodehelper executions from /usr/bin/
+  * grsec: af_unix fix escaping of unix domain paths
   * v0.2.117-001-rc
 
  -- mempo <mempo@mempo.org>  Sat, 15 Apr 2015 08:27:00 +0200
