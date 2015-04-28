@@ -1,3 +1,117 @@
+commit def1c6f2ead1dd9b1115db95a2f2c3c7b54f0bcb
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Apr 27 07:31:18 2015 -0400
+
+    Backport GCC 5.1 support
+
+ include/linux/compiler-gcc5.h     |    3 --
+ tools/gcc/colorize_plugin.c       |    4 +-
+ tools/gcc/constify_plugin.c       |   11 +++++--
+ tools/gcc/gcc-common.h            |   24 ++++++++++++++-
+ tools/gcc/kallocstat_plugin.c     |   11 +++++--
+ tools/gcc/kernexec_plugin.c       |   59 ++++++++++++++++++++++++++----------
+ tools/gcc/latent_entropy_plugin.c |   12 +++++--
+ tools/gcc/stackleak_plugin.c      |   22 ++++++++++---
+ tools/gcc/structleak_plugin.c     |   25 ++++++++++++----
+ 9 files changed, 127 insertions(+), 44 deletions(-)
+
+commit 0a93a118992ffa23e1033e0330d2996b3203bf02
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Apr 26 16:09:26 2015 -0400
+
+    compile fix
+
+ fs/exec.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 308f5d5d33b0de2e686060560055518a6ca245ff
+Author: David S. Miller <davem@davemloft.net>
+Date:   Fri Apr 17 15:15:40 2015 -0400
+
+    sfc: Fix memcpy() with const destination compiler warning.
+    
+    drivers/net/ethernet/sfc/selftest.c: In function ‘efx_iterate_state’:
+    drivers/net/ethernet/sfc/selftest.c:388:9: warning: passing argument 1 of ‘memcpy’ discards ‘const’ qualifier from pointer target type [-Wdiscarded-array-qualifiers]
+    
+    This is because the msg[] member of struct efx_loopback_payload
+    is marked as 'const'.  Remove that.
+    
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/ethernet/sfc/selftest.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 45009beecf6ef95319de265086e78a987e3e2bfd
+Author: Jann Horn <jann@thejh.net>
+Date:   Sun Apr 19 02:48:39 2015 +0200
+
+    fs: take i_mutex during prepare_binprm for set[ug]id executables
+    
+    This prevents a race between chown() and execve(), where chowning a
+    setuid-user binary to root would momentarily make the binary setuid
+    root.
+    
+    This patch was mostly written by Linus Torvalds.
+    
+    Signed-off-by: Jann Horn <jann@thejh.net>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	fs/exec.c
+    
+    Conflicts:
+    
+    	fs/exec.c
+
+ fs/exec.c |   76 ++++++++++++++++++++++++++++++++++++-------------------------
+ 1 files changed, 45 insertions(+), 31 deletions(-)
+
+commit ff8def064f6bb06ba8b176e2b402b508a1b507b0
+Author: Kirill Tkhai <ktkhai@parallels.com>
+Date:   Thu Apr 16 12:48:01 2015 -0700
+
+    fs/exec.c:de_thread: move notify_count write under lock
+    
+    We set sig->notify_count = -1 between RELEASE and ACQUIRE operations:
+    
+    	spin_unlock_irq(lock);
+    	...
+    	if (!thread_group_leader(tsk)) {
+    		...
+                    for (;;) {
+    			sig->notify_count = -1;
+                            write_lock_irq(&tasklist_lock);
+    
+    There are no restriction on it so other processors may see this STORE
+    mixed with other STOREs in both areas limited by the spinlocks.
+    
+    Probably, it may be reordered with the above
+    
+    	sig->group_exit_task = tsk;
+    	sig->notify_count = zap_other_threads(tsk);
+    
+    in some way.
+    
+    Set it under tasklist_lock locked to be sure nothing will be reordered.
+    
+    Signed-off-by: Kirill Tkhai <ktkhai@parallels.com>
+    Acked-by: Oleg Nesterov <oleg@redhat.com>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ fs/exec.c |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+commit 533e02a98c35103cf6f0e4fc4abee6f629636530
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Apr 25 21:37:30 2015 -0400
+
+    Update RANDSTRUCT plugin to support GCC 5.1
+
+ tools/gcc/randomize_layout_plugin.c |   12 +++++++-----
+ 1 files changed, 7 insertions(+), 5 deletions(-)
+
 commit 87f3e57baff74dc19fe69e50b1804fc2d233ee1c
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Apr 14 22:56:35 2015 -0400
