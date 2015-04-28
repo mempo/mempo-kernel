@@ -1,3 +1,12 @@
+linux-image (linux-3.2.68-mempo-0.2.118) UNRELEASED; urgency=medium
+  * grsec: Backport GCC 5.1 support
+  * grsec: sfc: Fix memcpy() with const destination compiler warning.
+  * grsec: fs: take i_mutex during prepare_binprm for set[ug]id executables
+  * grsec: fs/exec.c:de_thread: move notify_count write under lock 
+  * v0.2.118-001-rc
+
+ -- mempo <mempo@mempo.org>  Sat, 28 Apr 2015 08:27:00 +0200
+
 linux-image (linux-3.2.68-mempo-0.2.117) UNRELEASED; urgency=high
   * grsec: crypto: aesni - fix memory usage in GCM decryption;
   * grsec: RDS: make sure not to loop forever inside rds_send_xmit;
