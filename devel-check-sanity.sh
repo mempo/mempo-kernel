@@ -184,9 +184,9 @@ echo -e "$bcolor_eel$bcolor_zero\n"
 bash ./prepare-toolchain.sh "onlylib" || exit 1
 print_ok_header "Sanity check ended"
 
-echo "You  HAVE TO ALSO:  Check on your own:"
+echo "We did not checked some other things, they were probably done by devel-update script but you can confirm:"
 echo "  * Does all kernelconfig files contain correct name version of mempo like '0.1.92' did you INCREASED it if needed? See README.md"
-echo "  * Does changelog have the correct entry block for new mempo version if that was needed? See README.md"
+echo "  * Does changelog have the new entry on top (with proper DATE and version in head/foot of the entry)"
 echo "other then that, that is all."
 
 if [[ "$opt_batch" == "no" ]] ; then

@@ -261,6 +261,16 @@ mywait
 echo ""
 echo ""
 cat changelog  | grep -B 1 -A 4 linux-image | head -n 4
+mywait
+
+echo "Now I will show you what was changed and now commited from grsec."
+echo "Write down a summary to add to our changelog based on the diff with grsec changelog:"
+mywait
+
+git show HEAD
+
+echo "Now opening editor. Remember to change the DATE and VERSION OF MEMPO there"
+mywait
 
 
 # TODO generate new block for new mempo version,
@@ -285,6 +295,6 @@ mywait
 
 bash devel-check-sanity.sh || { echo "It seems sanity checks failed? I will exit then." ; exit 102; }
 echo "Ok that is all. Thanks."
-echo ; echo "also, REMEMBER to also EDIT THE changelog file before commiting!" ; echo
+# echo ; echo "also, REMEMBER to also EDIT THE changelog file before commiting!" ; echo
 mywait
 

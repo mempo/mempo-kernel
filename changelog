@@ -1,3 +1,13 @@
+linux-image (linux-3.2.68-mempo-0.2.119) UNRELEASED; urgency=medium
+  * grsec: fix own-bug: GRKERNSEC_CHROOT_RENAME / CLONE_FS
+  * grsec: pax: false-positive raid5
+  * grsec: pax: signed int fixes zlib, get_user x86, mmc error handler
+  * grsec: pax: LTO fixes
+  * grsec: porting to gcc 5 and compile fixes
+  * v0.2.119-001-rc
+
+ -- mempo <mempo@mempo.org>  Sat, 01 May 2015 10:14:30 +0200
+
 linux-image (linux-3.2.68-mempo-0.2.118) UNRELEASED; urgency=medium
   * grsec: Backport GCC 5.1 support
   * grsec: sfc: Fix memcpy() with const destination compiler warning.
