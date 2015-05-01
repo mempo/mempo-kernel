@@ -1,3 +1,158 @@
+commit 0baf8370967e9882079a3b8f4044d55e50996954
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 30 19:40:23 2015 -0400
+
+    Fix a refcount underflow reported by Jan Hejl caused by GRKERNSEC_CHROOT_RENAME
+    We failed to increment the tree in copy_fs_struct, so users of clone with
+    CLONE_FS who then exited caused a decrement of the refcounts with no associated
+    increment.  This would generally occur on / and took at least a month on
+    a heavily-loaded system to trigger.  It shouldn't cause any security problems
+    as no freeing is associated with the refcount, and the only interesting value
+    is 0, which permits renames in that tree.  I've tested this fixed implementation
+    to ensure the refcounts are under control in both directions.
+
+ fs/fs_struct.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 7e576c1e0c3affc3d074d20023987068dec14dc4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 30 08:42:48 2015 -0400
+
+    compile fix
+
+ arch/x86/kernel/apic/io_apic.c |    2 +-
+ drivers/xen/events.c           |    6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 854af2d5a6205dc0140cc9a5d965c014f4713782
+Merge: 1e2a5f5 1fc75df
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 30 08:42:12 2015 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit 1fc75dff2760dfb7a5917698577a6946fde8805c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 30 08:41:57 2015 -0400
+
+    Update to pax-linux-3.2.68-test170.patch:
+    - fixed compilation errors due to some overzealous constification of irq_chip variables, reported by spender
+
+ arch/x86/kernel/apic/io_apic.c |    4 ++--
+ drivers/xen/events.c           |    6 +++---
+ 2 files changed, 5 insertions(+), 5 deletions(-)
+
+commit 1e2a5f5ad440487e4cb17e8cbd17932ebb99a88d
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu Apr 30 07:16:44 2015 -0400
+
+    compile fix
+
+ drivers/xen/events.c |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 194c3cf240f1606dc51af7466646b44e4ec7da9b
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 29 22:34:18 2015 -0400
+
+    compile fix
+
+ arch/x86/kernel/apic/io_apic.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 64d9fdff41de53618377e012b6aeca908cf656de
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 29 22:36:56 2015 -0400
+
+    compile fix
+
+ tools/gcc/gcc-common.h |   45 ---------------------------------------------
+ 1 files changed, 0 insertions(+), 45 deletions(-)
+
+commit ef834e332e0553f1653ac11646968716bed8c3e2
+Merge: def1c6f ad13b69
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 29 21:47:53 2015 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	security/Kconfig
+    	tools/gcc/gcc-common.h
+
+commit ad13b6908bd3b7d4fd3fac297c1a58b3b3120e5e
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed Apr 29 21:44:47 2015 -0400
+
+    Update to pax-linux-3.2.68-test169.patch:
+    - fixed a false positive size overflow bug in raid5, reported by jack mort (https://bugs.gentoo.org/show_bug.cgi?id=545492)
+    - the overflow plugin caught an incorrect sign conversion in zlib, reported by Attila TÃ³th (https://bugs.gentoo.org/show_bug.cgi?id=545776)
+    - the overflow plugin caught an incorrect sign conversion in get_user on x86, reported by GÃ¡bor Hasenfrasz (https://forums.grsecurity.net/viewtopic.php?f=3&t=4188)
+    - ported all plugins to gcc-5 except size overflow
+    - fixed integer signedness mixup in mmc error code handling, caught by the size overflow plugin, reported by Tom Seewald
+    - fixed a few section conflicts exposed by LTO
+    - fixed the latent entropy plugin for LTO
+    - fixed the stackleak plugin for LTO
+
+ arch/sparc/include/asm/uaccess_32.h            |    1 +
+ arch/sparc/include/asm/uaccess_64.h            |    5 +
+ arch/x86/include/asm/page_32.h                 |    2 +-
+ arch/x86/include/asm/page_64_types.h           |    2 +-
+ arch/x86/include/asm/uaccess.h                 |   11 +-
+ arch/x86/kernel/apic/io_apic.c                 |    4 +-
+ arch/x86/kernel/apm_32.c                       |    2 +-
+ arch/x86/kernel/cpu/common.c                   |   14 +-
+ arch/x86/kernel/reboot.c                       |    2 +-
+ crypto/zlib.c                                  |    4 +-
+ drivers/acpi/bus.c                             |    4 +-
+ drivers/acpi/ec.c                              |    2 +-
+ drivers/acpi/pci_slot.c                        |    2 +-
+ drivers/acpi/processor_core.c                  |    2 +-
+ drivers/acpi/sleep.c                           |    2 +-
+ drivers/acpi/thermal.c                         |    2 +-
+ drivers/acpi/video.c                           |    2 +-
+ drivers/char/i8k.c                             |    2 +-
+ drivers/char/sonypi.c                          |    2 +-
+ drivers/firmware/google/gsmi.c                 |    2 +-
+ drivers/firmware/google/memconsole.c           |    2 +-
+ drivers/hwmon/acpi_power_meter.c               |    2 +-
+ drivers/infiniband/core/uverbs_cmd.c           |    3 +
+ drivers/input/touchscreen/htcpen.c             |    2 +-
+ drivers/md/raid5.c                             |   12 +-
+ drivers/net/ethernet/via/via-rhine.c           |    2 +-
+ drivers/pci/pcie/portdrv_pci.c                 |    2 +-
+ drivers/platform/x86/compal-laptop.c           |    2 +-
+ drivers/platform/x86/hdaps.c                   |    2 +-
+ drivers/platform/x86/ibm_rtl.c                 |    2 +-
+ drivers/platform/x86/intel_oaktrail.c          |    2 +-
+ drivers/platform/x86/msi-laptop.c              |    2 +-
+ drivers/platform/x86/samsung-laptop.c          |    2 +-
+ drivers/platform/x86/samsung-q10.c             |    2 +-
+ drivers/platform/x86/sony-laptop.c             |    2 +-
+ drivers/pnp/pnpbios/core.c                     |    2 +-
+ drivers/xen/events.c                           |    6 +-
+ include/linux/compiler-gcc5.h                  |    2 -
+ include/linux/compiler.h                       |    2 +
+ include/linux/mmc/core.h                       |    2 +-
+ include/linux/syscalls.h                       |    3 +-
+ include/net/netlink.h                          |   10 +
+ kernel/trace/ring_buffer.c                     |   12 +-
+ mm/madvise.c                                   |    4 +-
+ net/l2tp/l2tp_ip.c                             |    2 +-
+ scripts/gcc-plugin.sh                          |    2 +-
+ security/Kconfig                               |    2 +-
+ tools/gcc/Makefile                             |    2 +-
+ tools/gcc/colorize_plugin.c                    |   11 +-
+ tools/gcc/constify_plugin.c                    |   11 +-
+ tools/gcc/gcc-common.h                         |  297 +++++++++++++++++++++++-
+ tools/gcc/kallocstat_plugin.c                  |   11 +-
+ tools/gcc/kernexec_plugin.c                    |   63 ++++--
+ tools/gcc/latent_entropy_plugin.c              |   24 ++-
+ tools/gcc/size_overflow_plugin/size_overflow.h |   10 +-
+ tools/gcc/stackleak_plugin.c                   |   55 ++++-
+ tools/gcc/structleak_plugin.c                  |   25 ++-
+ 57 files changed, 545 insertions(+), 123 deletions(-)
+
 commit def1c6f2ead1dd9b1115db95a2f2c3c7b54f0bcb
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Apr 27 07:31:18 2015 -0400
