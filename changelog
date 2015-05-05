@@ -1,3 +1,9 @@
+linux-image (linux-3.2.68-mempo-0.2.121) UNRELEASED; urgency=medium
+  * grsec: fixed a bunch of NULL function pointer dereference regressions in the compat drm ioctl code for i915/mga/r128/radeon, reported by minipli
+  * v0.2.121-001-rc
+
+ -- mempo <mempo@mempo.org>  Sat, 05 May 2015 08:40:30 +0200
+
 linux-image (linux-3.2.68-mempo-0.2.120) UNRELEASED; urgency=medium
   * grsec: ipv4: Missing sk_nulls_node_init() in ping_unhash().
   * v0.2.120-001-rc
