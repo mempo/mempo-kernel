@@ -1,3 +1,23 @@
+commit c1d714093f257f05e9513ea72a17d55a6d3fd3ad
+Merge: ff5cfd8 bee8f9a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 4 19:36:14 2015 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit bee8f9a8e65a87c104f0f31c8747ff4240e5baa7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon May 4 19:35:53 2015 -0400
+
+    Update to pax-linux-3.2.68-test171.patch:
+    - fixed a bunch of NULL function pointer dereference regressions in the compat drm ioctl code for i915/mga/r128/radeon, reported by minipli
+
+ drivers/gpu/drm/i915/i915_ioc32.c     |   13 ++++++-------
+ drivers/gpu/drm/mga/mga_ioc32.c       |    7 +++----
+ drivers/gpu/drm/r128/r128_ioc32.c     |    7 +++----
+ drivers/gpu/drm/radeon/radeon_ioc32.c |    7 +++----
+ 4 files changed, 15 insertions(+), 19 deletions(-)
+
 commit ff5cfd8d5e09199432ebf729d03dbd9b20c74db6
 Author: David S. Miller <davem@davemloft.net>
 Date:   Fri May 1 22:02:47 2015 -0400
