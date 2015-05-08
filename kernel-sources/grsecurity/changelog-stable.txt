@@ -1,3 +1,47 @@
+commit 813308a7db37854542b4452ef7808ee38f25f1d2
+Merge: 9d08c90 f1cc348
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 7 18:28:38 2015 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit f1cc348c69051d8a58237bdbb3fdb771c0d2a4ad
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 7 18:28:04 2015 -0400
+
+    Update to pax-linux-3.2.68-test173.patch:
+    - worked around a gcc induced intentional overflow in the bunzip decompressor, reported by Martin Filo (https://bugs.gentoo.org/show_bug.cgi?id=548508)
+    - F_SETPIPE_SZ handling ignored pipe_min_size and could trigger the size overflow instrumentation, reported by minipli
+    - fixed an integer signedness mixup in a parameter of semop and semtimedop, by minipli
+
+ fs/pipe.c                |   13 ++++++++-----
+ include/linux/compat.h   |    2 +-
+ include/linux/syscalls.h |    4 ++--
+ ipc/compat.c             |    2 +-
+ ipc/sem.c                |    4 ++--
+ lib/decompress_bunzip2.c |    3 ++-
+ 6 files changed, 16 insertions(+), 12 deletions(-)
+
+commit 9d08c9084b135cacccd2fe9ea0ca7e41ae6a8d84
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Thu May 7 18:01:36 2015 -0400
+
+    Even though in the history of autoconfig it has never tripped anyone
+    up under realistic use cases (e.g. nobody starts a config, enables
+    only CONFIG_GRKERNSEC, then exits menuconfig, then loads it back up
+    and tries to apply an autoconfig setting) explicitly mention that you
+    cannot do it and expect the autoconfig to work.  Due to how the Kbuild
+    system works, we can't apply defaults and also allow them to be modified
+    via custom settings -- if they're 'select'ed then they can't be modified,
+    and using 'select' violates any dependencies that may exist.  Therefore
+    we have to resort to using 'default', which after a user has already chosen
+    all the settings by virtue of enabling CONFIG_GRKERNSEC and then saving their
+    complete kernel config, cannot have any effect as the options have now all
+    been chosen and there's no 'default' applicable.
+
+ security/Kconfig |    5 +++++
+ 1 files changed, 5 insertions(+), 0 deletions(-)
+
 commit c1d714093f257f05e9513ea72a17d55a6d3fd3ad
 Merge: ff5cfd8 bee8f9a
 Author: Brad Spengler <spender@grsecurity.net>
