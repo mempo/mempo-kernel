@@ -1,3 +1,9 @@
+linux-image (linux-3.2.68-mempo-0.2.122) UNRELEASED; urgency=medium
+  * grsec: bunzip false gcc overflow; F_SETPIPE_SZ pipe_min_size; semtimedop/semop sign
+  * v0.2.122-001-rc
+
+ -- mempo <mempo@mempo.org>  Sat, 07 May 2015 03:30:00 +0200
+
 linux-image (linux-3.2.68-mempo-0.2.121) UNRELEASED; urgency=medium
   * grsec: fixed a bunch of NULL function pointer dereference regressions in the compat drm ioctl code for i915/mga/r128/radeon, reported by minipli
   * (git commit message update)
