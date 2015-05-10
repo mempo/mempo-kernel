@@ -1,3 +1,187 @@
+commit 577b968ed6fcf3d9e3b6de0e45e3d6cf80af15c9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 10 11:16:18 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 6178e173f21d9ab1121c90db3c1bfa3655c52285
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 10 10:31:54 2015 -0400
+
+    Update size_overflow hash table
+
+ .../size_overflow_plugin/size_overflow_hash.data   |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+commit fcf8bbbf9a815d2431fe664b917dbf44271bba35
+Merge: 70fc60d 6b71bd6
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 10 10:30:41 2015 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit 6b71bd614295b6a79680327058140dad7eafc9cd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 10 10:30:25 2015 -0400
+
+    Update to pax-linux-3.2.69-test173.patch
+
+ arch/x86/kernel/traps.c  |    2 +-
+ include/linux/compiler.h |    8 ++++----
+ kernel/trace/ftrace.c    |    2 --
+ 3 files changed, 5 insertions(+), 7 deletions(-)
+
+commit 70fc60ddae5089ff56db4eafee75cfa64b63a25a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 10 09:51:57 2015 -0400
+
+    compile fix
+
+ arch/x86/kernel/traps.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 90052e90ee56d8def1a775eef8c1dafa10d17c4a
+Merge: 321b4a8 a6ec535
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 10 08:57:35 2015 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	fs/exec.c
+    	fs/udf/inode.c
+    	net/ipv4/ip_sockglue.c
+
+commit a6ec535ffc2a318ee17e3aa818204f5c0c05b527
+Merge: f1cc348 d9f31c5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 10 08:49:43 2015 -0400
+
+    Merge branch 'linux-3.2.y' into pax-stable
+    
+    Conflicts:
+    	include/linux/compiler.h
+    	kernel/trace/ftrace.c
+
+commit 321b4a805257805ab97a4d215c3497ed0523d970
+Author: Jason A. Donenfeld <Jason@zx2c4.com>
+Date:   Wed May 6 15:09:40 2015 +0200
+
+    usbnet: avoid integer overflow in start_xmit
+    
+    transfer_buffer_length is of type u32. It's therefore wrong to assign it
+    to a signed integer. This patch avoids the overflow.
+    
+    It's worth noting that entry->length here is a long; perhaps it would be
+    beneficial at somepoint to change this to be unsigned as well, if
+    nothing else relies on its signedness for error conditions or the like.
+    
+    Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/usb/usbnet.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 69d7ed75345f15799589d4b91b6a4799dd6b9b58
+Author: Christophe Leroy <christophe.leroy@c-s.fr>
+Date:   Wed May 6 17:26:47 2015 +0200
+
+    splice: sendfile() at once fails for big files
+    
+    Using sendfile with below small program to get MD5 sums of some files,
+    it appear that big files (over 64kbytes with 4k pages system) get a
+    wrong MD5 sum while small files get the correct sum.
+    This program uses sendfile() to send a file to an AF_ALG socket
+    for hashing.
+    
+    /* md5sum2.c */
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <unistd.h>
+    #include <string.h>
+    #include <fcntl.h>
+    #include <sys/socket.h>
+    #include <sys/stat.h>
+    #include <sys/types.h>
+    #include <linux/if_alg.h>
+    
+    int main(int argc, char **argv)
+    {
+    	int sk = socket(AF_ALG, SOCK_SEQPACKET, 0);
+    	struct stat st;
+    	struct sockaddr_alg sa = {
+    		.salg_family = AF_ALG,
+    		.salg_type = "hash",
+    		.salg_name = "md5",
+    	};
+    	int n;
+    
+    	bind(sk, (struct sockaddr*)&sa, sizeof(sa));
+    
+    	for (n = 1; n < argc; n++) {
+    		int size;
+    		int offset = 0;
+    		char buf[4096];
+    		int fd;
+    		int sko;
+    		int i;
+    
+    		fd = open(argv[n], O_RDONLY);
+    		sko = accept(sk, NULL, 0);
+    		fstat(fd, &st);
+    		size = st.st_size;
+    		sendfile(sko, fd, &offset, size);
+    		size = read(sko, buf, sizeof(buf));
+    		for (i = 0; i < size; i++)
+    			printf("%2.2x", buf[i]);
+    		printf("  %s\n", argv[n]);
+    		close(fd);
+    		close(sko);
+    	}
+    	exit(0);
+    }
+    
+    Test below is done using official linux patch files. First result is
+    with a software based md5sum. Second result is with the program above.
+    
+    root@vgoip:~# ls -l patch-3.6.*
+    -rw-r--r--    1 root     root         64011 Aug 24 12:01 patch-3.6.2.gz
+    -rw-r--r--    1 root     root         94131 Aug 24 12:01 patch-3.6.3.gz
+    
+    root@vgoip:~# md5sum patch-3.6.*
+    b3ffb9848196846f31b2ff133d2d6443  patch-3.6.2.gz
+    c5e8f687878457db77cb7158c38a7e43  patch-3.6.3.gz
+    
+    root@vgoip:~# ./md5sum2 patch-3.6.*
+    b3ffb9848196846f31b2ff133d2d6443  patch-3.6.2.gz
+    5fd77b24e68bb24dcc72d6e57c64790e  patch-3.6.3.gz
+    
+    After investivation, it appears that sendfile() sends the files by blocks
+    of 64kbytes (16 times PAGE_SIZE). The problem is that at the end of each
+    block, the SPLICE_F_MORE flag is missing, therefore the hashing operation
+    is reset as if it was the end of the file.
+    
+    This patch adds SPLICE_F_MORE to the flags when more data is pending.
+    
+    With the patch applied, we get the correct sums:
+    
+    root@vgoip:~# md5sum patch-3.6.*
+    b3ffb9848196846f31b2ff133d2d6443  patch-3.6.2.gz
+    c5e8f687878457db77cb7158c38a7e43  patch-3.6.3.gz
+    
+    root@vgoip:~# ./md5sum2 patch-3.6.*
+    b3ffb9848196846f31b2ff133d2d6443  patch-3.6.2.gz
+    c5e8f687878457db77cb7158c38a7e43  patch-3.6.3.gz
+    
+    Signed-off-by: Christophe Leroy <christophe.leroy@c-s.fr>
+    Signed-off-by: Jens Axboe <axboe@fb.com>
+
+ fs/splice.c |   12 +++++++++++-
+ 1 files changed, 11 insertions(+), 1 deletions(-)
+
 commit 813308a7db37854542b4452ef7808ee38f25f1d2
 Merge: 9d08c90 f1cc348
 Author: Brad Spengler <spender@grsecurity.net>
