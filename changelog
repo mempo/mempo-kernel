@@ -1,3 +1,11 @@
+
+linux-image (linux-3.2.69-mempo-0.2.124) UNRELEASED; urgency=high
+  * grsec: size overflow false positive squashfs (by Martin Vath)
+  * grsec: fixed /proc/kcore regression to not return uninitialized memory !
+
+ -- mempo <mempo@mempo.org>  Sat, 15 May 2015 00:10:00 +0200
+
+
 linux-image (linux-3.2.69-mempo-0.2.123) UNRELEASED; urgency=medium
   * new kernel used: 3.2.69
   * grsec: pax update, compile fixes, size_overflow hash table updates
