@@ -1,3 +1,12 @@
+commit a8d8e8106a40b50db4f5bc89f03cae550f5a4071
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun May 17 14:22:18 2015 -0400
+
+    Fix an ICE in the RANDSTRUCT plugin on GCC 5.1 reported and fixed by pipacs
+
+ tools/gcc/randomize_layout_plugin.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
 commit e0e4c89c9a105d5359b543a847cbe298bf85fe14
 Merge: 577b968 72e2b50
 Author: Brad Spengler <spender@grsecurity.net>
