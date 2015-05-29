@@ -267,7 +267,7 @@ echo "Now I will show you what was changed and now commited from grsec."
 echo "Write down a summary to add to our changelog based on the diff with grsec changelog:"
 mywait
 
-git show HEAD || { echo "Error in git show? Ignoring." }
+git show HEAD || { echo "Error in git show? Ignoring." ; }
 
 echo "Now opening editor. Remember to change the DATE and VERSION OF MEMPO there"
 mywait
