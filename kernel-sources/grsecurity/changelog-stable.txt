@@ -1,3 +1,23 @@
+commit 54b6695eaa28ffa87efb9fbafcbf3532484e76c2
+Merge: 9610345 ad86648
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 27 19:24:17 2015 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit ad8664877959e5e4d027b1441f1e4a5c9abc7ec0
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Wed May 27 19:21:54 2015 -0400
+
+    Update to pax-linux-3.2.69-test175.patch:
+    - fixed a regression in the structleak plugin that would disable it under LTO
+    - synchronized some plugin files with the other trees
+
+ tools/gcc/constify_plugin.c   |    3 ++-
+ tools/gcc/gcc-common.h        |   23 +++++++++++++++++++++++
+ tools/gcc/structleak_plugin.c |    2 +-
+ 3 files changed, 26 insertions(+), 2 deletions(-)
+
 commit 96103451e5718d3cce1f504f553413b58d16639f
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon May 18 18:01:08 2015 -0400
