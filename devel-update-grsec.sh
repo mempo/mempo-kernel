@@ -79,7 +79,7 @@ function download() {
 
 	# TODO detect if we are re-downloading same file again, if that link redirects to a file name that we already have 
 	# for the kernel/sig and then report a bug that this is the same version so no need for upgrade
-	wget --timeout=5  http://grsecurity.net/changelog-${opt_stable_version}.txt  $url $url.sig 
+	wget --timeout=15  http://grsecurity.net/changelog-${opt_stable_version}.txt  $url $url.sig 
 	sha256=$(sha256deep  -q  $new_grsec)  ;  cd ../..
 	set +x
 } 
