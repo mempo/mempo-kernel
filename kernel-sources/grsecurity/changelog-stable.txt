@@ -1,3 +1,69 @@
+commit 188395da0792bc5c094f4f1c954e12d02c27b95f
+Author: Rusty Russell <rusty@rustcorp.com.au>
+Date:   Wed May 27 10:59:26 2015 +0930
+
+    lguest: fix out-by-one error in address checking.
+    
+    This bug has been there since day 1; addresses in the top guest physical
+    page weren't considered valid.  You could map that page (the check in
+    check_gpte() is correct), but if a guest tried to put a pagetable there
+    we'd check that address manually when walking it, and kill the guest.
+    
+    Signed-off-by: Rusty Russell <rusty@rustcorp.com.au>
+    Cc: stable@kernel.org
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+
+ drivers/lguest/core.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit c9d6e6f29bb91c3cb735fd9b73f990d7cc7ea540
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Thu May 28 23:09:19 2015 -0400
+
+    d_walk() might skip too much
+    
+    when we find that a child has died while we'd been trying to ascend,
+    we should go into the first live sibling itself, rather than its sibling.
+    
+    Off-by-one in question had been introduced in "deal with deadlock in
+    d_walk()" and the fix needs to be backported to all branches this one
+    has been backported to.
+    
+    Cc: stable@vger.kernel.org # 3.2 and later
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/dcache.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 04453e48d367ed485741e260c63971d56f9465df
+Author: Eric Dumazet <edumazet@google.com>
+Date:   Sat May 30 09:16:53 2015 -0700
+
+    udp: fix behavior of wrong checksums
+    
+    We have two problems in UDP stack related to bogus checksums :
+    
+    1) We return -EAGAIN to application even if receive queue is not empty.
+       This breaks applications using edge trigger epoll()
+    
+    2) Under UDP flood, we can loop forever without yielding to other
+       processes, potentially hanging the host, especially on non SMP.
+    
+    This patch is an attempt to make things better.
+    
+    We might in the future add extra support for rt applications
+    wanting to better control time spent doing a recv() in a hostile
+    environment. For example we could validate checksums before queuing
+    packets in socket receive queue.
+    
+    Signed-off-by: Eric Dumazet <edumazet@google.com>
+    Cc: Willem de Bruijn <willemb@google.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ipv4/udp.c |    6 ++----
+ net/ipv6/udp.c |    6 ++----
+ 2 files changed, 4 insertions(+), 8 deletions(-)
+
 commit 54b6695eaa28ffa87efb9fbafcbf3532484e76c2
 Merge: 9610345 ad86648
 Author: Brad Spengler <spender@grsecurity.net>
