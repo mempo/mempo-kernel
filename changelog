@@ -1,3 +1,9 @@
+
+linux-image (linux-3.2.69-mempo-0.2.128) UNRELEASED; urgency=high
+  * grsec linux: lguest memory fix; d_walk() deadlock; UDP flood hang
+
+ -- mempo <mempo@mempo.org>  Tue,  4 Jun 2015 01:25:00 +0200
+
 linux-image (linux-3.2.69-mempo-0.2.127) UNRELEASED; urgency=medium
   * grsec: fix structleak plugin that would disable itself under LTO
 
