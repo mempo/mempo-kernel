@@ -1,4 +1,11 @@
 
+linux-image (linux-3.2.69-mempo-0.2.129) UNRELEASED; urgency=high
+  * grsec fix CVE-2015-1805 privilage! 
+  * grsec compat_get_bitmap possible bug
+  * grsec -std=gnu89 for HOSTCFLAGS
+
+ -- mempo <mempo@mempo.org>  Tue,  9 Jun 2015 12:00:00 +0200
+
 linux-image (linux-3.2.69-mempo-0.2.128) UNRELEASED; urgency=high
   * grsec linux: lguest memory fix; d_walk() deadlock; UDP flood hang
 
