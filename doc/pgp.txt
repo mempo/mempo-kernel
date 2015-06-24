@@ -1,19 +1,5 @@
-= = = = = = = = = = = = = = =
-List of PGP keys and their security levels:
-33D3 8C87 97A7 A35E D8BC  AF1F 4EBE 40EA EFF6 2C7F - key rfree, medium
-21A5 9D31 7421 F02E C3C3  81F3 4623 E8F7 4595 3F23 - key rfree-mempo, medium
 
-key rfree is for preparing work for Mempo (and for many other FOSS projects)
-key rfree-mempo is for more finall signature after some review, for Mempo
+The information that was in this file is now moved to mian README (README.md) file.
 
-The security levels like "medium" are defined in IFCCS_00003_1::medium etc, see
-<https://ifccs.org/ifccs00003_1> (or mirror on <http://mempo.org/#IFCCS_00003_1>)
 
-You can confirm this keys with: 
-  https://github.org/mempo/ (registered Nov 2013) 
-  http://mempo.org , http://mempo.i2p , http://www.mempo.i2p/ 
-  https://wiki.debian.org/Mempo#pgp (but more people can edit Wiki)
-  IRC history, Freenet FMS chat history.
-to assert that this PGP keys in fact are historically authorized as the established 
-"Mempo" project and as user "rfree".
-= = = = = = = = = = = = = = =
+
