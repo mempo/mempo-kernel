@@ -258,31 +258,32 @@ other then that (and the [home_readlink] fixed in git tag v0.1.98-01-release-ver
 
 * [home_readlink] (check for this problem was added in v0.1.98-01-release-verify1) Not only the $PWD must be identical: /home/kernelbuild, but in addition the real name, e.g. readpath /home/kernelbuild must also be identical. 
 Some of the officially released kernels (on http://deb.mempo.org/ and previously in archives) 
-might require that the readpath is /homebig/kernelbuild/ 
-or /home2/kernelbuild/
+might require that the readpath is /homesrv/kernelbuild/ 
+(it was instead /homebig/kernelbuild/ up untill version 0.2.130-002)
+(or possibly /home2/kernelbuild/ - it was used too previously at some point, afair)
 
 Check for that is being added now (in special tag v0.1.98-01-release-verify1 for version v0.1.98, so should be normal part of v0.1.99 and the expected path is on top of run-flavour.sh).
 
 See difference between unpacked files to find out what is the real path.
-If you see there /homebig (or /home2) then you must create identical setup.
+If you see there /homesrv (or /homebig or /home2) then you must create identical setup.
 If you do not have a separate partition for that, this can be "faked" with mount -o bind.
 For example, as root:
 
 mkdir /home/fakehome/ 
 mv -i /home/kernelbuild/ /home/fakehome/   # move real data
-mkdir /homebig
-mount /home/fakehome/ /homebig  -o bind   # the bind
+mkdir /homesrv
+mount /home/fakehome/ /homesrv  -o bind   # the bind
 unlink /home/kernelbuild   # remove old link
-ln -s /homebig/kernelbuild /home/kernelbuild
+ln -s /homesrv/kernelbuild /home/kernelbuild
 echo "CHECK:" ; readlink /home/kernelbuild
-echo "Should say that this is in example /homebig/kernelbuild or /home/kernelbuild - the readlink directory that you want to fake"
+echo "Should say that this is in example /homesrv/kernelbuild or /home/kernelbuild - the readlink directory that you want to fake"
 
-So /home/kernelbuild will be a symlink into /homebig/kernelbuild , and in that directory 
+So /home/kernelbuild will be a symlink into /homesrv/kernelbuild , and in that directory 
 you will create/download all the files e.g. mempobot or deterministic-kernel. 
 
 Once you have the condition that:
 	$HOME is /home/kernelbuild 
-	and readlink $HOME is /homebig/kernelbuild
+	and readlink $HOME is /homesrv/kernelbuild
 then home / readlink home situation is solved, and you should
 enter that directory and execute the normal build procesdure (so e.g. for v0.1.98 it would be to run mempobot script download-and-build-all.sh as described above). 
 

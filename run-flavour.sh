@@ -12,7 +12,7 @@ version=$( git describe --tags )
 computer=$HOSTNAME
 date_start=$( date -u +%s )
 
-good_readlink_HOME="/homebig/kernelbuild/" # this changes with versions/releases, see doc/build.txt , bookmark [home_readlink]. backlink: if you would remove/mov this line, update doc/build.txt as it references us.
+good_readlink_HOME="/homesrv/kernelbuild/" # this changes with versions/releases, see doc/build.txt , bookmark [home_readlink]. backlink: if you would remove/mov this line, update doc/build.txt as it references us.
 
 # set -x 
 mkdir -p kernel-sources/kernel

@@ -2,6 +2,9 @@ linux-image (linux-3.2.69-mempo-0.2.130) UNRELEASED; urgency=medium
   * grsec compile fix
   * grsec warnings in tracing check for balanced ops
   * grsec skb_gso_segment ethtool RTNL/atomic fix
+  * v.0.2.130-001-rc
+  * changed the build directory real name (readlink) to homesrv from homebig
+  * v.0.2.130-002-rc
 
  -- mempo <mempo@mempo.org>  Wed, 24 Jun 2015 12:50:00 +0200
 
