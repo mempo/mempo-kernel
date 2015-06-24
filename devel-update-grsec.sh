@@ -188,19 +188,18 @@ function update_kernel_version {
 echo "Updating kernel version"
 update_kernel_version
 
-echo "The version CONFIG_LOCALVERSION was automatically updated." ; mywait_e
+echo "The version CONFIG_LOCALVERSION was automatically updated." 
+# mywait_e
 # TODO: find update version name in .config
-vim kernel-build/linux-mempo/configs-kernel/*.kernel-config
+#vim kernel-build/linux-mempo/configs-kernel/*.kernel-config
 grep "CONFIG_LOCALVERSION" kernel-build/linux-mempo/configs-kernel/*.kernel-config
 echo "^------------- DOES THIS LOOK OK, this are the versions from config file. (edit them now in other window if not correct and press ENTER when done)"
 read _
 
 bash devel-update-revision.sh "restart" "batch" || { echo "Can not update revision"; exit 2; }
 
-
-echo "Update sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" ; mywait 
-
-#mywait
+echo "OK, Updated sources to github https://github.com/mempo/deterministic-kernel/ or vyrly or rfree (the newest one)" 
+mywait 
 
 echo "[AUTO] GIT: remove all old patches first"
 git rm "$gr_path/*.patch" ""$gr_path/*.patch.sig || { 
@@ -247,7 +246,7 @@ mywait
 
 
 echo "Now we will increase mempo version"
-mywait
+# mywait
 
 # . devel-update-version.sh "$@" 
 
@@ -261,10 +260,11 @@ mywait
 echo ""
 echo ""
 cat changelog  | grep -B 1 -A 4 linux-image | head -n 4
-mywait
+# mywait
+echo ""
 
 echo "Now I will show you what was changed and now commited from grsec."
-echo "Write down a summary to add to our changelog based on the diff with grsec changelog:"
+echo "Write down a summary to add to our changelog."
 mywait
 
 git show HEAD || { echo "Error in git show? Ignoring." ; }
@@ -295,6 +295,12 @@ mywait
 
 bash devel-check-sanity.sh || { echo "It seems sanity checks failed? I will exit then." ; exit 102; }
 echo "Ok that is all. Thanks."
+
+echo ""
+echo "NOW COMMIT THE WORK TO GIT"
+echo "git commit -a -m # <------------------------"
+echo ""
+
 # echo ; echo "also, REMEMBER to also EDIT THE changelog file before commiting!" ; echo
 mywait
 
