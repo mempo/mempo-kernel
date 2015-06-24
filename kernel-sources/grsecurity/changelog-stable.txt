@@ -1,3 +1,107 @@
+commit 0abe5214ad610defd446cf0e666e1bb5f7c37797
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Tue Jun 23 19:26:36 2015 -0400
+
+    compile fix
+
+ kernel/trace/trace_events_filter.c |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
+
+commit 62272cf4a3b7c93a8a7ae81017c06934cfae7849
+Author: Steven Rostedt <rostedt@goodmis.org>
+Date:   Mon Jun 15 17:50:25 2015 -0400
+
+    tracing: Have filter check for balanced ops
+    
+    When the following filter is used it causes a warning to trigger:
+    
+     # cd /sys/kernel/debug/tracing
+     # echo "((dev==1)blocks==2)" > events/ext4/ext4_truncate_exit/filter
+    -bash: echo: write error: Invalid argument
+     # cat events/ext4/ext4_truncate_exit/filter
+    ((dev==1)blocks==2)
+    ^
+    parse_error: No error
+    
+     ------------[ cut here ]------------
+     WARNING: CPU: 2 PID: 1223 at kernel/trace/trace_events_filter.c:1640 replace_preds+0x3c5/0x990()
+     Modules linked in: bnep lockd grace bluetooth  ...
+     CPU: 3 PID: 1223 Comm: bash Tainted: G        W       4.1.0-rc3-test+ #450
+     Hardware name: Hewlett-Packard HP Compaq Pro 6300 SFF/339A, BIOS K01 v02.05 05/07/2012
+      0000000000000668 ffff8800c106bc98 ffffffff816ed4f9 ffff88011ead0cf0
+      0000000000000000 ffff8800c106bcd8 ffffffff8107fb07 ffffffff8136b46c
+      ffff8800c7d81d48 ffff8800d4c2bc00 ffff8800d4d4f920 00000000ffffffea
+     Call Trace:
+      [<ffffffff816ed4f9>] dump_stack+0x4c/0x6e
+      [<ffffffff8107fb07>] warn_slowpath_common+0x97/0xe0
+      [<ffffffff8136b46c>] ? _kstrtoull+0x2c/0x80
+      [<ffffffff8107fb6a>] warn_slowpath_null+0x1a/0x20
+      [<ffffffff81159065>] replace_preds+0x3c5/0x990
+      [<ffffffff811596b2>] create_filter+0x82/0xb0
+      [<ffffffff81159944>] apply_event_filter+0xd4/0x180
+      [<ffffffff81152bbf>] event_filter_write+0x8f/0x120
+      [<ffffffff811db2a8>] __vfs_write+0x28/0xe0
+      [<ffffffff811dda43>] ? __sb_start_write+0x53/0xf0
+      [<ffffffff812e51e0>] ? security_file_permission+0x30/0xc0
+      [<ffffffff811dc408>] vfs_write+0xb8/0x1b0
+      [<ffffffff811dc72f>] SyS_write+0x4f/0xb0
+      [<ffffffff816f5217>] system_call_fastpath+0x12/0x6a
+     ---[ end trace e11028bd95818dcd ]---
+    
+    Worse yet, reading the error message (the filter again) it says that
+    there was no error, when there clearly was. The issue is that the
+    code that checks the input does not check for balanced ops. That is,
+    having an op between a closed parenthesis and the next token.
+    
+    This would only cause a warning, and fail out before doing any real
+    harm, but it should still not caues a warning, and the error reported
+    should work:
+    
+     # cd /sys/kernel/debug/tracing
+     # echo "((dev==1)blocks==2)" > events/ext4/ext4_truncate_exit/filter
+    -bash: echo: write error: Invalid argument
+     # cat events/ext4/ext4_truncate_exit/filter
+    ((dev==1)blocks==2)
+    ^
+    parse_error: Meaningless filter expression
+    
+    And give no kernel warning.
+    
+    Link: http://lkml.kernel.org/r/20150615175025.7e809215@gandalf.local.home
+    
+    Cc: Peter Zijlstra <a.p.zijlstra@chello.nl>
+    Cc: Ingo Molnar <mingo@redhat.com>
+    Cc: Arnaldo Carvalho de Melo <acme@kernel.org>
+    Cc: stable@vger.kernel.org # 2.6.31+
+    Reported-by: Vince Weaver <vincent.weaver@maine.edu>
+    Tested-by: Vince Weaver <vincent.weaver@maine.edu>
+    Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+
+ kernel/trace/trace_events_filter.c |   11 +++++++++--
+ 1 files changed, 9 insertions(+), 2 deletions(-)
+
+commit b22ad091991bafe57d9b746ed12415bd0726893a
+Author: Ben Hutchings <bhutchings@solarflare.com>
+Date:   Mon Jan 16 12:38:59 2012 +0000
+
+    net: Use device model to get driver name in skb_gso_segment()
+    
+    ethtool operations generally require the caller to hold RTNL and are
+    not safe to call in atomic context.  The device model provides this
+    information for most devices; we'll only lose it for some old ISA
+    drivers.
+    
+    Signed-off-by: Ben Hutchings <bhutchings@solarflare.com>
+    Acked-by: Herbert Xu <herbert@gondor.apana.org.au>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+    
+    Conflicts:
+    
+    	net/core/dev.c
+
+ net/core/dev.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
 commit 61d4a80220bc6bc70f8cf43f3ea3b4a36c1cf395
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Mon Jun 8 21:15:22 2015 -0400
