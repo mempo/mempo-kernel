@@ -1,3 +1,102 @@
+commit a2020f19df7dd9424c43353ca5c5cf63468b783a
+Merge: bb306ce 16c1a7a
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 29 21:37:06 2015 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit 16c1a7a89be87b08227a8f09ced6cccf399bd1d9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 29 21:36:16 2015 -0400
+
+    Update to pax-linux-3.2.69-test178.patch:
+    - fixed incorrect lowmem mapping setup on certain amd64 memory configurations (also fixed by the never backported upstream commit 20167d3421a089a1bf1bd680b150dc69c9506810), reported and much helped by rfree@mempo.org
+    - use non-deprecated cpumask accessors
+
+ arch/x86/include/asm/mmu_context.h |    6 +++---
+ arch/x86/kernel/ldt.c              |    2 +-
+ arch/x86/mm/fault.c                |    2 +-
+ arch/x86/mm/init_64.c              |    2 +-
+ mm/mprotect.c                      |    4 ++--
+ 5 files changed, 8 insertions(+), 8 deletions(-)
+
+commit bb306ce3d630da517b25c836533ef390480989e7
+Author: Steven Rostedt (Red Hat) <rostedt@goodmis.org>
+Date:   Thu Jun 25 18:10:09 2015 -0400
+
+    tracing/filter: Do not allow infix to exceed end of string
+    
+    While debugging a WARN_ON() for filtering, I found that it is possible
+    for the filter string to be referenced after its end. With the filter:
+    
+     # echo '>' > /sys/kernel/debug/events/ext4/ext4_truncate_exit/filter
+    
+    The filter_parse() function can call infix_get_op() which calls
+    infix_advance() that updates the infix filter pointers for the cnt
+    and tail without checking if the filter is already at the end, which
+    will put the cnt to zero and the tail beyond the end. The loop then calls
+    infix_next() that has
+    
+    	ps->infix.cnt--;
+    	return ps->infix.string[ps->infix.tail++];
+    
+    The cnt will now be below zero, and the tail that is returned is
+    already passed the end of the filter string. So far the allocation
+    of the filter string usually has some buffer that is zeroed out, but
+    if the filter string is of the exact size of the allocated buffer
+    there's no guarantee that the charater after the nul terminating
+    character will be zero.
+    
+    Luckily, only root can write to the filter.
+    
+    Cc: stable@vger.kernel.org # 2.6.33+
+    Signed-off-by: Steven Rostedt <rostedt@goodmis.org>
+
+ kernel/trace/trace_events_filter.c |    6 ++++++
+ 1 files changed, 6 insertions(+), 0 deletions(-)
+
+commit 4b8f3676356d8bf9a737092ec552d2f9d230b5ea
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Jun 29 17:43:34 2015 -0400
+
+    make DEBUG_PAGEALLOC depend on !PAX_MEMORY_SANITIZE, as done in 3.14 and 4.0 patches
+
+ mm/Kconfig.debug |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 6e69a0460bb713319fa1d3e3bd955ea30240f686
+Merge: 0abe521 80d4987
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 26 18:52:16 2015 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	arch/x86/mm/fault.c
+    	fs/exec.c
+
+commit 80d4987a12450d03431f988517281310d5497907
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Jun 26 18:50:44 2015 -0400
+
+    Update to pax-linux-3.2.69-test176.patch:
+    - Emese fixed a size overflow compile error, reported by Daniel Micay (https://bugs.archlinux.org/task/45320)
+    - the size overflow plugin caught an integer mixup in scsi_finish_command and sd_done, reported by hunger
+    - changed the loglevel of our own messages that could result in a kernel panic
+    - some small cleanups backported from the upcoming 4.1 port
+    - the size overflow plugin caught an integer mixup in the unlzma code, reported by Vladimir Lushnikov (https://bugs.gentoo.org/show_bug.cgi?id=552642)
+
+ arch/s390/mm/mmap.c        |    6 ++++++
+ arch/x86/mm/fault.c        |    6 +++---
+ drivers/scsi/scsi.c        |    2 +-
+ drivers/scsi/sd.c          |    4 ++--
+ drivers/scsi/sr.c          |    8 ++++----
+ fs/exec.c                  |    8 ++++----
+ include/scsi/scsi_driver.h |    2 +-
+ lib/decompress_unlzma.c    |    4 ++--
+ tools/gcc/gcc-common.h     |    4 ++--
+ 9 files changed, 25 insertions(+), 19 deletions(-)
+
 commit 0abe5214ad610defd446cf0e666e1bb5f7c37797
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Tue Jun 23 19:26:36 2015 -0400
