@@ -65,7 +65,7 @@ function change_one_setting() {
 		sed -e "s/^$N=.*\$/$N=$V/" < "$tempdir/new1" > "$tempdir/new2"
 	fi
 
-	# diff "$argument_input" "$tempdir/new2"
+	# echo "Applying change $argument_input" "$tempdir/new2"
 	cp "$tempdir/new2" "$argument_input"
 }
 
@@ -86,11 +86,12 @@ do
 	IFS="="
 	read -r VAR VAL <<< "${pair}"
 	IFS="${IFS_OLD}"
-	# echo "pair=$pair" ; echo "VAR=$VAR" ; echo "VAL=$VAL" # debug
+	echo "Will change config: pair=$pair" ; echo "VAR=$VAR" ; echo "VAL=$VAL" # debug
 	change_one_setting "$VAR" "$VAL"
 done
 
-# diff "$tempdir/start" "$argument_input" # debug
+echo "Changes to .config:"
+diff "$tempdir/start" "$argument_input" # debug
 
 normal_exit='y'
 
