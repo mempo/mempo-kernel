@@ -66,8 +66,9 @@ function change_one_setting() {
 	fi
 
 	# echo "Applying change $argument_input" "$tempdir/new2"
-	
-	diff -q "$tempdir/new2" "$argument_input" 2> /dev/null && { # nothing changed - so we need to add that option then
+
+	egrep "^# $N is not set\$|^$N=" "$tempdir/new2" || { # nothing found - so we need to add that option then
+		echo "Did not found option $N - so will append $V"
 		if [[ $V == '-' ]] ;
 		then
 			echo "# $N is not set" >> "$tempdir/new2"
