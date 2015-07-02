@@ -66,6 +66,16 @@ function change_one_setting() {
 	fi
 
 	# echo "Applying change $argument_input" "$tempdir/new2"
+	
+	diff -q "$tempdir/new2" "$argument_input" 2> /dev/null && { # nothing changed - so we need to add that option then
+		if [[ $V == '-' ]] ;
+		then
+			echo "# $N is not set" >> "$tempdir/new2"
+		else
+			echo "$N=$V" >> "$tempdir/new2"
+		fi
+	}
+
 	cp "$tempdir/new2" "$argument_input"
 }
 
