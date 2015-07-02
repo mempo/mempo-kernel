@@ -7,6 +7,8 @@ linux-image (linux-3.2.69-mempo-0.2.131) UNRELEASED; urgency=high
   * pax: compile fixes; also in scsi_finish_command
   * pax: loglevel of panic messages
   * pax: unlzma size overflow
+  * mempo: config: returned constify to desk|servmaxdbg
+  * mdmpo: updated configs to be consistent 
 
  -- mempo <mempo@mempo.org>  Wed, 24 Jun 2015 12:50:00 +0200
 
