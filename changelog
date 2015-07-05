@@ -1,3 +1,10 @@
+linux-image (linux-3.2.69-mempo-0.2.132) UNRELEASED; urgency=high
+  * grsec: exploit fix! config_item_set_name configfs
+  * grsec: new socket families logging
+
+ -- mempo <mempo@mempo.org>  Sun, 05 Jun 2015 20:15:00 +0200
+
+
 linux-image (linux-3.2.69-mempo-0.2.131) UNRELEASED; urgency=high
   * kernel: amd64 memory mapping (rare) bug noticed/debugged with rfree@mempo.org
   * ...this fix was backported from vanilla commit 20167d3421a089a1bf1bd680b150dc69c9506810
@@ -8,7 +15,7 @@ linux-image (linux-3.2.69-mempo-0.2.131) UNRELEASED; urgency=high
   * pax: loglevel of panic messages
   * pax: unlzma size overflow
   * mempo: config: returned constify to desk|servmaxdbg
-  * mdmpo: updated configs to be consistent 
+  * mempo: updated configs to be consistent 
 
  -- mempo <mempo@mempo.org>  Wed, 24 Jun 2015 12:50:00 +0200
 
