@@ -1,3 +1,27 @@
+commit 37b1602e9cccf4f35c495c51f6173a2eefddb4ec
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 5 07:26:54 2015 -0400
+
+    Fix format string vulns in config_item_set_name (used by configfs)
+    Thanks to Nicolas Iooss for the report!
+    
+    Conflicts:
+    
+    	drivers/usb/gadget/configfs.c
+
+ fs/configfs/item.c       |    4 ++--
+ include/linux/configfs.h |    2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+commit 7dbba86245ec789a322ca2e55baffc7af0958594
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 4 11:16:00 2015 -0400
+
+    add newer socket families for logging
+
+ grsecurity/gracl_ip.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit a2020f19df7dd9424c43353ca5c5cf63468b783a
 Merge: bb306ce 16c1a7a
 Author: Brad Spengler <spender@grsecurity.net>
