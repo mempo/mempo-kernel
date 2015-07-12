@@ -1,3 +1,41 @@
+commit 586603783933d8530faf6af7f35056a74678bcfe
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 11 11:26:23 2015 -0400
+
+    compile fix
+
+ security/selinux/hooks.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 34ce24798d9137b7becdd1c62cf996163a4f2678
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 11 10:08:47 2015 -0400
+
+    Backport vuln fix from Stephen Smalley for an SELinux execmem bypass:
+    http://lkml.iu.edu/hypermail/linux/kernel/1507.1/02442.html
+    Not marked for -stable even though its handling has been inconsistent
+    since at least 3.2 (as far back as I checked).  Shared anonymous
+    memory has been implemented through pseudo-files for a while now.
+    One would expect fine-grained military-grade expert policy writers
+    to have spotted this long ago.  Grsec is not affected.
+
+ security/selinux/hooks.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+commit 5689dd1f9bd31c3527069a76f05f70df40e946ce
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 11 10:04:18 2015 -0400
+
+    Functionally no different than the existing code, but at least now
+    we aren't comparing negative values against unsigned types as done
+    by Linus:
+    http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=45820c294fe1b1a9df495d57f40585ef2d069a39
+    and Jan:
+    http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=0b08c5e5944
+
+ kernel/auditsc.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
 commit 37b1602e9cccf4f35c495c51f6173a2eefddb4ec
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sun Jul 5 07:26:54 2015 -0400
