@@ -2,6 +2,8 @@
 # Do NOT call this directly, see readme. See and update build-system.txt
 # Main file that starts the build when all the sources are unpacked
 
+source '../../support.sh' || { echo "Can not load lib" ; exit 1; }
+
 print_ok_header "all.sh"
 echo "Rebuilding everything"
 echo "Running $0 with: $@"

@@ -4,5 +4,5 @@ read _
 
 for i in ../../kernel-build/linux-mempo/configs-kernel/* ; do 
 	echo $i 
-	bash kconfig-cli-set.sh $i CONFIG_IKCONFIG=y CONFIG_IKCONFIG_PROC=y # edit this line before use
+	bash kconfig-cli-set.sh "$i" CONFIG_DEFAULT_MODIFY_LDT_SYSCALL=y # edit this line before use
 done

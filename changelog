@@ -4,23 +4,27 @@ linux-image (linux-3.2.69-mempo-0.2.135) UNRELEASED; urgency=high
   * grsec: ambiently read-only sysctl; modules_disabled, kptr_restrict
   * linux: 9p fs; minor_idr memory free; AX.25 heartbeet
   * linux: net IFLA_VF_PORTS; __printf secure
-	* (again: yes, version 0.2.134 was skipped apparently from numbering)
+  * (again: yes, version 0.2.134 was skipped apparently from numbering)
+  * v0.2.135-001-rc
+  * CONFIG_DEFAULT_MODIFY_LDT_SYSCALL=y
+  * typos fixed in changelog, and spaces; and cosmetic fix in all.sh
+  * v0.2.135-002-rc (updated random seed too)
 
- -- mempo <mempo@mempo.org>  Sun, 26 Jun 2015 03:00:00 +0200
+ -- mempo <mempo@mempo.org>  Sun, 26 Jul 2015 14:20:00 +0200
 
 linux-image (linux-3.2.69-mempo-0.2.134) UNRELEASED; urgency=high
   * linux: selinux bug fix
   * grsec: nicer code, and compile fixes
-	* (yes, version 0.2.134 was skipped apparently from numbering)
-	* this change log was previously named as changelog for 0.2.133
+  * (yes, version 0.2.134 was skipped apparently from numbering)
+  * this change log was previously named as changelog for 0.2.133
 
- -- mempo <mempo@mempo.org>  Sun, 05 Jun 2015 20:15:00 +0200
+ -- mempo <mempo@mempo.org>  Sun, 05 Jul 2015 20:15:00 +0200
 
 linux-image (linux-3.2.69-mempo-0.2.132) UNRELEASED; urgency=high
   * grsec: exploit fix! config_item_set_name configfs
   * grsec: new socket families logging
 
- -- mempo <mempo@mempo.org>  Sun, 05 Jun 2015 20:15:00 +0200
+ -- mempo <mempo@mempo.org>  Sun, 05 Jul 2015 20:15:00 +0200
 
 
 linux-image (linux-3.2.69-mempo-0.2.131) UNRELEASED; urgency=high
@@ -33,7 +37,7 @@ linux-image (linux-3.2.69-mempo-0.2.131) UNRELEASED; urgency=high
   * pax: loglevel of panic messages
   * pax: unlzma size overflow
   * mempo: config: returned constify to desk|servmaxdbg
-  * mempo: updated configs to be consistent 
+  * mempo: updated configs to be consistent
 
  -- mempo <mempo@mempo.org>  Wed, 24 Jun 2015 12:50:00 +0200
 
@@ -49,7 +53,7 @@ linux-image (linux-3.2.69-mempo-0.2.130) UNRELEASED; urgency=medium
 
 
 linux-image (linux-3.2.69-mempo-0.2.129) UNRELEASED; urgency=high
-  * grsec fix CVE-2015-1805 privilage! 
+  * grsec fix CVE-2015-1805 privilage!
   * grsec compat_get_bitmap possible bug
   * grsec -std=gnu89 for HOSTCFLAGS
 
@@ -125,7 +129,7 @@ linux-image (linux-3.2.68-mempo-0.2.118) UNRELEASED; urgency=medium
   * grsec: Backport GCC 5.1 support
   * grsec: sfc: Fix memcpy() with const destination compiler warning.
   * grsec: fs: take i_mutex during prepare_binprm for set[ug]id executables
-  * grsec: fs/exec.c:de_thread: move notify_count write under lock 
+  * grsec: fs/exec.c:de_thread: move notify_count write under lock
   * v0.2.118-001-rc
 
  -- mempo <mempo@mempo.org>  Sat, 28 Apr 2015 08:27:00 +0200
@@ -273,7 +277,7 @@ linux-image (linux-3.2.66-mempo-0.2) UNRELEASED; urgency=medium
 linux-image (linux-3.2.66-mempo-0.1.100) UNRELEASED; urgency=medium
   * grsec fix dma-on-stack; view /proc/pid/mem,fd,cmdline for d tasks
   * v0.1.100-01-rc
-	* not fully released (will be not uploaded to repo)
+  * not fully released (will be not uploaded to repo)
 
  -- mempo <mempo@mempo.org>  Fri, 16 Jan 2015 04:10:00 +0200
 
@@ -290,7 +294,7 @@ linux-image (linux-3.2.66-mempo-0.1.98) UNRELEASED; urgency=high
   * added cannary (in signed git tag)
   * v0.1.98-01-release-doc1 - this is just doc update, same .deb, same seed, revision
 
-  * added check for $HOME symlink (see doc/build.txt) [home_readlink] 
+  * added check for $HOME symlink (see doc/build.txt) [home_readlink]
   * the resulting .deb files should be identical to v0.1.98-01-rc if you manualy fixed this problems
   * v0.1.98-01-release-verify1 - NOT a separate release (same seed, revision, etc)
 
@@ -519,7 +523,7 @@ linux-image (linux-3.2.61-mempo-0.1.72) UNRELEASED; urgency=medium
  -- mempo <mempo@mempo.org>  Thu, 28 Jul 2014 14:40:00 +0200
 
 linux-image (linux-3.2.61-mempo-0.1.71) UNRELEASED; urgency=medium
-  * updated grsecurity: retval, compile, __read_only, sparc64 fixes 
+  * updated grsecurity: retval, compile, __read_only, sparc64 fixes
   * v0.1.71-01-rc
   * v0.1.71-02-rc
   * v0.1.71-03-rc
@@ -839,15 +843,15 @@ linux-image (linux-3.2.55-mempo-0.1.32) UNRELEASED; urgency=low
 
   * updated to grsecurity-3.0-3.2.55-201403172027.patch
   * v0.1.32-rc0
-  * new seed 
+  * new seed
 
  -- mempo <mempo@mempo.org>  Tue, 17 Mar 2014 13:51:04 +0200
 
 
 linux-image (linux-3.2.55-mempo-0.1.31) UNRELEASED; urgency=low
 
-  * dpkg 0.1.24.6 is required for this version. 
-  * Fixed the #bug1 described on https://wiki.debian.org/SameKernel#bug1  
+  * dpkg 0.1.24.6 is required for this version.
+  * Fixed the #bug1 described on https://wiki.debian.org/SameKernel#bug1
   * v0.1.31-01-rc
 
  -- mempo <mempo@mempo.org>  Fri, 07 Mar 2014 15:41:04 +0200
@@ -864,17 +868,17 @@ linux-image (linux-3.2.55-mempo-0.1.30) UNRELEASED; urgency=low
 
 linux-image (linux-3.2.55-mempo-0.1.29) UNRELEASED; urgency=low
 
-  * updated to grsecurity-3.0-3.2.55-201403022154.patch 
+  * updated to grsecurity-3.0-3.2.55-201403022154.patch
   * new seed
-  * v0.1.29-rc0 
+  * v0.1.29-rc0
 
  -- mempo <mempo@mempo.org>  Tue, 04 Mar 2014 22:30:00 +0200
 
 linux-image (linux-3.2.55-mempo-0.1.28) UNRELEASED; urgency=low
 
   * updated to grsecurity-3.0-3.2.55-201402241936.patch
-  * new seed 
-  * v0.1.28-rc1 
+  * new seed
+  * v0.1.28-rc1
   * corrected kernel name in .config
   * more debug at end of run.sh and echo nicer report
   * v0.1.28-rc2
@@ -1000,7 +1004,7 @@ linux-image (linux-3.2.54-mempo-0.1.22) UNRELEASED; urgency=low
 
 linux-image (linux-3.2.54-mempo-0.1.21) UNRELEASED; urgency=low
 
-  * updated to linux 3.2.54 
+  * updated to linux 3.2.54
   * updated to grsecurity-3.0-3.2.54-201401051649.patch
   * fixed kernel version name
 
