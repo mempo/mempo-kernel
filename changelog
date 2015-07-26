@@ -1,6 +1,18 @@
-linux-image (linux-3.2.69-mempo-0.2.133) UNRELEASED; urgency=high
+
+linux-image (linux-3.2.69-mempo-0.2.135) UNRELEASED; urgency=high
+  * grsec: compile fixes; constify fixes; modify_ldt
+  * grsec: ambiently read-only sysctl; modules_disabled, kptr_restrict
+  * linux: 9p fs; minor_idr memory free; AX.25 heartbeet
+  * linux: net IFLA_VF_PORTS; __printf secure
+	* (again: yes, version 0.2.134 was skipped apparently from numbering)
+
+ -- mempo <mempo@mempo.org>  Sun, 26 Jun 2015 03:00:00 +0200
+
+linux-image (linux-3.2.69-mempo-0.2.134) UNRELEASED; urgency=high
   * linux: selinux bug fix
   * grsec: nicer code, and compile fixes
+	* (yes, version 0.2.134 was skipped apparently from numbering)
+	* this change log was previously named as changelog for 0.2.133
 
  -- mempo <mempo@mempo.org>  Sun, 05 Jun 2015 20:15:00 +0200
 
