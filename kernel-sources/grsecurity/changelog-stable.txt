@@ -1,3 +1,359 @@
+commit 216cb9c00c93f345089a829deaa63f062d2b03d8
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 25 12:18:43 2015 -0400
+
+    Update to pax-linux-3.14.48-test53.patch:
+    - fixed the constify plugin for gcc-5
+    - Emese fixed the size_overflow plugin for gcc-5
+
+ include/linux/compiler-gcc5.h                      |    1 -
+ tools/gcc/constify_plugin.c                        |    2 +-
+ tools/gcc/gcc-common.h                             |  130 +++++++++++++--
+ .../insert_size_overflow_asm.c                     |  112 +++++++------
+ .../insert_size_overflow_check_core.c              |   80 ++++-----
+ .../insert_size_overflow_check_ipa.c               |  174 +++++++++++---------
+ .../size_overflow_plugin/intentional_overflow.c    |   96 ++++++-----
+ tools/gcc/size_overflow_plugin/misc.c              |   20 ++-
+ .../size_overflow_plugin/remove_unnecessary_dup.c  |   19 +-
+ tools/gcc/size_overflow_plugin/size_overflow.h     |   88 ++++++++--
+ .../gcc/size_overflow_plugin/size_overflow_debug.c |   23 ++-
+ .../size_overflow_plugin/size_overflow_plugin.c    |    7 +-
+ .../size_overflow_plugin_hash.c                    |   31 ++---
+ 13 files changed, 491 insertions(+), 292 deletions(-)
+
+commit 7af5bff119d8d09e14b15f8367af6bb423c0b6e7
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 25 11:49:44 2015 -0400
+
+    compile fix
+
+ kernel/sysctl.c |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+commit 3331b04884e8ddbbf89ee53f802cd7dbbc0d2e84
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 25 11:02:49 2015 -0400
+
+    compile fix
+
+ grsecurity/grsec_sysctl.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 67eb0dfbf04d28e8591660eb199082cbd7dbd6ea
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 25 10:59:07 2015 -0400
+
+    compile fix
+
+ include/linux/sysctl.h |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
+
+commit 95245366379da1cce9d960181673403479fb70d5
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 25 10:50:51 2015 -0400
+
+    Add framework for having ambiently read-only sysctl variables.
+    Add all grsecurity sysctl entries to it, as well as security-relevant
+    upstream sysctl values (modules_disabled, kptr_restrict, etc)
+    
+    Conflicts:
+    
+    	kernel/printk/printk.c
+    
+    Conflicts:
+    
+    	grsecurity/grsec_init.c
+    	kernel/module.c
+    	kernel/printk/printk.c
+
+ grsecurity/grsec_init.c   |  104 +-
+ grsecurity/grsec_sysctl.c |  104 +-
+ include/linux/sysctl.h    |    2 +
+ kernel/events/core.c      |    6 +-
+ kernel/module.c           |    2 +-
+ kernel/printk/printk.c    | 2912 +++++++++++++++++++++++++++++++++++++++++++++
+ kernel/sysctl.c           |   89 ++-
+ lib/vsprintf.c            |    4 +-
+ 8 files changed, 3106 insertions(+), 117 deletions(-)
+
+commit 06fa0ab59a1a4027a6531b43e9d3f8d810c2e7ae
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 25 11:33:44 2015 -0400
+
+    port modify_ldt code
+
+ arch/x86/kernel/ldt.c |    3 +--
+ 1 files changed, 1 insertions(+), 2 deletions(-)
+
+commit 069012f660f2b16c690782e96eccbbe4eaf8b206
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 25 11:28:15 2015 -0400
+
+    Implement modify_ldt sysctl toggle from https://lkml.org/lkml/2015/7/25/103,
+    make it not depend on CONFIG_MODIFY_LDT_SYSCALL, force modify_ldt to off
+    regardless of config setting if grsec is enabled (with the allowance to
+    turn it on at runtime), and harden up the implementation a bit
+    
+    Conflicts:
+    
+    	arch/x86/Kconfig
+    	kernel/sysctl.c
+
+ Documentation/sysctl/kernel.txt |   15 +++++++++++++++
+ arch/x86/Kconfig                |   16 ++++++++++++++++
+ arch/x86/kernel/ldt.c           |   18 ++++++++++++++++++
+ kernel/sysctl.c                 |    8 ++++++++
+ 4 files changed, 57 insertions(+), 0 deletions(-)
+
+commit 2235626a23679463294d505fb58c59cc6c52b1ad
+Author: Nicolas Iooss <nicolas.iooss_linux@m4x.org>
+Date:   Fri Jul 17 16:23:42 2015 -0700
+
+    include, lib: add __printf attributes to several function prototypes
+    
+    Using __printf attributes helps to detect several format string issues
+    at compile time (even though -Wformat-security is currently disabled in
+    Makefile).  For example it can detect when formatting a pointer as a
+    number, like the issue fixed in commit a3fa71c40f18 ("wl18xx: show
+    rx_frames_per_rates as an array as it really is"), or when the arguments
+    do not match the format string, c.f.  for example commit 5ce1aca81435
+    ("reiserfs: fix __RASSERT format string").
+    
+    To prevent similar bugs in the future, add a __printf attribute to every
+    function prototype which needs one in include/linux/ and lib/.  These
+    functions were mostly found by using gcc's -Wsuggest-attribute=format
+    flag.
+    
+    Signed-off-by: Nicolas Iooss <nicolas.iooss_linux@m4x.org>
+    Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+    Cc: Felipe Balbi <balbi@ti.com>
+    Cc: Joel Becker <jlbec@evilplan.org>
+    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+    Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+    
+    Conflicts:
+    
+    	include/linux/clkdev.h
+    	include/linux/configfs.h
+    	include/linux/printk.h
+    
+    Conflicts:
+    
+    	include/linux/cpu.h
+    	include/linux/device.h
+    	include/linux/iommu.h
+    	include/linux/printk.h
+    
+    Conflicts:
+    
+    	include/linux/clkdev.h
+    	include/linux/compat.h
+    	include/linux/dcache.h
+    	include/linux/printk.h
+
+ include/linux/clkdev.h    |    2 +-
+ include/linux/compat.h    |    2 +-
+ include/linux/configfs.h  |    3 ++-
+ include/linux/dcache.h    |    3 ++-
+ include/linux/device.h    |   10 ++++------
+ include/linux/kernel.h    |    9 +++++----
+ include/linux/kobject.h   |    5 +++--
+ include/linux/mmiotrace.h |    2 +-
+ lib/kobject.c             |    5 +++--
+ 9 files changed, 22 insertions(+), 19 deletions(-)
+
+commit da6704ee4e2d2766937cb999d56ac9d37550937d
+Author: Daniel Borkmann <daniel@iogearbox.net>
+Date:   Mon Jul 13 00:06:02 2015 +0200
+
+    rtnetlink: reject non-IFLA_VF_PORT attributes inside IFLA_VF_PORTS
+    
+    Similarly as in commit 4f7d2cdfdde7 ("rtnetlink: verify IFLA_VF_INFO
+    attributes before passing them to driver"), we have a double nesting
+    of netlink attributes, i.e. IFLA_VF_PORTS only contains IFLA_VF_PORT
+    that is nested itself. While IFLA_VF_PORTS is a verified attribute
+    from ifla_policy[], we only check if the IFLA_VF_PORTS container has
+    IFLA_VF_PORT attributes and then pass the attribute's content itself
+    via nla_parse_nested(). It would be more correct to reject inner types
+    other than IFLA_VF_PORT instead of continuing parsing and also similarly
+    as in commit 4f7d2cdfdde7, to check for a minimum of NLA_HDRLEN.
+    
+    Signed-off-by: Daniel Borkmann <daniel@iogearbox.net>
+    Cc: Roopa Prabhu <roopa@cumulusnetworks.com>
+    Cc: Scott Feldman <sfeldma@gmail.com>
+    Cc: Jason Gunthorpe <jgunthorpe@obsidianresearch.com>
+    Acked-by: Roopa Prabhu <roopa@cumulusnetworks.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/core/rtnetlink.c |   11 +++++++----
+ 1 files changed, 7 insertions(+), 4 deletions(-)
+
+commit 8c17fc6c51e1acfe973259bc8c00f83e84c37119
+Author: Richard Stearn <richard@rns-stearn.demon.co.uk>
+Date:   Mon Jul 13 11:38:24 2015 +0200
+
+    NET: AX.25: Stop heartbeat timer on disconnect.
+    
+    This may result in a kernel panic.  The bug has always existed but
+    somehow we've run out of luck now and it bites.
+    
+    Signed-off-by: Richard Stearn <richard@rns-stearn.demon.co.uk>
+    Cc: stable@vger.kernel.org	# all branches
+    Signed-off-by: Ralf Baechle <ralf@linux-mips.org>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/ax25/ax25_subr.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit 4aae781438b44e2d5af7286fe12e976f539c5174
+Author: Neil Horman <nhorman@tuxdriver.com>
+Date:   Tue Jul 7 14:02:18 2015 -0400
+
+    vmxnet3: prevent receive getting out of sequence on napi poll
+    
+    vmxnet3's current napi path is built to count every rx descriptor we recieve,
+    and use that as a count of the napi budget.  That means its possible to return
+    from a napi poll halfway through recieving a fragmented packet accross multiple
+    dma descriptors.  If that happens, the next napi poll will start with the
+    descriptor ring in an improper state (e.g. the first descriptor we look at may
+    have the end-of-packet bit set), which will cause a BUG halt in the driver.
+    
+    Fix the issue by only counting whole received packets in the napi poll and
+    returning that value, rather than the descriptor count.
+    
+    Tested by the reporter and myself, successfully
+    
+    Signed-off-by: Neil Horman <nhorman@tuxdriver.com>
+    CC: Shreyas Bhatewara <sbhatewara@vmware.com>
+    CC: "David S. Miller" <davem@davemloft.net>
+    Acked-by: Andy Gospodarek <gospo@cumulusnetworks.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/vmxnet3/vmxnet3_drv.c |    8 ++++----
+ 1 files changed, 4 insertions(+), 4 deletions(-)
+
+commit 617ddad89f6b3db5fdd2d00a695119d9e1075353
+Author: Johannes Thumshirn <jthumshirn@suse.de>
+Date:   Wed Jul 8 17:16:49 2015 +0200
+
+    macvtap: Destroy minor_idr on module_exit
+    
+    Destroy minor_idr on module_exit, reclaiming the allocated memory.
+    
+    This was detected by the following semantic patch (written by Luis Rodriguez
+    <mcgrof@suse.com>)
+    <SmPL>
+    @ defines_module_init @
+    declarer name module_init, module_exit;
+    declarer name DEFINE_IDR;
+    identifier init;
+    @@
+    
+    module_init(init);
+    
+    @ defines_module_exit @
+    identifier exit;
+    @@
+    
+    module_exit(exit);
+    
+    @ declares_idr depends on defines_module_init && defines_module_exit @
+    identifier idr;
+    @@
+    
+    DEFINE_IDR(idr);
+    
+    @ on_exit_calls_destroy depends on declares_idr && defines_module_exit @
+    identifier declares_idr.idr, defines_module_exit.exit;
+    @@
+    
+    exit(void)
+    {
+     ...
+     idr_destroy(&idr);
+     ...
+    }
+    
+    @ missing_module_idr_destroy depends on declares_idr && defines_module_exit && !on_exit_calls_destroy @
+    identifier declares_idr.idr, defines_module_exit.exit;
+    @@
+    
+    exit(void)
+    {
+     ...
+     +idr_destroy(&idr);
+    }
+    </SmPL>
+    
+    Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ drivers/net/macvtap.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
+
+commit e611dd22d8eaf06948d7782a50512b779d8e563e
+Author: Al Viro <viro@zeniv.linux.org.uk>
+Date:   Sun Jul 12 10:34:29 2015 -0400
+
+    9p: don't leave a half-initialized inode sitting around
+    
+    Cc: stable@vger.kernel.org # all branches
+    Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+
+ fs/9p/vfs_inode.c      |    3 +--
+ fs/9p/vfs_inode_dotl.c |    3 +--
+ 2 files changed, 2 insertions(+), 4 deletions(-)
+
+commit af6fe5f9223e7c99118e01025ceae0c0a2580494
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 25 09:20:34 2015 -0400
+
+    Backport:
+    commit 36b84539390fc30663a7a026eef598c4656124bc
+    Author: Al Viro <viro@ZenIV.linux.org.uk>
+    Date:   Wed Jul 8 02:42:38 2015 +0100
+    
+        freeing unlinked file indefinitely delayed
+    
+    Conflicts:
+    
+    	fs/dcache.c
+
+ fs/dcache.c |   13 ++++++++-----
+ 1 files changed, 8 insertions(+), 5 deletions(-)
+
+commit 61f2cbfbadebefa1849412249a912adde2a48e40
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Jul 12 12:40:03 2015 -0400
+
+    fix RBAC debug compilation
+
+ grsecurity/gracl_policy.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit ba90e3ffe6ba0d2d6e2e9634e676c487c79c8af4
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 11 18:46:04 2015 -0400
+
+    Add missing virtual execute() method to constify plugin for GCC 5.1.
+    The missing function didn't affect the security provided by the constify
+    plugin, but would prevent compilation errors from being generated
+    in cases where const structures were declared as local variables.
+
+ tools/gcc/constify_plugin.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
+commit 7b17e50ada6008a8020610830090798f1e891334
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Jul 11 12:25:32 2015 -0400
+
+    RANDSTRUCT fix for GCC 5.1: make sure we run our bad cast logging pass
+    Doesn't affect the security provided by the plugin, is purely for informational
+    purposes
+
+ tools/gcc/randomize_layout_plugin.c |    4 ++++
+ 1 files changed, 4 insertions(+), 0 deletions(-)
+
 commit 586603783933d8530faf6af7f35056a74678bcfe
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Jul 11 11:26:23 2015 -0400
