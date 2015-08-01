@@ -1,4 +1,11 @@
 
+linux-image (linux-3.2.69-mempo-0.2.136) UNRELEASED; urgency=high
+  * linux: kzalloc md kernel mem infoleak!!
+  * linux: backport 4.1-rc1: scsi/sg.c vuln fix!
+  * linux: xen set_aliased_prot OOPS fix
+
+ -- mempo <mempo@mempo.org>  Sun, 02 Aug 2015 01:10:00 +0200
+
 linux-image (linux-3.2.69-mempo-0.2.135) UNRELEASED; urgency=high
   * grsec: compile fixes; constify fixes; modify_ldt
   * grsec: ambiently read-only sysctl; modules_disabled, kptr_restrict
