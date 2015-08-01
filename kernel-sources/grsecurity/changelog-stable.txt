@@ -1,3 +1,100 @@
+commit 5088787d1a19583ff0a46387a108e3b99c11bf92
+Author: Benjamin Randazzo <benjamin@randazzo.fr>
+Date:   Sat Jul 25 16:36:50 2015 +0200
+
+    md: use kzalloc() when bitmap is disabled
+    
+    In drivers/md/md.c get_bitmap_file() uses kmalloc() for creating a
+    mdu_bitmap_file_t called "file".
+    
+    5769         file = kmalloc(sizeof(*file), GFP_NOIO);
+    5770         if (!file)
+    5771                 return -ENOMEM;
+    
+    This structure is copied to user space at the end of the function.
+    
+    5786         if (err == 0 &&
+    5787             copy_to_user(arg, file, sizeof(*file)))
+    5788                 err = -EFAULT
+    
+    But if bitmap is disabled only the first byte of "file" is initialized
+    with zero, so it's possible to read some bytes (up to 4095) of kernel
+    space memory from user space. This is an information leak.
+    
+    5775         /* bitmap disabled, zero the first byte and copy out */
+    5776         if (!mddev->bitmap_info.file)
+    5777                 file->pathname[0] = '\0';
+    
+    Signed-off-by: Benjamin Randazzo <benjamin@randazzo.fr>
+    Signed-off-by: NeilBrown <neilb@suse.com>
+    
+    Conflicts:
+    
+    	drivers/md/md.c
+    
+    Conflicts:
+    
+    	drivers/md/md.c
+    
+    Conflicts:
+    
+    	drivers/md/md.c
+
+ drivers/md/md.c |   10 ++++------
+ 1 files changed, 4 insertions(+), 6 deletions(-)
+
+commit 4e3e47675ff3f830a69f39ff1ea094563715bbcc
+Author: Andy Lutomirski <luto@kernel.org>
+Date:   Thu Jul 30 14:31:31 2015 -0700
+
+    x86/xen: Probe target addresses in set_aliased_prot() before the hypercall
+    
+    The update_va_mapping hypercall can fail if the VA isn't present
+    in the guest's page tables.  Under certain loads, this can
+    result in an OOPS when the target address is in unpopulated vmap
+    space.
+    
+    While we're at it, add comments to help explain what's going on.
+    
+    This isn't a great long-term fix.  This code should probably be
+    changed to use something like set_memory_ro.
+    
+    Signed-off-by: Andy Lutomirski <luto@kernel.org>
+    Cc: Andrew Cooper <andrew.cooper3@citrix.com>
+    Cc: Andy Lutomirski <luto@amacapital.net>
+    Cc: Boris Ostrovsky <boris.ostrovsky@oracle.com>
+    Cc: Borislav Petkov <bp@alien8.de>
+    Cc: Brian Gerst <brgerst@gmail.com>
+    Cc: David Vrabel <dvrabel@cantab.net>
+    Cc: Denys Vlasenko <dvlasenk@redhat.com>
+    Cc: H. Peter Anvin <hpa@zytor.com>
+    Cc: Jan Beulich <jbeulich@suse.com>
+    Cc: Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>
+    Cc: Linus Torvalds <torvalds@linux-foundation.org>
+    Cc: Peter Zijlstra <peterz@infradead.org>
+    Cc: Sasha Levin <sasha.levin@oracle.com>
+    Cc: Steven Rostedt <rostedt@goodmis.org>
+    Cc: Thomas Gleixner <tglx@linutronix.de>
+    Cc: security@kernel.org <security@kernel.org>
+    Cc: <stable@vger.kernel.org>
+    Cc: xen-devel <xen-devel@lists.xen.org>
+    Link: http://lkml.kernel.org/r/0b0e55b995cda11e7829f140b833ef932fcabe3a.1438291540.git.luto@kernel.org
+    Signed-off-by: Ingo Molnar <mingo@kernel.org>
+
+ arch/x86/xen/enlighten.c |   40 ++++++++++++++++++++++++++++++++++++++++
+ 1 files changed, 40 insertions(+), 0 deletions(-)
+
+commit a23e976defed00e9c2f6ff7533450578d245181c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sat Aug 1 14:29:08 2015 -0400
+
+    Backport fix for another vuln the fix for which was snuck into
+    the 4.1-rc1 merge process by Al Viro.  Spotted by Ben Hutchings:
+    http://seclists.org/oss-sec/2015/q3/271
+
+ drivers/scsi/sg.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
 commit 216cb9c00c93f345089a829deaa63f062d2b03d8
 Author: Brad Spengler <spender@grsecurity.net>
 Date:   Sat Jul 25 12:18:43 2015 -0400
