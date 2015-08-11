@@ -1,3 +1,69 @@
+commit 13e09e261792b1cdb577d89af5cdf7dafe6403b1
+Author: Dan Carpenter <dan.carpenter@oracle.com>
+Date:   Sat Aug 1 15:33:26 2015 +0300
+
+    rds: fix an integer overflow test in rds_info_getsockopt()
+    
+    "len" is a signed integer.  We check that len is not negative, so it
+    goes from zero to INT_MAX.  PAGE_SIZE is unsigned long so the comparison
+    is type promoted to unsigned long.  ULONG_MAX - 4095 is a higher than
+    INT_MAX so the condition can never be true.
+    
+    I don't know if this is harmful but it seems safe to limit "len" to
+    INT_MAX - 4095.
+    
+    Fixes: a8c879a7ee98 ('RDS: Info and stats')
+    Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+    Signed-off-by: David S. Miller <davem@davemloft.net>
+
+ net/rds/info.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+commit 5f71a17e4b3f406474055ef8723e55f82118517c
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 02:39:35 2015 -0400
+
+    Backport virtio-net security fix by Jason Wang from:
+    http://marc.info/?l=linux-netdev&m=143868216724068&w=2
+
+ drivers/net/virtio_net.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+commit 655452be4ba3abe1864d157001723762498432f7
+Merge: a6667a3 92efcfe
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 01:50:01 2015 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+    
+    Conflicts:
+    	arch/mips/kernel/irq.c
+    	kernel/trace/trace_events_filter.c
+
+commit 92efcfeca5be11a36c8a089a374d9396764e397d
+Merge: 16c1a7a 058fbb1
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Mon Aug 10 01:48:25 2015 -0400
+
+    Update to pax-linux-3.2.70-test179.patch:
+    
+    Merge branch 'linux-3.2.y' into pax-stable
+    
+    Conflicts:
+    	arch/arm/include/asm/elf.h
+    	arch/powerpc/mm/mmap_64.c
+    	fs/binfmt_elf.c
+
+commit a6667a39ecfc62cad6ae68e7f38f7b40f6dd559f
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Sun Aug 2 08:26:16 2015 -0400
+
+    Update plugins from 4.1 tree to fix reported compilation errors
+
+ tools/gcc/kernexec_plugin.c  |    8 ++++++--
+ tools/gcc/stackleak_plugin.c |    8 ++++++--
+ 2 files changed, 12 insertions(+), 4 deletions(-)
+
 commit 5088787d1a19583ff0a46387a108e3b99c11bf92
 Author: Benjamin Randazzo <benjamin@randazzo.fr>
 Date:   Sat Jul 25 16:36:50 2015 +0200
