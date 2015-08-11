@@ -1,3 +1,9 @@
+linux-image (linux-3.2.70-mempo-0.2.137) UNRELEASED; urgency=medium
+  * linux: rds: fix an integer overflow test in rds_info_getsockopt()
+  * linux: Backport virtio-net security fix by Jason Wang
+  * grsec: merge 'linux-3.2.y' into pax-stable, 'pax-stable' into grsec-stable 
+
+ -- mempo <mempo@mempo.org>  Sun, 11 Aug 2015 10:17:00 +0200
 
 linux-image (linux-3.2.69-mempo-0.2.136) UNRELEASED; urgency=high
   * linux: kzalloc md kernel mem infoleak!!
