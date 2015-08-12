@@ -1,3 +1,13 @@
+linux-image (linux-3.2.70-mempo-0.2.137) UNRELEASED; urgency=high
+  * kernel version update to 3.2.70
+  * linux: rds_info_getsockopt fix
+  * backport: virtio-net security fix http://marc.info/?l=linux-netdev&m=143868216724068&w=2
+  * pax: irq and trace_events_filter
+  * pax: ? asm/elf, mmap_64, binfmt_elf
+  * compile fix
+  * v0.2.137-001-rc
+
+ -- mempo <mempo@mempo.org>  Wed, 12 Aug 2015 00:30:00 +0200
 
 linux-image (linux-3.2.69-mempo-0.2.136) UNRELEASED; urgency=high
   * linux: kzalloc md kernel mem infoleak!!
