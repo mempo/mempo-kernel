@@ -1,3 +1,21 @@
+commit facbff181ef6e99400f215f93c3259aca442754c
+Merge: 13e09e2 00d46cd
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 14 21:29:40 2015 -0400
+
+    Merge branch 'pax-stable' into grsec-stable
+
+commit 00d46cd059b886a277793e1e972d311738a5ca9f
+Merge: 92efcfe d07c3d9
+Author: Brad Spengler <spender@grsecurity.net>
+Date:   Fri Aug 14 21:29:31 2015 -0400
+
+    Merge branch 'linux-3.2.y' into pax-stable
+    
+    Conflicts:
+    	lib/bitmap.c
+    	mm/memory.c
+
 commit 13e09e261792b1cdb577d89af5cdf7dafe6403b1
 Author: Dan Carpenter <dan.carpenter@oracle.com>
 Date:   Sat Aug 1 15:33:26 2015 +0300
