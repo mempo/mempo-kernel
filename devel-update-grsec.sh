@@ -157,8 +157,8 @@ if [[ "$kernel_ver" != "$kernel_general_version" ]] ; then
 	echo "Bad kernel version $kernel_general_version vs $kernel_ver from $new_grsec" >&2 
 	echo "To do this, for example you can take such steps:"
 	echo ""
-	echo "  1) in $file_source change $ver_a to $ver_b (leave the checksum or edit it rigth away)"
-	echo "  2) in $file_env change $ver_a to $ver_b"
+	echo "  1) in $file_env change $ver_a to $ver_b (do that first - it affects what file is downloaded in next step)" 
+	echo "  2) in $file_source change $ver_a to $ver_b (leave the checksum or edit it rigth away)"
 	echo "  3) start build with ./run.sh - it will stop after complaining about wrong checksum, write the actuall checksum into $file_source if you didn't previously"
 	echo "  3b) double check the checksum (e.g. various ISP connections etc)"
 	echo ""
